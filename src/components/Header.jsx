@@ -69,31 +69,29 @@ export const Header = () => {
 
           {/* Right: Wallet & Status */}
           <div className="flex items-center space-x-4">
-            {/* Status Indicators */}
-            {selectedAccount && (
-              <div className="hidden md:flex items-center space-x-3 mr-4">
-                {/* Substrate Block */}
-                <a
-                  href={polkadotJsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center space-x-2 px-3 py-1.5 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-sm"
-                  title="Click to open Polkadot.js Apps"
-                >
-                  <div className={`w-2 h-2 rounded-full ${substrateConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                  <span className="text-gray-500 text-xs">Block</span>
-                  <span className="font-mono text-gray-900 text-xs">
-                    {currentBlock ? `#${currentBlock}` : '-'}
-                  </span>
-                </a>
+            {/* Status Indicators - Always visible */}
+            <div className="hidden md:flex items-center space-x-3 mr-4">
+              {/* Substrate Block */}
+              <a
+                href={polkadotJsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center space-x-2 px-3 py-1.5 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-sm"
+                title="Click to open Polkadot.js Apps"
+              >
+                <div className={`w-2 h-2 rounded-full ${substrateConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className="text-gray-500 text-xs">Block</span>
+                <span className="font-mono text-gray-900 text-xs">
+                  {currentBlock ? `#${currentBlock}` : '-'}
+                </span>
+              </a>
 
-                {/* IPFS */}
-                <div className="flex items-center space-x-2 px-3 py-1.5 bg-gray-50 rounded-lg text-sm">
-                  <div className={`w-2 h-2 rounded-full ${ipfsReady ? 'bg-green-500' : 'bg-orange-500'}`}></div>
-                  <span className="text-gray-500 text-xs">IPFS</span>
-                </div>
+              {/* IPFS */}
+              <div className="flex items-center space-x-2 px-3 py-1.5 bg-gray-50 rounded-lg text-sm">
+                <div className={`w-2 h-2 rounded-full ${ipfsReady ? 'bg-green-500' : 'bg-orange-500'}`}></div>
+                <span className="text-gray-500 text-xs">IPFS</span>
               </div>
-            )}
+            </div>
 
             {/* Wallet Button */}
             <div className="relative">
