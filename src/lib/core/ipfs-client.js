@@ -58,6 +58,10 @@ export class IpfsClient {
         // Configuration simplifiée pour navigateur
         const heliaConfig = {
           libp2p: {
+            // Adresses d'écoute vides pour navigateur (pas de listen, juste dial out)
+            addresses: {
+              listen: []
+            },
             // Transports compatibles navigateur
             transports: [
               webSockets()

@@ -146,6 +146,9 @@
         log('⚙️ Creating Helia with WebSocket transport...', 'info');
         const helia = await createHelia({
           libp2p: {
+            addresses: {
+              listen: []  // No listening addresses for browser
+            },
             transports: [
               webSockets()
             ],
@@ -206,6 +209,9 @@
         
         const helia = await createHelia({
           libp2p: {
+            addresses: {
+              listen: []  // No listening addresses for browser
+            },
             transports: [webSockets()],
             peerDiscovery: [
               bootstrap({
