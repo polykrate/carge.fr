@@ -38,21 +38,61 @@ export class IpfsClient {
 
   async _initHelia() {
     try {
-      console.log('🚀 Initializing Helia (P2P IPFS)...');
+      console.log('🚀 Initializing Helia (P2P IPFS) with optimized config...');
       
-      // Timeout de 5 secondes pour l'initialisation
+      // Timeout de 10 secondes pour l'initialisation
       const timeout = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Helia init timeout')), 5000)
+        setTimeout(() => reject(new Error('Helia init timeout')), 10000)
       );
 
       const initHelia = (async () => {
         const { createHelia } = await import('https://esm.sh/helia@4');
         const { unixfs } = await import('https://esm.sh/@helia/unixfs@3');
 
-        this.helia = await createHelia();
+        // Configuration optimisée pour connexion rapide
+        const heliaConfig = {
+          libp2p: {
+            // Peers bootstrap rapides et fiables
+            peerDiscovery: {
+              bootstrap: {
+                enabled: true,
+                list: [
+                  // Bootstrap nodes IPFS officiels (rapides)
+                  '/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN',
+                  '/dnsaddr/bootstrap.libp2p.io/p2p/QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa',
+                  '/dnsaddr/bootstrap.libp2p.io/p2p/QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb',
+                  '/dnsaddr/bootstrap.libp2p.io/p2p/QmcZf59bWwK5XFi76CZX8cbJ4BhTzzA3gU1ZjYZcYW3dwt',
+                ]
+              }
+            },
+            // Services minimaux pour connexion rapide
+            services: {
+              identify: {},
+              ping: {
+                protocolPrefix: 'ipfs',
+                maxInboundStreams: 1,
+                maxOutboundStreams: 1,
+              }
+            },
+            // Limiter les connexions pour performance browser
+            connectionManager: {
+              maxConnections: 10,
+              minConnections: 2,
+              dialTimeout: 5000,
+            },
+          },
+          // Datastore en mémoire (plus rapide)
+          start: true,
+        };
+
+        this.helia = await createHelia(heliaConfig);
         this.fs = unixfs(this.helia);
+        
+        // Log des peers connectés
+        const peers = this.helia.libp2p.getPeers();
+        console.log(`✅ Helia ready with ${peers.length} peer(s) connected`);
+        
         this.isReady = true;
-        console.log('✅ Helia ready (P2P mode)');
         return true;
       })();
 
@@ -112,12 +152,14 @@ export class IpfsClient {
     // Essayer Helia en premier (si disponible)
     if (this.isReady && this.fs) {
       try {
-        console.log('🔄 Attempting P2P download via Helia...');
+        // Log du nombre de peers
+        const peers = this.helia?.libp2p?.getPeers() || [];
+        console.log(`🔄 Attempting P2P download via Helia (${peers.length} peers)...`);
         
         const decoder = new TextDecoder();
         let content = '';
 
-        // Timeout de 8 secondes pour Helia
+        // Timeout de 12 secondes pour Helia (plus de temps pour trouver les peers)
         const downloadPromise = (async () => {
           for await (const chunk of this.fs.cat(cid)) {
             content += decoder.decode(chunk, { stream: true });
@@ -126,7 +168,7 @@ export class IpfsClient {
         })();
 
         const timeout = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Helia download timeout')), 8000)
+          setTimeout(() => reject(new Error('Helia download timeout')), 12000)
         );
 
         content = await Promise.race([downloadPromise, timeout]);
@@ -137,6 +179,8 @@ export class IpfsClient {
         console.warn('⚠️ Helia download failed:', error.message);
         console.log('📡 Falling back to HTTP gateway...');
       }
+    } else {
+      console.log('⚠️ Helia not ready, using HTTP gateway directly');
     }
 
     // Fallback sur gateway HTTP
