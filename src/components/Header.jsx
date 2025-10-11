@@ -1,9 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { WalletSelector } from './WalletSelector';
 
 export const Header = () => {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
   const {
     selectedAccount,
     selectedWallet,
@@ -29,6 +32,8 @@ export const Header = () => {
 
   const polkadotJsUrl = `https://polkadot.js.org/apps/?rpc=${encodeURIComponent(config.SUBSTRATE_WS_URL)}`;
 
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
   return (
     <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
       <div className="container mx-auto px-6 py-4">
@@ -39,7 +44,7 @@ export const Header = () => {
             <span className="text-xs text-gray-400">Law as Code</span>
           </div>
 
-          {/* Navigation */}
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6 text-sm">
             <Link
               to="/"
@@ -67,9 +72,9 @@ export const Header = () => {
             </Link>
           </nav>
 
-          {/* Right: Wallet & Status */}
+          {/* Right: Desktop Status & Wallet + Mobile Hamburger */}
           <div className="flex items-center space-x-4">
-            {/* Status Indicators - Always visible */}
+            {/* Desktop Status Indicators */}
             <div className="hidden md:flex items-center space-x-3 mr-4">
               {/* Substrate Block */}
               <a
@@ -93,8 +98,8 @@ export const Header = () => {
               </div>
             </div>
 
-            {/* Wallet Button */}
-            <div className="relative">
+            {/* Desktop Wallet Button */}
+            <div className="relative hidden md:block">
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -169,8 +174,115 @@ export const Header = () => {
                 </div>
               )}
             </div>
+
+            {/* Mobile Hamburger Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 transition"
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 mt-4 pt-4 pb-2">
+            {/* Mobile Navigation */}
+            <nav className="flex flex-col space-y-2 mb-4">
+              <Link
+                to="/"
+                onClick={closeMobileMenu}
+                className={`px-3 py-2 rounded-lg text-sm ${
+                  isActive('/') ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Home
+              </Link>
+              <Link
+                to="/workflows"
+                onClick={closeMobileMenu}
+                className={`px-3 py-2 rounded-lg text-sm ${
+                  isActive('/workflows') ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Workflows
+              </Link>
+              <Link
+                to="/verify"
+                onClick={closeMobileMenu}
+                className={`px-3 py-2 rounded-lg text-sm ${
+                  isActive('/verify') ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Verify Proof
+              </Link>
+              <Link
+                to="/about"
+                onClick={closeMobileMenu}
+                className={`px-3 py-2 rounded-lg text-sm ${
+                  isActive('/about') ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                About
+              </Link>
+            </nav>
+
+            {/* Mobile Status Indicators */}
+            <div className="flex items-center space-x-3 mb-4">
+              {/* Substrate Block */}
+              <a
+                href={polkadotJsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-sm"
+                title="Click to open Polkadot.js Apps"
+              >
+                <div className={`w-2 h-2 rounded-full ${substrateConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className="text-gray-500 text-xs">Block</span>
+                <span className="font-mono text-gray-900 text-xs">
+                  {currentBlock ? `#${currentBlock}` : '-'}
+                </span>
+              </a>
+
+              {/* IPFS */}
+              <div className="flex-1 flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg text-sm">
+                <div className={`w-2 h-2 rounded-full ${ipfsReady ? 'bg-green-500' : 'bg-orange-500'}`}></div>
+                <span className="text-gray-500 text-xs">IPFS</span>
+              </div>
+            </div>
+
+            {/* Mobile Wallet Button */}
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleWalletMenu();
+              }}
+              type="button"
+              className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition font-medium text-sm"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
+              <span>{shortAddress}</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Click outside to close */}
