@@ -50,9 +50,36 @@ export const Verify = () => {
   };
 
   const verifyProof = async (proof) => {
-    const verifier = new ProofVerifier(substrateClient);
-    const verification = await verifier.verifyProof(proof);
-    setResult(verification);
+    try {
+      console.log('🔍 Starting proof verification...');
+      const verifier = new ProofVerifier(substrateClient);
+      const verification = await verifier.verifyProof(proof);
+      
+      console.log('✅ Verification result:', verification);
+      
+      // Format result for display
+      const result = {
+        isValid: verification.found,
+        message: verification.found 
+          ? 'Proof found on blockchain and verified!'
+          : 'Proof not found on blockchain',
+        details: verification.found ? {
+          contentHash: verification.contentHash,
+          creator: verification.trail.creatorAddress,
+          createdAt: `Block #${verification.trail.createdAt}`,
+          expiresAt: `Block #${verification.trail.expiresAt}`,
+          signature: verification.trail.substrateSignature,
+        } : {
+          contentHash: verification.contentHash,
+          status: 'Not found in blockchain storage'
+        }
+      };
+      
+      setResult(result);
+    } catch (err) {
+      console.error('❌ Verification error:', err);
+      throw err;
+    }
   };
 
   return (
