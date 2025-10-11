@@ -128,13 +128,6 @@ export const Home = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-200 py-8">
-        <div className="container mx-auto px-6 text-center text-sm text-gray-600">
-          <p>Carge - Built on Ragchain (Tanssi Parachain)</p>
-          <p className="mt-2 text-xs">Open Source · GPL-3.0 License</p>
-        </div>
-      </footer>
     </>
   );
 };

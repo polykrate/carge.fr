@@ -1,12 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
+import { WalletSelector } from './WalletSelector';
 
 export const Header = () => {
   const location = useLocation();
   const {
     selectedAccount,
+    selectedWallet,
     accounts,
     isWalletMenuOpen,
+    isWalletSelectOpen,
     substrateConnected,
     ipfsReady,
     currentBlock,
@@ -15,6 +18,7 @@ export const Header = () => {
     selectAccount,
     disconnectWallet,
     setIsWalletMenuOpen,
+    setIsWalletSelectOpen,
   } = useApp();
 
   const isActive = (path) => location.pathname === path;
@@ -94,7 +98,13 @@ export const Header = () => {
             {/* Wallet Button */}
             <div className="relative">
               <button
-                onClick={toggleWalletMenu}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('🖱️ Wallet button clicked');
+                  toggleWalletMenu();
+                }}
+                type="button"
                 className="flex items-center space-x-2 px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition font-medium text-sm"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,11 +118,19 @@ export const Header = () => {
                 <span>{shortAddress}</span>
               </button>
 
-              {/* Wallet Dropdown Menu */}
+              {/* Wallet Selector */}
+              {isWalletSelectOpen && <WalletSelector />}
+
+              {/* Account Selector */}
               {isWalletMenuOpen && (
-                <div className="absolute top-16 right-0 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
+                <div className="absolute top-16 right-0 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50">
                   <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-                    <div className="text-sm font-medium text-gray-900">Select Account</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      Select Account
+                      {selectedWallet && (
+                        <span className="ml-2 text-xs font-normal text-gray-500">({selectedWallet})</span>
+                      )}
+                    </div>
                     <div className="text-xs text-gray-500 mt-0.5">Choose your wallet account</div>
                   </div>
 
@@ -158,8 +176,14 @@ export const Header = () => {
       </div>
 
       {/* Click outside to close */}
-      {isWalletMenuOpen && (
-        <div className="fixed inset-0 z-40" onClick={() => setIsWalletMenuOpen(false)}></div>
+      {(isWalletMenuOpen || isWalletSelectOpen) && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => {
+            setIsWalletMenuOpen(false);
+            setIsWalletSelectOpen(false);
+          }}
+        ></div>
       )}
     </header>
   );

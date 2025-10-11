@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { WalletConnector } from '../lib/core/wallet-connector.js';
+import { MultiWalletConnector } from '../lib/core/multi-wallet-connector.js';
 import { SubstrateClient } from '../lib/core/substrate-client.js';
 import { IpfsClient } from '../lib/core/ipfs-client.js';
 import { config } from '../lib/config.js';
@@ -16,14 +16,17 @@ export const useApp = () => {
 
 export const AppProvider = ({ children }) => {
   // Services
-  const [walletConnector] = useState(() => new WalletConnector());
+  const [walletConnector] = useState(() => new MultiWalletConnector());
   const [substrateClient] = useState(() => new SubstrateClient(config.SUBSTRATE_RPC_URL));
   const [ipfsClient] = useState(() => new IpfsClient());
 
   // State
   const [selectedAccount, setSelectedAccount] = useState(null);
+  const [selectedWallet, setSelectedWallet] = useState(null);
+  const [installedWallets, setInstalledWallets] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [isWalletMenuOpen, setIsWalletMenuOpen] = useState(false);
+  const [isWalletSelectOpen, setIsWalletSelectOpen] = useState(false);
   
   // Connection status
   const [substrateConnected, setSubstrateConnected] = useState(false);
@@ -33,7 +36,14 @@ export const AppProvider = ({ children }) => {
   // Initialize services on mount
   useEffect(() => {
     initializeApp();
+    detectWallets();
   }, []);
+
+  const detectWallets = async () => {
+    const wallets = await walletConnector.detectInstalledWallets();
+    setInstalledWallets(wallets);
+    console.log('📱 Detected wallets:', wallets.map(w => w.name).join(', '));
+  };
 
   const initializeApp = async () => {
     // Connect to Substrate
@@ -89,15 +99,21 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const connectWallet = async () => {
+  const connectWallet = async (walletId = 'polkadot-js') => {
     try {
-      await walletConnector.connect();
+      console.log('🔌 Connecting wallet:', walletId);
+      await walletConnector.connect(walletId);
       const allAccounts = await walletConnector.getAccounts();
+      console.log('✅ Wallet connected:', allAccounts.length, 'accounts');
       setAccounts(allAccounts);
+      setSelectedWallet(walletId);
+      setIsWalletSelectOpen(false);
       setIsWalletMenuOpen(true);
+      localStorage.setItem('carge_selected_wallet', walletId);
       return allAccounts;
     } catch (error) {
-      console.error('Wallet connection failed:', error);
+      console.error('❌ Wallet connection failed:', error);
+      alert(`Wallet connection failed: ${error.message}\n\nPlease install a Substrate wallet.`);
       throw error;
     }
   };
@@ -122,8 +138,10 @@ export const AppProvider = ({ children }) => {
   };
 
   const toggleWalletMenu = async () => {
+    console.log('🔄 Toggle wallet menu, current state:', { isWalletMenuOpen, accountsLength: accounts.length });
     if (!isWalletMenuOpen && accounts.length === 0) {
-      await connectWallet();
+      // Show wallet selection first
+      setIsWalletSelectOpen(true);
     } else {
       setIsWalletMenuOpen(!isWalletMenuOpen);
     }
@@ -138,8 +156,11 @@ export const AppProvider = ({ children }) => {
     
     // State
     selectedAccount,
+    selectedWallet,
+    installedWallets,
     accounts,
     isWalletMenuOpen,
+    isWalletSelectOpen,
     substrateConnected,
     ipfsReady,
     currentBlock,
@@ -150,6 +171,7 @@ export const AppProvider = ({ children }) => {
     disconnectWallet,
     toggleWalletMenu,
     setIsWalletMenuOpen,
+    setIsWalletSelectOpen,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
