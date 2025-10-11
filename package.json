@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@helia/unixfs": "^6.0.1",
+    "@libp2p/circuit-relay-v2": "^4.0.5",
+    "@libp2p/webrtc": "^6.0.6",
+    "@libp2p/websockets": "^10.0.6",
     "@polkadot/api": "^16.4.8",
     "@polkadot/extension-dapp": "^0.62.2",
     "@polkadot/util": "^13.5.6",
@@ -22,13 +25,17 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@tailwindcss/postcss": "^4.1.14",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.14",
     "vite": "^7.1.7"
   }
 }

@@ -9,11 +9,14 @@ export class IpfsClient {
     this.isReady = false;
     this.initPromise = null;
     
-    // Public IPFS gateways (fallback)
+    // Public IPFS gateways (fallback) - Ordered by reliability
     this.gateways = [
-      'https://dweb.link/ipfs',
       'https://ipfs.io/ipfs',
+      'https://dweb.link/ipfs',
+      'https://gateway.pinata.cloud/ipfs',
       'https://cloudflare-ipfs.com/ipfs',
+      'https://ipfs.eth.aragon.network/ipfs',
+      'https://gateway.ipfs.io/ipfs',
     ];
   }
 
@@ -46,13 +49,12 @@ export class IpfsClient {
       );
 
       const initHelia = (async () => {
-        const { createHelia } = await import('https://esm.sh/helia@4');
-        const { unixfs } = await import('https://esm.sh/@helia/unixfs@3');
-
-        // Import des transports pour navigateur
-        const { webSockets } = await import('https://esm.sh/@libp2p/websockets@8');
-        const { webRTC } = await import('https://esm.sh/@libp2p/webrtc@5');
-        const { circuitRelayTransport } = await import('https://esm.sh/@libp2p/circuit-relay-v2@2');
+        // Import depuis les packages installés
+        const { createHelia } = await import('helia');
+        const { unixfs } = await import('@helia/unixfs');
+        const { webSockets } = await import('@libp2p/websockets');
+        const { webRTC } = await import('@libp2p/webrtc');
+        const { circuitRelayTransport } = await import('@libp2p/circuit-relay-v2');
 
         // Configuration optimisée pour navigateur
         const heliaConfig = {
@@ -129,7 +131,7 @@ export class IpfsClient {
   /**
    * Télécharge depuis HTTP gateway (fallback)
    */
-  async downloadViaGateway(cid, timeout = 10000) {
+  async downloadViaGateway(cid, timeout = 20000) {
     const errors = [];
 
     for (const gateway of this.gateways) {
@@ -141,6 +143,9 @@ export class IpfsClient {
 
         const response = await fetch(`${gateway}/${cid}`, {
           signal: controller.signal,
+          headers: {
+            'Accept': 'application/octet-stream, text/plain, */*',
+          },
         });
 
         clearTimeout(timeoutId);
@@ -155,6 +160,8 @@ export class IpfsClient {
       } catch (error) {
         console.warn(`❌ Gateway ${gateway} failed:`, error.message);
         errors.push({ gateway, error: error.message });
+        // Petit délai avant d'essayer le prochain gateway
+        await new Promise(resolve => setTimeout(resolve, 500));
         continue;
       }
     }
@@ -180,7 +187,7 @@ export class IpfsClient {
         const decoder = new TextDecoder();
         let content = '';
 
-        // Timeout de 12 secondes pour Helia (plus de temps pour trouver les peers)
+        // Timeout de 15 secondes pour Helia (plus de temps pour trouver les peers)
         const downloadPromise = (async () => {
           for await (const chunk of this.fs.cat(cid)) {
             content += decoder.decode(chunk, { stream: true });
@@ -189,7 +196,7 @@ export class IpfsClient {
         })();
 
         const timeout = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Helia download timeout')), 12000)
+          setTimeout(() => reject(new Error('Helia download timeout')), 15000)
         );
 
         content = await Promise.race([downloadPromise, timeout]);
