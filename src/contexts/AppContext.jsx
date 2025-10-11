@@ -71,13 +71,16 @@ export const AppProvider = ({ children }) => {
       console.error('Substrate connection failed:', error);
     }
 
-    // Initialize IPFS
-    try {
-      const ready = await ipfsClient.init();
+    // Initialize IPFS (non-bloquant)
+    ipfsClient.init().then(ready => {
       setIpfsReady(ready);
-    } catch (error) {
+      if (!ready) {
+        console.log('💡 IPFS will use HTTP gateway fallback');
+      }
+    }).catch(error => {
       console.error('IPFS initialization failed:', error);
-    }
+      console.log('💡 IPFS will use HTTP gateway fallback');
+    });
 
     // Restore wallet state
     const savedAccount = localStorage.getItem('carge_selected_account');
