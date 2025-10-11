@@ -53,59 +53,42 @@ export class IpfsClient {
         const { createHelia } = await import('helia');
         const { unixfs } = await import('@helia/unixfs');
         const { webSockets } = await import('@libp2p/websockets');
-        const { webRTC } = await import('@libp2p/webrtc');
-        const { circuitRelayTransport } = await import('@libp2p/circuit-relay-v2');
+        const { bootstrap } = await import('@libp2p/bootstrap');
 
-        // Configuration optimisée pour navigateur
+        // Configuration simplifiée pour navigateur
         const heliaConfig = {
           libp2p: {
             // Transports compatibles navigateur
             transports: [
-              webSockets(),
-              webRTC(),
-              circuitRelayTransport({
-                discoverRelays: 1,
-              }),
+              webSockets()
             ],
-            // Peers bootstrap compatibles navigateur (WebSocket + WebRTC)
-            peerDiscovery: {
-              bootstrap: {
-                enabled: true,
+            // Peer discovery avec bootstrap
+            peerDiscovery: [
+              bootstrap({
                 list: [
-                  // Bootstrap WebSocket Secure (compatible navigateur)
+                  // Bootstrap nodes WebSocket Secure (compatible navigateur)
                   '/dns4/node0.preload.ipfs.io/tcp/443/wss/p2p/QmZMxNdpMkewiVZLMRxaNxUeZpDUb34pWjZ1kZvsd16Zic',
                   '/dns4/node1.preload.ipfs.io/tcp/443/wss/p2p/Qmbut9Ywz9YEDrz8ySBSgWyJk41Uvm2QJPhwDJzJyGFsD6',
                   '/dns4/node2.preload.ipfs.io/tcp/443/wss/p2p/QmV7gnbW5VTcJ3oyM2Xk1rdFBJ3kTkvxc87UFGsun29STS',
                   '/dns4/node3.preload.ipfs.io/tcp/443/wss/p2p/QmY7JB6MQXhxHvq7dBDh4HpbH29v4yE9JRadAVpndvzySN',
                 ]
-              }
-            },
-            // Services minimaux
-            services: {
-              identify: {},
-              ping: {
-                protocolPrefix: 'ipfs',
-                maxInboundStreams: 1,
-                maxOutboundStreams: 1,
-              }
-            },
-            // Connection Manager optimisé navigateur
+              })
+            ],
+            // Connection Manager
             connectionManager: {
-              maxConnections: 10,
+              maxConnections: 20,
               minConnections: 2,
-              dialTimeout: 10000, // Plus de temps pour WebRTC
             },
           },
-          // Datastore en mémoire
           start: true,
         };
 
-        console.log('🔧 Creating Helia with browser-compatible transports (WebSocket, WebRTC)...');
+        console.log('🔧 Creating Helia with WebSocket transport...');
         this.helia = await createHelia(heliaConfig);
         this.fs = unixfs(this.helia);
         
         // Attendre un peu pour que les connexions se fassent
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 3000));
         
         // Log des peers connectés
         const peers = this.helia.libp2p.getPeers();
