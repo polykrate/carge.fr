@@ -1,0 +1,23 @@
+{
+  "ragData": {
+    "ragHash": "0x514361f1469c116fd024757559d1dd47d26ae6564c5551e6ff60e0aa50407253",
+    "stepHash": "0xd717d6ac1e0ba33c595b3da6f2970d6542e144372c418bf342a98dbc3477b378",
+    "livrable": {
+      "work": {
+        "title": "Digital Sunrise",
+        "type": "artwork",
+        "description": "An abstract representation of dawn using geometric shapes and vibrant colors, blending warm oranges and soft purples to capture the peaceful transition from night to day",
+        "creationDate": "2025-10-03",
+        "contentHash": "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+      },
+      "creator": {
+        "legalName": "Alice Dubois",
+        "email": "alice.dubois@example.fr",
+        "country": "FR",
+        "walletAddress": "5GrwvaEF5zXb26eEhKWq5JnJT3SDVG3oVPqnQQfTvLTuEMZW",
+        "eidCertificate": "FR-eIDAS-2025-ART-001"
+      }
+    }
+  }
+}
+
