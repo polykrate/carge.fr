@@ -65,7 +65,7 @@ export const AppProvider = ({ children }) => {
           }
         }, 6000);
         
-        return () => clearInterval(interval);
+        // Clean up interval on unmount (sera géré par useEffect return)
       }
     } catch (error) {
       console.error('Substrate connection failed:', error);
