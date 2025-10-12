@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { u8aToHex } from '@polkadot/util';
 import { showError, showSuccess, toastTx } from '../lib/toast';
+import { quickSignSchema, validate, formatValidationErrors } from '../lib/validation';
 
 export const QuickSign = () => {
   const { substrateClient, selectedAccount, walletConnector } = useApp();
@@ -43,15 +44,16 @@ export const QuickSign = () => {
   };
 
   const handleSign = async () => {
-    if (!file || !fileHash) {
-      showError('Please select a file first');
-      setError('Please select a file first');
-      return;
-    }
+    // Validation with Zod
+    const validation = validate(quickSignSchema, {
+      file: file,
+      account: selectedAccount,
+    });
 
-    if (!selectedAccount) {
-      showError('Please connect your wallet first');
-      setError('Please connect your wallet first');
+    if (!validation.success) {
+      const errorMessage = formatValidationErrors(validation.errors);
+      showError(errorMessage);
+      setError(errorMessage);
       return;
     }
 

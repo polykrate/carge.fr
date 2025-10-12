@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { ProofVerifier } from '../lib/core/proof-verifier.js';
+import { showError, showSuccess, showLoading, dismiss } from '../lib/toast';
 
 export const Verify = () => {
   const { substrateClient } = useApp();
@@ -25,6 +26,8 @@ export const Verify = () => {
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    const toastId = showLoading('Verifying proof...');
 
     try {
       setVerifying(true);
@@ -124,8 +127,18 @@ export const Verify = () => {
       };
       
       setResult(result);
+      
+      if (result.isValid) {
+        dismiss(toastId);
+        showSuccess('Proof verified successfully!');
+      } else {
+        dismiss(toastId);
+        showError(result.message);
+      }
     } catch (err) {
       console.error('Verification error:', err);
+      dismiss(toastId);
+      showError(err.message || 'Verification failed');
       throw err;
     }
   };
