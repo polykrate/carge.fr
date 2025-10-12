@@ -51,43 +51,48 @@ export class MultiWalletConnector {
    */
   async detectInstalledWallets() {
     // On mobile, wallets take longer to inject
-    const waitTime = this.isMobile() ? 1500 : 300;
+    const waitTime = this.isMobile() ? 2000 : 500;
     console.log(`⏳ Waiting ${waitTime}ms for wallet injection (${this.isMobile() ? 'mobile' : 'desktop'})...`);
     await new Promise(resolve => setTimeout(resolve, waitTime));
 
     const installed = [];
 
-    // Try using @polkadot/extension-dapp first (works better on mobile)
-    try {
-      const { web3Enable, web3Accounts } = await import('@polkadot/extension-dapp');
-      
-      // Silent enable to detect wallets
-      const extensions = await web3Enable('Carge');
-      
-      if (extensions.length > 0) {
-        console.log(`✅ Found ${extensions.length} wallet(s) via extension-dapp`);
+    // Use CDN-loaded extension-dapp (works on both desktop and mobile)
+    if (window.polkadotExtensionDapp) {
+      try {
+        console.log('✅ Using CDN-loaded extension-dapp');
+        const { web3Enable } = window.polkadotExtensionDapp;
         
-        // Map detected extensions to our wallet list
-        for (const ext of extensions) {
-          const walletConfig = this.supportedWallets[ext.name] || {
-            name: ext.name,
-            logo: '💼',
-            extensionKey: ext.name,
-            downloadUrl: null
-          };
+        // Silent enable to detect wallets
+        const extensions = await web3Enable('Carge');
+        
+        if (extensions && extensions.length > 0) {
+          console.log(`✅ Found ${extensions.length} wallet(s) via CDN extension-dapp`);
           
-          installed.push({
-            id: ext.name,
-            ...walletConfig,
-            extension: ext,
-            version: ext.version
-          });
+          // Map detected extensions to our wallet list
+          for (const ext of extensions) {
+            const walletConfig = this.supportedWallets[ext.name] || {
+              name: ext.name,
+              logo: '💼',
+              extensionKey: ext.name,
+              downloadUrl: null
+            };
+            
+            installed.push({
+              id: ext.name,
+              ...walletConfig,
+              extension: ext,
+              version: ext.version
+            });
+          }
+          
+          return installed;
         }
-        
-        return installed;
+      } catch (error) {
+        console.warn('CDN extension-dapp detection failed:', error.message);
       }
-    } catch (error) {
-      console.warn('Extension-dapp detection failed:', error.message);
+    } else {
+      console.warn('⚠️ window.polkadotExtensionDapp not found (CDN scripts not loaded)');
     }
 
     // Fallback to window.injectedWeb3 (desktop)
@@ -131,8 +136,12 @@ export class MultiWalletConnector {
     try {
       console.log(`🔌 Connecting to ${walletId}...`);
 
-      // Import extension-dapp
-      const { web3Enable } = await import('@polkadot/extension-dapp');
+      // Use CDN-loaded extension-dapp
+      if (!window.polkadotExtensionDapp) {
+        throw new Error('Polkadot extension API not found. Please ensure wallet is installed.');
+      }
+
+      const { web3Enable } = window.polkadotExtensionDapp;
 
       // Enable the extension
       const extensions = await web3Enable('Carge');
@@ -174,7 +183,11 @@ export class MultiWalletConnector {
     }
 
     try {
-      const { web3Accounts } = await import('@polkadot/extension-dapp');
+      if (!window.polkadotExtensionDapp) {
+        throw new Error('Polkadot extension API not found');
+      }
+
+      const { web3Accounts } = window.polkadotExtensionDapp;
       
       // Get all accounts
       const allAccounts = await web3Accounts();
@@ -212,7 +225,11 @@ export class MultiWalletConnector {
     }
 
     try {
-      const { web3FromAddress } = await import('@polkadot/extension-dapp');
+      if (!window.polkadotExtensionDapp) {
+        throw new Error('Polkadot extension API not found');
+      }
+
+      const { web3FromAddress } = window.polkadotExtensionDapp;
       
       const injector = await web3FromAddress(this.selectedAccount);
       
@@ -242,7 +259,11 @@ export class MultiWalletConnector {
    */
   async getX25519PublicKey(address, password, keyIndex = 0) {
     try {
-      const { web3FromAddress } = await import('@polkadot/extension-dapp');
+      if (!window.polkadotExtensionDapp) {
+        throw new Error('Polkadot extension API not found');
+      }
+
+      const { web3FromAddress } = window.polkadotExtensionDapp;
       
       const injector = await web3FromAddress(address);
       
@@ -253,7 +274,11 @@ export class MultiWalletConnector {
 
       // For now, we'll use the account's public key
       // In production, you'd need proper X25519 key derivation
-      const { decodeAddress } = await import('@polkadot/util-crypto');
+      if (!window.polkadotUtilCrypto) {
+        throw new Error('Polkadot util-crypto not found');
+      }
+
+      const { decodeAddress } = window.polkadotUtilCrypto;
       const publicKey = Buffer.from(decodeAddress(address)).toString('hex');
       
       return { publicKey: '0x' + publicKey };
