@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../contexts/AppContext';
 import { RagClient } from '../lib/core/rag-client.js';
 import { CidConverter } from '../lib/core/cid-converter.js';
 import { FormGenerator } from '../lib/core/form-generator.js';
 
 export const Workflows = () => {
+  const { t } = useTranslation();
   const { substrateClient, ipfsClient, selectedAccount } = useApp();
   
   // Generate Polkadot.js Apps explorer link for a block number
@@ -188,10 +190,10 @@ export const Workflows = () => {
   if (loading) {
     return (
       <div className="container mx-auto px-6 py-12 max-w-4xl">
-        <h1 className="text-4xl font-light mb-4">Workflows</h1>
+        <h1 className="text-4xl font-light mb-4">{t('workflows.title')}</h1>
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin text-4xl">⏳</div>
-          <span className="ml-4 text-gray-600">Loading workflows from blockchain...</span>
+          <span className="ml-4 text-gray-600">{t('common.loading')}</span>
         </div>
       </div>
     );
@@ -199,8 +201,8 @@ export const Workflows = () => {
 
   return (
     <div className="container mx-auto px-6 py-12 max-w-4xl">
-      <h1 className="text-4xl font-light mb-4">Workflows</h1>
-      <p className="text-gray-600 mb-8">Select a workflow from the blockchain and execute it with your signature</p>
+      <h1 className="text-4xl font-light mb-4">{t('workflows.title')}</h1>
+      <p className="text-gray-600 mb-8">{t('workflows.description')}</p>
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
@@ -211,20 +213,20 @@ export const Workflows = () => {
       {/* RAG Selection */}
       <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-medium">Available Workflows</h2>
+          <h2 className="text-xl font-medium">{t('workflows.available')}</h2>
           <button
             onClick={loadRags}
             className="px-3 py-1.5 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition"
           >
-            Refresh
+            {t('workflows.refresh')}
           </button>
         </div>
 
         {rags.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <div className="text-4xl mb-2">📋</div>
-            <p>No workflows found on blockchain</p>
-            <p className="text-sm mt-2">Try refreshing or check your connection</p>
+            <p>{t('workflows.noWorkflows')}</p>
+            <p className="text-sm mt-2">{t('workflows.tryRefresh')}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -240,7 +242,7 @@ export const Workflows = () => {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <div className="font-medium text-gray-900">{rag.metadata.name || 'Unnamed Workflow'}</div>
+                    <div className="font-medium text-gray-900">{rag.metadata.name || t('workflows.unnamed')}</div>
                     {rag.metadata.description && (
                       <div className="text-sm text-gray-600 mt-1">{rag.metadata.description}</div>
                     )}
@@ -265,7 +267,7 @@ export const Workflows = () => {
           <div className="space-y-4">
             {/* Name & Description */}
             <div className="pb-4 border-b">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{selectedRag.metadata.name || 'Unnamed Workflow'}</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{selectedRag.metadata.name || t('workflows.unnamed')}</h3>
               {selectedRag.metadata.description && (
                 <p className="text-gray-600 text-sm">{selectedRag.metadata.description}</p>
               )}
@@ -274,11 +276,11 @@ export const Workflows = () => {
             {/* Metadata Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm pb-4 border-b">
               <div>
-                <span className="text-gray-500">Publisher:</span>
+                <span className="text-gray-500">{t('workflows.publisher')}:</span>
                 <p className="font-mono text-xs mt-1 break-all">{selectedRag.metadata.publisherSS58 || selectedRag.metadata.publisher}</p>
               </div>
               <div>
-                <span className="text-gray-500">Created at Block:</span>
+                <span className="text-gray-500">{t('workflows.createdAt')}:</span>
                 <a
                   href={getBlockExplorerLink(selectedRag.metadata.createdAt)}
                   target="_blank"
@@ -291,7 +293,7 @@ export const Workflows = () => {
               </div>
               {selectedRag.metadata.expiresAt && (
                 <div>
-                  <span className="text-gray-500">Expires at Block:</span>
+                  <span className="text-gray-500">{t('workflows.expiresAt')}:</span>
                   <a
                     href={getBlockExplorerLink(selectedRag.metadata.expiresAt)}
                     target="_blank"
@@ -305,19 +307,19 @@ export const Workflows = () => {
               )}
               {selectedRag.metadata.stakedAmount && selectedRag.metadata.stakedAmount !== '0' && (
                 <div>
-                  <span className="text-gray-500">Staked Amount:</span>
-                  <p className="mt-1 font-medium">{selectedRag.metadata.stakedAmount} units</p>
+                  <span className="text-gray-500">{t('workflows.staked')}:</span>
+                  <p className="mt-1 font-medium">{selectedRag.metadata.stakedAmount} {t('common.units')}</p>
                 </div>
               )}
             </div>
 
             {/* CIDs Section */}
             <div className="space-y-3 pb-4 border-b">
-              <h4 className="font-medium text-gray-900">IPFS Resources</h4>
+              <h4 className="font-medium text-gray-900">{t('workflows.ipfsResources')}</h4>
               <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
-                <CidLink hexCid={selectedRag.metadata.instructionCid} label="Instructions" />
-                <CidLink hexCid={selectedRag.metadata.resourceCid} label="Resources" />
-                <CidLink hexCid={selectedRag.metadata.schemaCid} label="Schema" />
+                <CidLink hexCid={selectedRag.metadata.instructionCid} label={t('workflows.instructions')} />
+                <CidLink hexCid={selectedRag.metadata.resourceCid} label={t('workflows.resources')} />
+                <CidLink hexCid={selectedRag.metadata.schemaCid} label={t('workflows.schema')} />
               </div>
             </div>
 
@@ -325,7 +327,7 @@ export const Workflows = () => {
             {selectedRag.metadata.steps && selectedRag.metadata.steps.length > 0 && (
               <div className="space-y-2">
                 <h4 className="font-medium text-gray-900">
-                  Multi-Step Workflow ({selectedRag.metadata.steps.length} step{selectedRag.metadata.steps.length > 1 ? 's' : ''})
+                  {t('workflows.multiStep')} ({selectedRag.metadata.steps.length} {selectedRag.metadata.steps.length > 1 ? t('workflows.steps') : t('workflows.step')})
                 </h4>
                 <div className="space-y-2">
                   {selectedRag.metadata.steps.map((stepHash, i) => {
@@ -340,7 +342,7 @@ export const Workflows = () => {
                           {i + 1}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm">{stepRag?.metadata.name || 'Unknown Step'}</div>
+                          <div className="font-medium text-sm">{stepRag?.metadata.name || t('workflows.unknownStep')}</div>
                           {stepRag?.metadata.description && (
                             <div className="text-xs text-gray-600 mt-1">{stepRag.metadata.description}</div>
                           )}
