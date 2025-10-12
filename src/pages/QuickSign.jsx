@@ -82,7 +82,15 @@ export const QuickSign = () => {
       console.log('API connected');
 
       // Get the injector from the selected account
-      const { web3FromAddress } = await import('@polkadot/extension-dapp');
+      // CRITICAL: Use CDN-loaded API (works on both desktop and mobile)
+      if (!window.polkadotExtensionDapp) {
+        throw new Error('Polkadot extension API not found');
+      }
+      
+      // Ensure web3Enable has been called (should be done in detectWallets, but safety check)
+      const { web3Enable, web3FromAddress } = window.polkadotExtensionDapp;
+      await web3Enable('Carge'); // Safe to call multiple times
+      
       const injector = await web3FromAddress(selectedAccount);
       
       if (!injector || !injector.signer) {
@@ -99,8 +107,11 @@ export const QuickSign = () => {
       console.log('Preparing to sign content hash...');
       console.log('Content hash:', fileHash);
       
-      // Import SignerPayloadRaw and signRaw utilities
-      const { signatureVerify, cryptoWaitReady } = await import('@polkadot/util-crypto');
+      // Use CDN-loaded util-crypto
+      if (!window.polkadotUtilCrypto) {
+        throw new Error('Polkadot util-crypto not found');
+      }
+      const { signatureVerify, cryptoWaitReady } = window.polkadotUtilCrypto;
       await cryptoWaitReady();
       
       // Sign the file hash with the wallet
@@ -121,7 +132,10 @@ export const QuickSign = () => {
       toastTx.broadcasting(toastId);
       
       // Calculate the wrapped message hash for display (what was actually signed)
-      const { stringToU8a, u8aToHex, hexToU8a } = await import('@polkadot/util');
+      if (!window.polkadotUtil) {
+        throw new Error('Polkadot util not found');
+      }
+      const { stringToU8a, u8aToHex, hexToU8a } = window.polkadotUtil;
       const fileHashBytes = hexToU8a(fileHash);
       const wrappedMessage = new Uint8Array([
         ...stringToU8a('<Bytes>'),

@@ -126,9 +126,9 @@ export const validate = (schema, data) => {
     return {
       success: result.success,
       data: result.success ? result.data : null,
-      errors: result.success ? [] : result.error.errors.map(err => ({
-        path: err.path.join('.'),
-        message: err.message,
+      errors: result.success ? [] : (result.error?.errors || result.error?.issues || []).map(err => ({
+        path: err.path?.join('.') || 'unknown',
+        message: err.message || 'Validation error',
       })),
     };
   } catch (error) {
