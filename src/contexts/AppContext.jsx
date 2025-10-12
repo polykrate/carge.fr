@@ -86,10 +86,41 @@ export const AppProvider = ({ children }) => {
       setIpfsReady(false);
     });
 
-    // Restore wallet state
+    // Auto-connect wallet on mobile or restore saved state on desktop
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const savedAccount = localStorage.getItem('carge_selected_account');
-    if (savedAccount) {
-      try {
+    const savedWallet = localStorage.getItem('carge_selected_wallet');
+    
+    try {
+      // On mobile: always try to auto-connect after a short delay (let wallet inject APIs)
+      if (isMobile) {
+        console.log('📱 Mobile detected, waiting for wallet injection...');
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for injection
+        
+        // Detect wallets again after delay
+        const wallets = await walletConnector.detectInstalledWallets();
+        setInstalledWallets(wallets);
+        
+        if (wallets.length > 0) {
+          console.log('📱 Mobile wallet detected, auto-connecting...');
+          const walletToConnect = savedWallet || wallets[0].id;
+          await walletConnector.connect(walletToConnect);
+          const allAccounts = await walletConnector.getAccounts();
+          setAccounts(allAccounts);
+          setSelectedWallet(walletToConnect);
+          
+          // Auto-select saved account or first available
+          if (allAccounts.length > 0) {
+            const accountToSelect = savedAccount && allAccounts.some(acc => acc.address === savedAccount)
+              ? savedAccount
+              : allAccounts[0].address;
+            await selectAccount(accountToSelect);
+            console.log('✅ Mobile auto-connected:', accountToSelect);
+          }
+        }
+      } else if (savedAccount) {
+        // Desktop: only restore if previously saved
+        console.log('💻 Desktop: Restoring saved account...');
         await walletConnector.connect();
         const allAccounts = await walletConnector.getAccounts();
         setAccounts(allAccounts);
@@ -97,12 +128,13 @@ export const AppProvider = ({ children }) => {
         const accountExists = allAccounts.some(acc => acc.address === savedAccount);
         if (accountExists) {
           await selectAccount(savedAccount);
+          console.log('✅ Desktop account restored:', savedAccount);
         } else {
           localStorage.removeItem('carge_selected_account');
         }
-      } catch (error) {
-        console.error('Failed to restore wallet state:', error);
       }
+    } catch (error) {
+      console.error('❌ Failed to auto-connect wallet:', error);
     }
   };
 
