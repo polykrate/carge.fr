@@ -109,13 +109,29 @@ export const AppProvider = ({ children }) => {
           setAccounts(allAccounts);
           setSelectedWallet(walletToConnect);
           
-          // Auto-select saved account or first available
-          if (allAccounts.length > 0) {
-            const accountToSelect = savedAccount && allAccounts.some(acc => acc.address === savedAccount)
-              ? savedAccount
-              : allAccounts[0].address;
-            await selectAccount(accountToSelect);
-            console.log('✅ Mobile auto-connected:', accountToSelect);
+          // Log account details to check for "active" indicators
+          console.log('📋 All accounts metadata:');
+          allAccounts.forEach((acc, idx) => {
+            console.log(`  [${idx}] ${acc.meta.name || 'Unnamed'}`);
+            console.log(`      Address: ${acc.address}`);
+            console.log(`      Source: ${acc.meta.source}`);
+            console.log(`      Meta:`, acc.meta);
+          });
+          
+          // Try to restore previously selected account
+          if (savedAccount && allAccounts.some(acc => acc.address === savedAccount)) {
+            await selectAccount(savedAccount);
+            console.log('✅ Mobile: Restored saved account:', savedAccount);
+          } else if (allAccounts.length === 1) {
+            // If only one account, auto-select it
+            await selectAccount(allAccounts[0].address);
+            console.log('✅ Mobile: Auto-selected single account');
+          } else if (allAccounts.length > 0) {
+            // Multiple accounts: auto-select first one (usually the active account in mobile wallets)
+            // Most mobile wallets (SubWallet, Nova) put the currently active account first
+            await selectAccount(allAccounts[0].address);
+            console.log('✅ Mobile: Auto-selected first account (likely active in wallet)');
+            console.log('💡 Tip: You can change accounts via the wallet menu (top-right)');
           }
         }
       } else if (savedAccount) {
