@@ -70,7 +70,7 @@ export const Home = () => {
             </div>
 
             {/* AI */}
-            <div className="p-8 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="p-8 bg-gray-50 border border-gray-300 rounded-lg">
               <div className="flex items-center gap-3 mb-4">
                 <div className="text-3xl">🤖</div>
                 <div>
@@ -99,7 +99,7 @@ export const Home = () => {
             </div>
 
             {/* Electronic Signature */}
-            <div className="p-8 bg-green-50 border border-green-200 rounded-lg">
+            <div className="p-8 bg-gray-50 border border-gray-300 rounded-lg">
               <div className="flex items-center gap-3 mb-4">
                 <div className="text-3xl">✍️</div>
                 <div>

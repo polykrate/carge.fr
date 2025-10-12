@@ -96,6 +96,7 @@ const resources = {
         createdAt: 'Created at Block',
         expiresAt: 'Expires at Block',
         stakedAmount: 'Staked Amount',
+        staked: 'Staked',
         ipfsResources: 'IPFS Resources',
         instructions: 'Instructions',
         resources: 'Resources',
@@ -105,6 +106,8 @@ const resources = {
         step: 'step',
         submitDev: 'Submit (In Development)',
         units: 'units',
+        unnamed: 'Unnamed Workflow',
+        unknownStep: 'Unknown Step',
       },
       
       // Quick Sign page
@@ -314,6 +317,7 @@ const resources = {
         createdAt: 'Créé au bloc',
         expiresAt: 'Expire au bloc',
         stakedAmount: 'Montant engagé',
+        staked: 'Engagé',
         ipfsResources: 'Ressources IPFS',
         instructions: 'Instructions',
         resources: 'Ressources',
@@ -323,6 +327,8 @@ const resources = {
         step: 'étape',
         submitDev: 'Soumettre (développement)',
         units: 'unités',
+        unnamed: 'Workflow sans nom',
+        unknownStep: 'Étape inconnue',
       },
       
       // Page Signature Rapide

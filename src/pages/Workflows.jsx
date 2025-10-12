@@ -278,8 +278,6 @@ export const Workflows = () => {
       {/* RAG Details */}
       {selectedRag && (
         <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-medium mb-4">Workflow Details</h2>
-          
           <div className="space-y-4">
             {/* Name & Description */}
             <div className="pb-4 border-b">
