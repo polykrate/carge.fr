@@ -3,9 +3,16 @@ import { useApp } from '../contexts/AppContext';
 import { RagClient } from '../lib/core/rag-client.js';
 import { CidConverter } from '../lib/core/cid-converter.js';
 import { FormGenerator } from '../lib/core/form-generator.js';
+import { config } from '../lib/config.js';
 
 export const Workflows = () => {
   const { substrateClient, ipfsClient, selectedAccount } = useApp();
+  
+  // Helper to generate Polkadot.js Apps explorer link for a block number
+  const getBlockExplorerLink = (blockNumber) => {
+    const rpcUrl = config.SUBSTRATE_RPC_URL;
+    return `https://polkadot.js.org/apps/?rpc=${encodeURIComponent(rpcUrl)}#/explorer/query/${blockNumber}`;
+  };
   
   // State
   const [rags, setRags] = useState([]);
@@ -266,13 +273,29 @@ export const Workflows = () => {
                 <p className="font-mono text-xs mt-1 break-all">{selectedRag.metadata.publisherSS58 || selectedRag.metadata.publisher}</p>
               </div>
               <div>
-                <span className="text-gray-500">Created:</span>
-                <p className="mt-1">{new Date(selectedRag.metadata.createdAt * 1000).toLocaleString()}</p>
+                <span className="text-gray-500">Created at Block:</span>
+                <a
+                  href={getBlockExplorerLink(selectedRag.metadata.createdAt)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 text-blue-600 hover:text-blue-800 hover:underline font-medium inline-block"
+                  title="View block in explorer"
+                >
+                  #{selectedRag.metadata.createdAt.toLocaleString()}
+                </a>
               </div>
               {selectedRag.metadata.expiresAt && (
                 <div>
-                  <span className="text-gray-500">Expires:</span>
-                  <p className="mt-1">{new Date(selectedRag.metadata.expiresAt * 1000).toLocaleString()}</p>
+                  <span className="text-gray-500">Expires at Block:</span>
+                  <a
+                    href={getBlockExplorerLink(selectedRag.metadata.expiresAt)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 text-blue-600 hover:text-blue-800 hover:underline font-medium inline-block"
+                    title="View block in explorer"
+                  >
+                    #{selectedRag.metadata.expiresAt.toLocaleString()}
+                  </a>
                 </div>
               )}
               {selectedRag.metadata.stakedAmount && selectedRag.metadata.stakedAmount !== '0' && (
