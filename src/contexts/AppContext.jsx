@@ -37,12 +37,64 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     initializeApp();
     detectWallets();
+    setupAccountChangeListener();
+    
+    // Cleanup on unmount
+    return () => {
+      // Unsubscribe from account changes if needed
+    };
   }, []);
 
   const detectWallets = async () => {
     const wallets = await walletConnector.detectInstalledWallets();
     setInstalledWallets(wallets);
     console.log('📱 Detected wallets:', wallets.map(w => w.name).join(', '));
+  };
+
+  const setupAccountChangeListener = async () => {
+    // Wait for extension to be ready
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    if (!window.polkadotExtensionDapp) {
+      console.log('⚠️ Cannot setup account listener: extension not loaded');
+      return;
+    }
+
+    try {
+      const { web3Enable, web3AccountsSubscribe } = window.polkadotExtensionDapp;
+      
+      // Enable first (required before subscribing)
+      await web3Enable('Carge');
+      
+      // Subscribe to account changes
+      const unsubscribe = await web3AccountsSubscribe((injectedAccounts) => {
+        console.log('🔄 Accounts changed in wallet:', injectedAccounts.length, 'accounts');
+        
+        // If we have a connected wallet, update the accounts list
+        if (selectedWallet) {
+          const walletAccounts = injectedAccounts.filter(
+            acc => acc.meta.source === selectedWallet
+          );
+          
+          console.log('📋 Updated accounts for', selectedWallet, ':', walletAccounts.length);
+          setAccounts(walletAccounts);
+          
+          // If current selected account is no longer available, clear it
+          if (selectedAccount && !walletAccounts.some(acc => acc.address === selectedAccount)) {
+            console.log('⚠️ Previously selected account no longer available');
+            setSelectedAccount(null);
+            localStorage.removeItem('carge_selected_account');
+          }
+        }
+      });
+      
+      console.log('✅ Account change listener setup complete');
+      
+      // Store unsubscribe function for cleanup
+      return unsubscribe;
+    } catch (error) {
+      console.error('❌ Failed to setup account change listener:', error);
+    }
   };
 
   const initializeApp = async () => {
@@ -131,7 +183,8 @@ export const AppProvider = ({ children }) => {
             // Most mobile wallets (SubWallet, Nova) put the currently active account first
             await selectAccount(allAccounts[0].address);
             console.log('✅ Mobile: Auto-selected first account (likely active in wallet)');
-            console.log('💡 Tip: You can change accounts via the wallet menu (top-right)');
+            console.log('💡 Note: SubWallet usually puts your active account first in the list');
+            console.log('💡 Tip: Click the wallet button (top-right) to change accounts if needed');
           }
         }
       } else if (savedAccount) {
