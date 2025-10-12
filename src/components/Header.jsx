@@ -218,7 +218,7 @@ export const Header = () => {
                   isActive('/') ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                Home
+                {t('nav.home')}
               </Link>
               <Link
                 to="/workflows"
@@ -227,7 +227,7 @@ export const Header = () => {
                   isActive('/workflows') ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                Workflows
+                {t('nav.workflows')}
               </Link>
               <Link
                 to="/quick-sign"
@@ -236,7 +236,7 @@ export const Header = () => {
                   isActive('/quick-sign') ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                Quick Sign
+                {t('nav.quickSign')}
               </Link>
               <Link
                 to="/verify"
@@ -245,7 +245,7 @@ export const Header = () => {
                   isActive('/verify') ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                Verify Proof
+                {t('nav.verifyProof')}
               </Link>
               <Link
                 to="/about"
@@ -254,7 +254,7 @@ export const Header = () => {
                   isActive('/about') ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                About
+                {t('nav.about')}
               </Link>
             </nav>
 
@@ -269,7 +269,7 @@ export const Header = () => {
                 title="Click to open Polkadot.js Apps"
               >
                 <div className={`w-2 h-2 rounded-full ${substrateConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className="text-gray-500 text-xs">Block</span>
+                <span className="text-gray-500 text-xs">{t('wallet.block')}</span>
                 <span className="font-mono text-gray-900 text-xs">
                   {currentBlock ? `#${currentBlock}` : '-'}
                 </span>
@@ -280,6 +280,11 @@ export const Header = () => {
                 <div className={`w-2 h-2 rounded-full ${ipfsReady ? 'bg-green-500' : 'bg-orange-500'}`}></div>
                 <span className="text-gray-500 text-xs">IPFS</span>
               </div>
+            </div>
+
+            {/* Mobile Language Selector */}
+            <div className="mb-4">
+              <LanguageSelector />
             </div>
 
             {/* Mobile Wallet Button */}
