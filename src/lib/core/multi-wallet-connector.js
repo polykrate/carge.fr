@@ -7,6 +7,7 @@ export class MultiWalletConnector {
   constructor() {
     this.selectedWallet = null;
     this.selectedAccount = null;
+    this._web3Enabled = false; // Track if web3Enable has been called
     
     // Supported wallets with their extension keys
     this.supportedWallets = {
@@ -63,8 +64,12 @@ export class MultiWalletConnector {
         console.log('✅ Using CDN-loaded extension-dapp');
         const { web3Enable } = window.polkadotExtensionDapp;
         
-        // Silent enable to detect wallets
+        // CRITICAL: web3Enable MUST be called before ANY other extension-dapp functions
+        // This enables the dApp and authorizes it to interact with wallets
         const extensions = await web3Enable('Carge');
+        
+        // Store that we've enabled (so we don't need to call it again)
+        this._web3Enabled = true;
         
         if (extensions && extensions.length > 0) {
           console.log(`✅ Found ${extensions.length} wallet(s) via CDN extension-dapp`);
@@ -143,7 +148,21 @@ export class MultiWalletConnector {
 
       const { web3Enable } = window.polkadotExtensionDapp;
 
-      // Enable the extension
+      // Enable the extension if not already done
+      // web3Enable MUST be called at least once before using web3FromAddress
+      if (!this._web3Enabled) {
+        console.log('🔐 Enabling web3 for the first time...');
+        const extensions = await web3Enable('Carge');
+        this._web3Enabled = true;
+
+        if (extensions.length === 0) {
+          throw new Error('No wallet extension found. Please install a Substrate wallet.');
+        }
+      } else {
+        console.log('✅ web3 already enabled');
+      }
+
+      // Get extensions (they're cached after first enable)
       const extensions = await web3Enable('Carge');
 
       if (extensions.length === 0) {
@@ -227,6 +246,14 @@ export class MultiWalletConnector {
     try {
       if (!window.polkadotExtensionDapp) {
         throw new Error('Polkadot extension API not found');
+      }
+
+      // CRITICAL: Ensure web3Enable has been called before web3FromAddress
+      if (!this._web3Enabled) {
+        console.log('⚠️ web3Enable not called yet, enabling now...');
+        const { web3Enable } = window.polkadotExtensionDapp;
+        await web3Enable('Carge');
+        this._web3Enabled = true;
       }
 
       const { web3FromAddress } = window.polkadotExtensionDapp;
