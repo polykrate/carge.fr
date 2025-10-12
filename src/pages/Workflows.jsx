@@ -51,6 +51,31 @@ export const Workflows = () => {
     }
   };
 
+  // Format token amount with 12 decimals (RAG tokens)
+  const formatTokenAmount = (amount) => {
+    if (!amount || amount === '0') return '0';
+    
+    try {
+      // Convert string to BigInt, divide by 10^12
+      const value = BigInt(amount);
+      const decimals = BigInt(10 ** 12);
+      const integerPart = value / decimals;
+      const fractionalPart = value % decimals;
+      
+      // Format with up to 4 decimal places, remove trailing zeros
+      const fractionalStr = fractionalPart.toString().padStart(12, '0').slice(0, 4);
+      const trimmed = fractionalStr.replace(/0+$/, '');
+      
+      if (trimmed) {
+        return `${integerPart}.${trimmed}`;
+      }
+      return integerPart.toString();
+    } catch (err) {
+      console.error('Failed to format token amount:', err);
+      return amount;
+    }
+  };
+
   // Load RAGs on mount
   useEffect(() => {
     loadRags();
@@ -341,7 +366,7 @@ export const Workflows = () => {
                   {selectedRag.metadata.stakedAmount && selectedRag.metadata.stakedAmount !== '0' && (
                     <div>
                       <span className="text-gray-500">{t('workflows.staked')}:</span>
-                      <p className="mt-1 font-medium">{selectedRag.metadata.stakedAmount} {t('common.units')}</p>
+                      <p className="mt-1 font-medium">{formatTokenAmount(selectedRag.metadata.stakedAmount)} RAG</p>
                     </div>
                   )}
                 </div>
