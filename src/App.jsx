@@ -12,6 +12,7 @@ const Workflows = lazy(() => import('./pages/Workflows').then(m => ({ default: m
 const QuickSign = lazy(() => import('./pages/QuickSign').then(m => ({ default: m.QuickSign })));
 const Verify = lazy(() => import('./pages/Verify').then(m => ({ default: m.Verify })));
 const About = lazy(() => import('./pages/About').then(m => ({ default: m.About })));
+const WalletDebug = lazy(() => import('./pages/WalletDebug').then(m => ({ default: m.WalletDebug })));
 
 // Loading component
 const PageLoader = () => (
@@ -48,15 +49,16 @@ function App() {
             }}
           />
           <Layout>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/workflows" element={<Workflows />} />
-                <Route path="/quick-sign" element={<QuickSign />} />
-                <Route path="/verify" element={<Verify />} />
-                <Route path="/about" element={<About />} />
-              </Routes>
-            </Suspense>
+                    <Suspense fallback={<PageLoader />}>
+                      <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/workflows" element={<Workflows />} />
+                        <Route path="/quick-sign" element={<QuickSign />} />
+                        <Route path="/verify" element={<Verify />} />
+                        <Route path="/about" element={<About />} />
+                        <Route path="/wallet-debug" element={<WalletDebug />} />
+                      </Routes>
+                    </Suspense>
           </Layout>
         </AppProvider>
       </BrowserRouter>
