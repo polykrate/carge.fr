@@ -56,12 +56,6 @@ export const Header = () => {
               {t('nav.home')}
             </Link>
             <Link
-              to="/workflows"
-              className={isActive('/workflows') ? 'text-gray-900 font-medium' : 'text-gray-600 hover:text-gray-900'}
-            >
-              {t('nav.workflows')}
-            </Link>
-            <Link
               to="/quick-sign"
               className={isActive('/quick-sign') ? 'text-gray-900 font-medium' : 'text-gray-600 hover:text-gray-900'}
             >
@@ -72,6 +66,12 @@ export const Header = () => {
               className={isActive('/verify') ? 'text-gray-900 font-medium' : 'text-gray-600 hover:text-gray-900'}
             >
               {t('nav.verifyProof')}
+            </Link>
+            <Link
+              to="/workflows"
+              className={isActive('/workflows') ? 'text-gray-900 font-medium' : 'text-gray-600 hover:text-gray-900'}
+            >
+              {t('nav.workflows')}
             </Link>
             <Link
               to="/about"
@@ -221,15 +221,6 @@ export const Header = () => {
                 {t('nav.home')}
               </Link>
               <Link
-                to="/workflows"
-                onClick={closeMobileMenu}
-                className={`px-3 py-2 rounded-lg text-sm ${
-                  isActive('/workflows') ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                {t('nav.workflows')}
-              </Link>
-              <Link
                 to="/quick-sign"
                 onClick={closeMobileMenu}
                 className={`px-3 py-2 rounded-lg text-sm ${
@@ -246,6 +237,15 @@ export const Header = () => {
                 }`}
               >
                 {t('nav.verifyProof')}
+              </Link>
+              <Link
+                to="/workflows"
+                onClick={closeMobileMenu}
+                className={`px-3 py-2 rounded-lg text-sm ${
+                  isActive('/workflows') ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {t('nav.workflows')}
               </Link>
               <Link
                 to="/about"

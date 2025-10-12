@@ -19,10 +19,10 @@ export const Home = () => {
           </p>
           <div className="flex justify-center gap-4">
             <Link
-              to="/workflows"
+              to="/quick-sign"
               className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium"
             >
-              {t('home.ctaExecute')}
+              {t('home.ctaQuickSign')}
             </Link>
             <Link to="/verify" className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
               {t('home.ctaVerify')}

@@ -70,8 +70,17 @@ export const Workflows = () => {
       const ragClient = new RagClient(substrateClient);
       const allRags = await ragClient.getAllRags();
       
-      console.log(`Loaded ${allRags.length} RAG(s)`);
-      setRags(allRags);
+      // Filter only RAG masters (workflows with steps)
+      const ragMasters = allRags.filter(rag => {
+        const hasSteps = rag.metadata?.steps && rag.metadata.steps.length > 0;
+        if (!hasSteps) {
+          console.log(`Filtering out RAG without steps: ${rag.metadata?.name || 'Unnamed'}`);
+        }
+        return hasSteps;
+      });
+      
+      console.log(`Loaded ${ragMasters.length} RAG master(s) with steps (filtered from ${allRags.length} total)`);
+      setRags(ragMasters);
     } catch (err) {
       console.error('Failed to load RAGs:', err);
       setError('Failed to load workflows from blockchain');
