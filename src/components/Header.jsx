@@ -1,9 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../contexts/AppContext';
 import { WalletSelector } from './WalletSelector';
+import { LanguageSelector } from './LanguageSelector';
 
 export const Header = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
@@ -28,7 +31,7 @@ export const Header = () => {
 
   const shortAddress = selectedAccount
     ? `${selectedAccount.substring(0, 6)}...${selectedAccount.substring(selectedAccount.length - 4)}`
-    : 'Connect Wallet';
+    : t('wallet.connect');
 
   const polkadotJsUrl = `https://polkadot.js.org/apps/?rpc=${encodeURIComponent(config.SUBSTRATE_WS_URL)}`;
 
@@ -50,31 +53,31 @@ export const Header = () => {
               to="/"
               className={isActive('/') ? 'text-gray-900 font-medium' : 'text-gray-600 hover:text-gray-900'}
             >
-              Home
+              {t('nav.home')}
             </Link>
             <Link
               to="/workflows"
               className={isActive('/workflows') ? 'text-gray-900 font-medium' : 'text-gray-600 hover:text-gray-900'}
             >
-              Workflows
+              {t('nav.workflows')}
             </Link>
             <Link
               to="/quick-sign"
               className={isActive('/quick-sign') ? 'text-gray-900 font-medium' : 'text-gray-600 hover:text-gray-900'}
             >
-              Quick Sign
+              {t('nav.quickSign')}
             </Link>
             <Link
               to="/verify"
               className={isActive('/verify') ? 'text-gray-900 font-medium' : 'text-gray-600 hover:text-gray-900'}
             >
-              Verify Proof
+              {t('nav.verifyProof')}
             </Link>
             <Link
               to="/about"
               className={isActive('/about') ? 'text-gray-900 font-medium' : 'text-gray-600 hover:text-gray-900'}
             >
-              About
+              {t('nav.about')}
             </Link>
           </nav>
 
@@ -91,7 +94,7 @@ export const Header = () => {
                 title="Click to open Polkadot.js Apps"
               >
                 <div className={`w-2 h-2 rounded-full ${substrateConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className="text-gray-500 text-xs">Block</span>
+                <span className="text-gray-500 text-xs">{t('wallet.block')}</span>
                 <span className="font-mono text-gray-900 text-xs">
                   {currentBlock ? `#${currentBlock}` : '-'}
                 </span>
@@ -102,6 +105,9 @@ export const Header = () => {
                 <div className={`w-2 h-2 rounded-full ${ipfsReady ? 'bg-green-500' : 'bg-orange-500'}`}></div>
                 <span className="text-gray-500 text-xs">IPFS</span>
               </div>
+              
+              {/* Language Selector */}
+              <LanguageSelector />
             </div>
 
             {/* Desktop Wallet Button */}

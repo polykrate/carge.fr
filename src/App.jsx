@@ -1,8 +1,11 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { AppProvider } from './contexts/AppContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
+import './lib/i18n'; // Initialize i18n
 
 // Lazy load heavy pages for better performance
 const Workflows = lazy(() => import('./pages/Workflows').then(m => ({ default: m.Workflows })));
@@ -19,21 +22,45 @@ const PageLoader = () => (
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppProvider>
-        <Layout>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/workflows" element={<Workflows />} />
-              <Route path="/quick-sign" element={<QuickSign />} />
-              <Route path="/verify" element={<Verify />} />
-              <Route path="/about" element={<About />} />
-            </Routes>
-          </Suspense>
-        </Layout>
-      </AppProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppProvider>
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                borderRadius: '8px',
+              },
+              success: {
+                iconTheme: {
+                  primary: '#10b981',
+                  secondary: '#fff',
+                },
+              },
+              error: {
+                iconTheme: {
+                  primary: '#ef4444',
+                  secondary: '#fff',
+                },
+                duration: 5000,
+              },
+            }}
+          />
+          <Layout>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/workflows" element={<Workflows />} />
+                <Route path="/quick-sign" element={<QuickSign />} />
+                <Route path="/verify" element={<Verify />} />
+                <Route path="/about" element={<About />} />
+              </Routes>
+            </Suspense>
+          </Layout>
+        </AppProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 
