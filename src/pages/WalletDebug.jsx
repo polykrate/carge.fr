@@ -96,7 +96,12 @@ export const WalletDebug = () => {
       setDebugInfo(prev => ({
         ...prev,
         web3AccountsTest: 'SUCCESS',
-        accountsFound: accounts.length
+        accountsFound: accounts.length,
+        accountsList: accounts.map(acc => ({
+          address: acc.address,
+          name: acc.meta.name,
+          source: acc.meta.source
+        }))
       }));
     } catch (error) {
       alert(`❌ web3Accounts failed:\n${error.message}`);
@@ -104,6 +109,67 @@ export const WalletDebug = () => {
         ...prev,
         web3AccountsTest: 'FAILED',
         web3AccountsError: error.message
+      }));
+    }
+  };
+
+  const testSignature = async () => {
+    try {
+      if (!window.polkadotExtensionDapp) {
+        alert('❌ window.polkadotExtensionDapp not found');
+        return;
+      }
+      
+      const { web3Enable, web3Accounts, web3FromAddress } = window.polkadotExtensionDapp;
+      
+      // Step 1: Enable
+      console.log('🔐 Step 1: Calling web3Enable...');
+      const extensions = await web3Enable('Carge Debug');
+      console.log(`✅ Extensions found: ${extensions.length}`);
+      
+      // Step 2: Get accounts
+      console.log('👤 Step 2: Getting accounts...');
+      const accounts = await web3Accounts();
+      console.log(`✅ Accounts found: ${accounts.length}`);
+      
+      if (accounts.length === 0) {
+        alert('❌ No accounts found');
+        return;
+      }
+      
+      // Step 3: Get injector for first account
+      const account = accounts[0];
+      console.log(`🔑 Step 3: Getting injector for ${account.address}...`);
+      const injector = await web3FromAddress(account.address);
+      console.log('✅ Injector obtained:', injector);
+      
+      // Step 4: Sign a test message
+      const testMessage = '0x48656c6c6f20576f726c64'; // "Hello World" in hex
+      console.log('✍️ Step 4: Signing message...');
+      const result = await injector.signer.signRaw({
+        address: account.address,
+        data: testMessage,
+        type: 'bytes'
+      });
+      
+      console.log('✅ Signature obtained:', result.signature);
+      
+      alert(`✅ SIGNATURE SUCCESS!\n\nAccount: ${account.meta.name}\nAddress: ${account.address.substring(0, 10)}...\nSignature: ${result.signature.substring(0, 20)}...`);
+      
+      setDebugInfo(prev => ({
+        ...prev,
+        signatureTest: 'SUCCESS',
+        signatureAccount: account.address,
+        signatureLength: result.signature.length
+      }));
+    } catch (error) {
+      console.error('❌ Signature test failed:', error);
+      alert(`❌ Signature failed:\n${error.message}\n\nCheck console for details`);
+      setDebugInfo(prev => ({
+        ...prev,
+        signatureTest: 'FAILED',
+        signatureError: error.message,
+        signatureStack: error.stack
       }));
     }
   };
@@ -128,6 +194,12 @@ export const WalletDebug = () => {
             className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-medium"
           >
             Test web3Accounts()
+          </button>
+          <button
+            onClick={testSignature}
+            className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition font-medium"
+          >
+            🔐 Test SIGNATURE (signRaw)
           </button>
         </div>
       </div>
