@@ -22,7 +22,8 @@ export const Workflows = () => {
   };
   
   // State
-  const [rags, setRags] = useState([]);
+  const [allRags, setAllRags] = useState([]); // All RAGs from blockchain (for step resolution)
+  const [displayRags, setDisplayRags] = useState([]); // Only RAG masters (for display)
   const [loading, setLoading] = useState(true);
   const [selectedRag, setSelectedRag] = useState(null);
   const [loadingSchema, setLoadingSchema] = useState(false);
@@ -68,10 +69,13 @@ export const Workflows = () => {
       
       console.log('Loading RAGs from blockchain...');
       const ragClient = new RagClient(substrateClient);
-      const allRags = await ragClient.getAllRags();
+      const loadedRags = await ragClient.getAllRags();
       
-      // Filter only RAG masters (workflows with steps)
-      const ragMasters = allRags.filter(rag => {
+      // Store ALL RAGs (needed for step resolution)
+      setAllRags(loadedRags);
+      
+      // Filter only RAG masters (workflows with steps) for display
+      const ragMasters = loadedRags.filter(rag => {
         const hasSteps = rag.metadata?.steps && rag.metadata.steps.length > 0;
         if (!hasSteps) {
           console.log(`Filtering out RAG without steps: ${rag.metadata?.name || 'Unnamed'}`);
@@ -79,8 +83,8 @@ export const Workflows = () => {
         return hasSteps;
       });
       
-      console.log(`Loaded ${ragMasters.length} RAG master(s) with steps (filtered from ${allRags.length} total)`);
-      setRags(ragMasters);
+      console.log(`Loaded ${ragMasters.length} RAG master(s) with steps (filtered from ${loadedRags.length} total)`);
+      setDisplayRags(ragMasters);
     } catch (err) {
       console.error('Failed to load RAGs:', err);
       setError('Failed to load workflows from blockchain');
@@ -115,12 +119,13 @@ export const Workflows = () => {
         console.log('🔗 Master RAG detected, loading first step schema');
         const firstStepHash = rag.metadata.steps[0];
         
-        // Find the step RAG
-        const stepRag = rags.find(r => r.hash === firstStepHash);
+        // Find the step RAG in ALL RAGs (not just displayed masters)
+        const stepRag = allRags.find(r => r.hash === firstStepHash);
         if (!stepRag) {
-          throw new Error('First step RAG not found');
+          throw new Error(`First step RAG not found. Looking for hash: ${firstStepHash}`);
         }
         
+        console.log(`✅ Found step RAG: ${stepRag.metadata?.name || 'Unnamed'}`);
         schemaCidHex = stepRag.metadata.schemaCid;
       } else {
         // Simple RAG - load its own schema
@@ -231,7 +236,7 @@ export const Workflows = () => {
           </button>
         </div>
 
-        {rags.length === 0 ? (
+        {displayRags.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <div className="text-4xl mb-2">📋</div>
             <p>{t('workflows.noWorkflows')}</p>
@@ -239,7 +244,7 @@ export const Workflows = () => {
           </div>
         ) : (
           <div className="space-y-2">
-            {rags.map((rag) => (
+            {displayRags.map((rag) => (
               <button
                 key={rag.hash}
                 onClick={() => selectRag(rag)}
@@ -340,7 +345,7 @@ export const Workflows = () => {
                 </h4>
                 <div className="space-y-2">
                   {selectedRag.metadata.steps.map((stepHash, i) => {
-                    const stepRag = rags.find(r => r.hash === stepHash);
+                    const stepRag = allRags.find(r => r.hash === stepHash);
                     return (
                       <div 
                         key={i} 
