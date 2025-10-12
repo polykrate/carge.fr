@@ -101,10 +101,16 @@ export const Header = () => {
               </a>
 
               {/* IPFS */}
-              <div className="flex items-center space-x-2 px-3 py-1.5 bg-gray-50 rounded-lg text-sm">
+              <a
+                href="https://ipfs.tech/"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center space-x-2 px-3 py-1.5 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-sm"
+                title="Learn more about IPFS"
+              >
                 <div className={`w-2 h-2 rounded-full ${ipfsReady ? 'bg-green-500' : 'bg-orange-500'}`}></div>
                 <span className="text-gray-500 text-xs">IPFS</span>
-              </div>
+              </a>
               
               {/* Language Selector */}
               <LanguageSelector />
@@ -276,10 +282,16 @@ export const Header = () => {
               </a>
 
               {/* IPFS */}
-              <div className="flex-1 flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg text-sm">
+              <a
+                href="https://ipfs.tech/"
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-sm"
+                title="Learn more about IPFS"
+              >
                 <div className={`w-2 h-2 rounded-full ${ipfsReady ? 'bg-green-500' : 'bg-orange-500'}`}></div>
                 <span className="text-gray-500 text-xs">IPFS</span>
-              </div>
+              </a>
             </div>
 
             {/* Mobile Language Selector */}
