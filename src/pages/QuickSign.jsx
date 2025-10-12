@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { u8aToHex } from '@polkadot/util';
+import { showError, showSuccess, toastTx } from '../lib/toast';
 
 export const QuickSign = () => {
   const { substrateClient, selectedAccount, walletConnector } = useApp();
@@ -43,14 +44,18 @@ export const QuickSign = () => {
 
   const handleSign = async () => {
     if (!file || !fileHash) {
+      showError('Please select a file first');
       setError('Please select a file first');
       return;
     }
 
     if (!selectedAccount) {
+      showError('Please connect your wallet first');
       setError('Please connect your wallet first');
       return;
     }
+
+    const toastId = toastTx.signing();
 
     try {
       setSigning(true);
@@ -107,6 +112,9 @@ export const QuickSign = () => {
       const signature = signResult.signature;
       console.log('Signature obtained:', signature);
       console.log('Signature length:', signature.length, 'chars (includes 0x prefix)');
+      
+      // Update toast to broadcasting
+      toastTx.broadcasting(toastId);
       
       // Calculate the wrapped message hash for display (what was actually signed)
       const { stringToU8a, u8aToHex, hexToU8a } = await import('@polkadot/util');
@@ -177,6 +185,7 @@ export const QuickSign = () => {
             console.error('Dispatch error:', errorMessage);
           }
           
+          toastTx.error(errorMessage, toastId);
           setError(errorMessage);
           setSigning(false);
           unsub();
@@ -197,6 +206,7 @@ export const QuickSign = () => {
             signer: selectedAccount
           });
           
+          toastTx.success('Crypto trail created successfully!', toastId);
           setSigning(false);
           unsub();
           
@@ -206,7 +216,9 @@ export const QuickSign = () => {
           console.log('Transaction finalized in block:', result.status.asFinalized.toHex());
         } else if (result.status.isInvalid || result.status.isDropped || result.status.isUsurped) {
           console.error('Transaction invalid/dropped/usurped');
-          setError(`Transaction ${result.status.type}`);
+          const errorMsg = `Transaction ${result.status.type}`;
+          toastTx.error(errorMsg, toastId);
+          setError(errorMsg);
           setSigning(false);
           unsub();
           api.disconnect();
@@ -215,7 +227,9 @@ export const QuickSign = () => {
 
     } catch (err) {
       console.error('Signature error:', err);
-      setError(err.message || 'Failed to sign and submit');
+      const errorMsg = err.message || 'Failed to sign and submit';
+      toastTx.error(errorMsg, toastId);
+      setError(errorMsg);
       setSigning(false);
     }
   };
