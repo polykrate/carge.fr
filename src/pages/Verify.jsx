@@ -243,13 +243,15 @@ export const Verify = () => {
               className="hidden"
               id="file-upload"
               disabled={verifying}
+              aria-label="Upload proof file"
+              aria-describedby="upload-description"
             />
             <label htmlFor="file-upload" className="cursor-pointer">
               <svg className="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
               <p className="text-gray-700 font-medium mb-2">Drop file here or click to browse</p>
-              <p className="text-sm text-gray-500">Accepts any file - proof JSON or raw files</p>
+              <p className="text-sm text-gray-500" id="upload-description">Accepts any file - proof JSON or raw files</p>
             </label>
           </div>
         )}
@@ -263,6 +265,8 @@ export const Verify = () => {
               placeholder='Paste your proof JSON here...'
               className="w-full h-64 p-4 border border-gray-300 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 mb-4"
               disabled={verifying}
+              aria-label="Proof JSON input"
+              aria-describedby="json-description"
             />
             <button
               type="submit"
@@ -308,7 +312,7 @@ export const Verify = () => {
 
       {/* Result */}
       {result && (
-        <div className={`border rounded-lg p-6 ${
+        <div role="region" aria-label="Verification results" className={`border rounded-lg p-6 ${
           result.isValid
             ? 'bg-green-50 border-green-200'
             : 'bg-red-50 border-red-200'
