@@ -3,15 +3,20 @@ import { useApp } from '../contexts/AppContext';
 import { RagClient } from '../lib/core/rag-client.js';
 import { CidConverter } from '../lib/core/cid-converter.js';
 import { FormGenerator } from '../lib/core/form-generator.js';
-import { config } from '../lib/config.js';
 
 export const Workflows = () => {
   const { substrateClient, ipfsClient, selectedAccount } = useApp();
   
-  // Helper to generate Polkadot.js Apps explorer link for a block number
+  // Generate Polkadot.js Apps explorer link for a block number
   const getBlockExplorerLink = (blockNumber) => {
-    const rpcUrl = config.SUBSTRATE_RPC_URL;
-    return `https://polkadot.js.org/apps/?rpc=${encodeURIComponent(rpcUrl)}#/explorer/query/${blockNumber}`;
+    if (!substrateClient?.rpcUrl) return null;
+    
+    // Convert HTTP(S) RPC URL to WebSocket
+    const wsUrl = substrateClient.rpcUrl
+      .replace('https://', 'wss://')
+      .replace('http://', 'ws://');
+    
+    return `https://polkadot.js.org/apps/?rpc=${encodeURIComponent(wsUrl)}#/explorer/query/${blockNumber}`;
   };
   
   // State
