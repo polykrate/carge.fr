@@ -1,7 +1,16 @@
 import { useApp } from '../contexts/AppContext';
 
 export const WalletSelector = () => {
-  const { installedWallets, connectWallet, setIsWalletSelectOpen } = useApp();
+  const { installedWallets, connectWallet, setIsWalletSelectOpen, walletConnector } = useApp();
+
+  // Detect if mobile
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  const handleRetryDetection = async () => {
+    console.log('🔄 Retrying wallet detection...');
+    // Force page reload to re-trigger wallet detection
+    window.location.reload();
+  };
 
   if (installedWallets.length === 0) {
     return (
@@ -14,37 +23,82 @@ export const WalletSelector = () => {
         <div className="px-4 py-8 text-center">
           <div className="text-4xl mb-4">🔌</div>
           <p className="text-gray-700 font-medium mb-2">No Wallets Detected</p>
-          <p className="text-sm text-gray-500 mb-4">Please install a Substrate wallet to continue</p>
           
-          <div className="space-y-2">
-            <a
-              href="https://polkadot.js.org/extension/"
-              target="_blank"
-              rel="noreferrer"
-              className="block px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition text-sm font-medium"
-            >
-              Download Polkadot.js Extension
-            </a>
-            <a
-              href="https://talisman.xyz/"
-              target="_blank"
-              rel="noreferrer"
-              className="block px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition text-sm font-medium"
-            >
-              Download Talisman Wallet
-            </a>
-            <a
-              href="https://subwallet.app/"
-              target="_blank"
-              rel="noreferrer"
-              className="block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition text-sm font-medium"
-            >
-              Download SubWallet
-            </a>
-          </div>
+          {isMobile ? (
+            <>
+              <p className="text-sm text-gray-500 mb-4">
+                On mobile, please open this site from your wallet's in-app browser
+              </p>
+              <div className="space-y-2">
+                <a
+                  href="https://novawallet.io/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white rounded-lg transition text-sm font-medium"
+                >
+                  Download Nova Wallet
+                </a>
+                <a
+                  href="https://subwallet.app/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition text-sm font-medium"
+                >
+                  Download SubWallet
+                </a>
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg text-left">
+                  <p className="text-xs text-blue-800 font-medium mb-1">How to connect:</p>
+                  <ol className="text-xs text-blue-700 space-y-1 list-decimal list-inside">
+                    <li>Install a wallet app</li>
+                    <li>Open the wallet app</li>
+                    <li>Use the in-app browser</li>
+                    <li>Visit this site again</li>
+                  </ol>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-gray-500 mb-4">Please install a Substrate wallet extension</p>
+              <div className="space-y-2">
+                <a
+                  href="https://polkadot.js.org/extension/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition text-sm font-medium"
+                >
+                  Download Polkadot.js Extension
+                </a>
+                <a
+                  href="https://talisman.xyz/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition text-sm font-medium"
+                >
+                  Download Talisman Wallet
+                </a>
+                <a
+                  href="https://subwallet.app/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition text-sm font-medium"
+                >
+                  Download SubWallet
+                </a>
+              </div>
+            </>
+          )}
         </div>
 
-        <div className="px-4 py-2 bg-gray-50 border-t border-gray-200">
+        <div className="px-4 py-2 bg-gray-50 border-t border-gray-200 space-y-2">
+          {isMobile && (
+            <button
+              onClick={handleRetryDetection}
+              className="w-full px-3 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded transition font-medium"
+            >
+              🔄 Retry Detection
+            </button>
+          )}
           <button
             onClick={() => setIsWalletSelectOpen(false)}
             className="w-full px-3 py-2 text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition font-medium"

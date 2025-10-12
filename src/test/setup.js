@@ -35,3 +35,8 @@ if (!global.crypto || !global.crypto.subtle) {
 // Mock fetch
 global.fetch = vi.fn();
 
+// Mock window.injectedWeb3 for wallet tests
+if (typeof window !== 'undefined') {
+  window.injectedWeb3 = {};
+}
+

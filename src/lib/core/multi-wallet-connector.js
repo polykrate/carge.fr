@@ -38,30 +38,84 @@ export class MultiWalletConnector {
   }
 
   /**
-   * Detect installed wallets
+   * Detect if we're on mobile
+   * @returns {boolean}
+   */
+  isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }
+
+  /**
+   * Detect installed wallets (desktop and mobile)
    * @returns {Promise<Array>} List of installed wallets
    */
   async detectInstalledWallets() {
-    // Wait for extensions to inject
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // On mobile, wallets take longer to inject
+    const waitTime = this.isMobile() ? 1500 : 300;
+    console.log(`⏳ Waiting ${waitTime}ms for wallet injection (${this.isMobile() ? 'mobile' : 'desktop'})...`);
+    await new Promise(resolve => setTimeout(resolve, waitTime));
 
     const installed = [];
 
-    // Check if injectedWeb3 exists
-    if (!window.injectedWeb3) {
-      console.warn('No Substrate wallets detected');
-      return installed;
+    // Try using @polkadot/extension-dapp first (works better on mobile)
+    try {
+      const { web3Enable, web3Accounts } = await import('@polkadot/extension-dapp');
+      
+      // Silent enable to detect wallets
+      const extensions = await web3Enable('Carge');
+      
+      if (extensions.length > 0) {
+        console.log(`✅ Found ${extensions.length} wallet(s) via extension-dapp`);
+        
+        // Map detected extensions to our wallet list
+        for (const ext of extensions) {
+          const walletConfig = this.supportedWallets[ext.name] || {
+            name: ext.name,
+            logo: '💼',
+            extensionKey: ext.name,
+            downloadUrl: null
+          };
+          
+          installed.push({
+            id: ext.name,
+            ...walletConfig,
+            extension: ext,
+            version: ext.version
+          });
+        }
+        
+        return installed;
+      }
+    } catch (error) {
+      console.warn('Extension-dapp detection failed:', error.message);
     }
 
-    // Check each supported wallet
-    for (const [key, wallet] of Object.entries(this.supportedWallets)) {
-      if (window.injectedWeb3[key]) {
-        console.log(`✅ Found wallet: ${wallet.name}`);
-        installed.push({
-          id: key,
-          ...wallet,
-          extension: window.injectedWeb3[key]
-        });
+    // Fallback to window.injectedWeb3 (desktop)
+    if (window.injectedWeb3) {
+      console.log('📦 Checking window.injectedWeb3...');
+      
+      for (const [key, wallet] of Object.entries(this.supportedWallets)) {
+        if (window.injectedWeb3[key]) {
+          console.log(`✅ Found wallet via injectedWeb3: ${wallet.name}`);
+          installed.push({
+            id: key,
+            ...wallet,
+            extension: window.injectedWeb3[key]
+          });
+        }
+      }
+    } else {
+      console.warn('❌ No window.injectedWeb3 found');
+    }
+
+    if (installed.length === 0) {
+      console.warn('⚠️ No Substrate wallets detected. Please ensure you have:');
+      if (this.isMobile()) {
+        console.warn('  - Opened this site from your wallet\'s in-app browser (Nova, SubWallet, etc.)');
+        console.warn('  - Or installed a mobile wallet app');
+      } else {
+        console.warn('  - Installed a wallet extension (Polkadot.js, Talisman, SubWallet)');
+        console.warn('  - Refreshed the page after installation');
       }
     }
 
