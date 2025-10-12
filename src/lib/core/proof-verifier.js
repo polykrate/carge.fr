@@ -8,6 +8,7 @@ export class ProofVerifier {
     this.substrate = substrateClient;
   }
 
+
   /**
    * Calcule le hash SHA-256 du champ ragData d'une preuve
    */
@@ -157,6 +158,113 @@ export class ProofVerifier {
   }
 
   /**
+   * Verify signature off-chain
+   * @param {string} contentHash - Content hash hex
+   * @param {string} signature - Signature hex
+   * @param {string} creatorAddress - SS58 address of creator
+   * @returns {Promise<boolean>} True if signature is valid
+   */
+  async verifySignature(contentHash, signature, creatorAddress) {
+    try {
+      await this.waitForPolkadot();
+      
+      const { signatureVerify, cryptoWaitReady } = window.polkadotUtilCrypto;
+      const { hexToU8a, u8aToHex, stringToU8a } = window.polkadotUtil;
+      
+      await cryptoWaitReady();
+      
+      // Reconstruct the wrapped message that was signed
+      // The extension/MCP signs: b"<Bytes>" + contentHash + b"</Bytes>"
+      const contentHashBytes = hexToU8a(contentHash);
+      const wrappedMessage = new Uint8Array([
+        ...stringToU8a('<Bytes>'),
+        ...contentHashBytes,
+        ...stringToU8a('</Bytes>')
+      ]);
+      
+      console.log('Verifying signature off-chain...');
+      console.log('  - Content hash:', contentHash);
+      console.log('  - Wrapped message:', u8aToHex(wrappedMessage));
+      console.log('  - Signature:', signature);
+      console.log('  - Creator:', creatorAddress);
+      
+      // Verify using the wrapped message (not the hash)
+      const result = signatureVerify(wrappedMessage, signature, creatorAddress);
+      
+      console.log('Signature verification:', result.isValid ? 'VALID' : 'INVALID');
+      console.log('  - Crypto type:', result.crypto);
+      
+      return result.isValid;
+    } catch (error) {
+      console.error('Signature verification failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Query blockchain directly for a content hash
+   * @param {string} contentHash - Content hash (with or without 0x prefix)
+   * @returns {Promise<Object|null>} Trail data if found, null otherwise
+   */
+  async queryBlockchain(contentHash) {
+    try {
+      console.log('Querying blockchain for hash:', contentHash);
+      
+      // Wait for Polkadot.js to be ready
+      await this.waitForPolkadot();
+
+      // Build storage key
+      const storageKey = this.buildStorageKey(contentHash);
+      console.log('Storage key:', storageKey);
+
+      // Query blockchain
+      const result = await this.substrate.queryStorage(storageKey);
+
+      if (!result || result === '0x' || result === null) {
+        console.log('Hash not found on blockchain');
+        return null;
+      }
+
+      // Decode trail
+      const trailData = this.decodeCryptoTrail(result);
+      
+      if (!trailData) {
+        throw new Error('Trail found but failed to decode');
+      }
+
+      // Format creator address to SS58 first
+      let creatorAddress = trailData.creator;
+      try {
+        const { encodeAddress } = window.polkadotUtilCrypto;
+        const { hexToU8a } = window.polkadotUtil;
+        
+        const creatorBytes = hexToU8a(trailData.creator);
+        creatorAddress = encodeAddress(creatorBytes, 42); // 42 = generic Substrate prefix
+      } catch (e) {
+        console.warn('Failed to encode creator address:', e);
+      }
+      
+      // Verify signature off-chain using the SS58 address
+      const signatureValid = await this.verifySignature(
+        contentHash,
+        trailData.substrateSignature,
+        creatorAddress
+      );
+      
+      console.log('Trail found and decoded. Signature valid:', signatureValid);
+
+      return {
+        ...trailData,
+        creatorAddress,
+        signatureValid
+      };
+    } catch (error) {
+      console.error('Blockchain query error:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Vérifie une preuve sur la blockchain
    */
   async verifyProof(proofJson) {
@@ -172,49 +280,20 @@ export class ProofVerifier {
     const contentHash = await this.calculateRagDataHash(proof);
     console.log('Content hash:', contentHash);
 
-    // Wait for Polkadot.js to be ready
-    await this.waitForPolkadot();
-
-    // Build storage key
-    const storageKey = this.buildStorageKey(contentHash);
-    console.log('Storage key:', storageKey);
-
     // Query blockchain
-    const result = await this.substrate.queryStorage(storageKey);
+    const trail = await this.queryBlockchain(contentHash);
 
-    if (!result || result === '0x' || result === null) {
+    if (!trail) {
       return {
         found: false,
         contentHash
       };
     }
 
-    // Decode trail
-    const trailData = this.decodeCryptoTrail(result);
-    
-    if (!trailData) {
-      throw new Error('Trail found but failed to decode');
-    }
-
-    // Format creator address to SS58
-    let creatorAddress = trailData.creator;
-    try {
-      const { encodeAddress } = window.polkadotUtilCrypto;
-      const { hexToU8a } = window.polkadotUtil;
-      
-      const creatorBytes = hexToU8a(trailData.creator);
-      creatorAddress = encodeAddress(creatorBytes, 42); // 42 = generic Substrate prefix
-    } catch (e) {
-      console.warn('Failed to encode creator address:', e);
-    }
-
     return {
       found: true,
       contentHash,
-      trail: {
-        ...trailData,
-        creatorAddress
-      }
+      trail
     };
   }
 }

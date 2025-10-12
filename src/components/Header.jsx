@@ -59,6 +59,12 @@ export const Header = () => {
               Workflows
             </Link>
             <Link
+              to="/quick-sign"
+              className={isActive('/quick-sign') ? 'text-gray-900 font-medium' : 'text-gray-600 hover:text-gray-900'}
+            >
+              Quick Sign
+            </Link>
+            <Link
               to="/verify"
               className={isActive('/verify') ? 'text-gray-900 font-medium' : 'text-gray-600 hover:text-gray-900'}
             >
@@ -216,6 +222,15 @@ export const Header = () => {
                 }`}
               >
                 Workflows
+              </Link>
+              <Link
+                to="/quick-sign"
+                onClick={closeMobileMenu}
+                className={`px-3 py-2 rounded-lg text-sm ${
+                  isActive('/quick-sign') ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Quick Sign
               </Link>
               <Link
                 to="/verify"

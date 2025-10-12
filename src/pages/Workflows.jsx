@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { RagClient } from '../lib/core/rag-client.js';
 import { CidConverter } from '../lib/core/cid-converter.js';
@@ -15,25 +15,51 @@ export const Workflows = () => {
   const [schema, setSchema] = useState(null);
   const [formData, setFormData] = useState({});
   const [error, setError] = useState(null);
+  
+  // Ref for form container
+  const formContainerRef = useRef(null);
+  
+  // Convert hex address to SS58
+  const hexToSS58 = async (hexAddress) => {
+    try {
+      const { encodeAddress, decodeAddress } = await import('@polkadot/util-crypto');
+      const { hexToU8a } = await import('@polkadot/util');
+      
+      // Remove 0x prefix if present
+      const cleanHex = hexAddress.startsWith('0x') ? hexAddress.slice(2) : hexAddress;
+      const addressBytes = hexToU8a('0x' + cleanHex);
+      return encodeAddress(addressBytes, 42); // 42 = generic Substrate prefix
+    } catch (err) {
+      console.error('Failed to convert address:', err);
+      return hexAddress; // Return original if conversion fails
+    }
+  };
 
   // Load RAGs on mount
   useEffect(() => {
     loadRags();
   }, []);
 
+  // Generate form when schema is loaded
+  useEffect(() => {
+    if (schema && formContainerRef.current) {
+      FormGenerator.generateForm(schema, 'dynamic-form-fields');
+    }
+  }, [schema]);
+
   const loadRags = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      console.log('📥 Loading RAGs from blockchain...');
+      console.log('Loading RAGs from blockchain...');
       const ragClient = new RagClient(substrateClient);
       const allRags = await ragClient.getAllRags();
       
-      console.log(`✅ Loaded ${allRags.length} RAG(s)`);
+      console.log(`Loaded ${allRags.length} RAG(s)`);
       setRags(allRags);
     } catch (err) {
-      console.error('❌ Failed to load RAGs:', err);
+      console.error('Failed to load RAGs:', err);
       setError('Failed to load workflows from blockchain');
     } finally {
       setLoading(false);
@@ -42,12 +68,22 @@ export const Workflows = () => {
 
   const selectRag = async (rag) => {
     try {
-      setSelectedRag(rag);
       setLoadingSchema(true);
       setError(null);
       setSchema(null);
       
-      console.log('📋 Selected RAG:', rag.metadata.name);
+      // Convert publisher to SS58 before setting selectedRag
+      const ss58Publisher = await hexToSS58(rag.metadata.publisher);
+      const ragWithSS58 = {
+        ...rag,
+        metadata: {
+          ...rag.metadata,
+          publisherSS58: ss58Publisher
+        }
+      };
+      
+      setSelectedRag(ragWithSS58);
+      console.log('Selected RAG:', rag.metadata.name);
       
       // Determine which schema to load
       let schemaCidHex;
@@ -76,10 +112,10 @@ export const Workflows = () => {
       const schemaText = await ipfsClient.downloadText(cidString);
       const schemaObj = JSON.parse(schemaText);
       
-      console.log('✅ Schema loaded:', schemaObj);
+      console.log('Schema loaded:', schemaObj);
       setSchema(schemaObj);
     } catch (err) {
-      console.error('❌ Failed to load schema:', err);
+      console.error('Failed to load schema:', err);
       setError(`Failed to load workflow schema: ${err.message}`);
     } finally {
       setLoadingSchema(false);
@@ -88,7 +124,53 @@ export const Workflows = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert('Workflow execution is under development. This will sign and submit to blockchain.');
+    const data = FormGenerator.getFormData('dynamic-form-fields');
+    console.log('Form data:', data);
+    
+    const validation = FormGenerator.validateForm(data, schema);
+    if (!validation.valid) {
+      alert('Please fill all required fields:\n' + validation.errors.join('\n'));
+      return;
+    }
+    
+    alert('Workflow execution is under development. This will sign and submit to blockchain.\n\nData: ' + JSON.stringify(data, null, 2));
+  };
+
+  // Helper to create clickable CID link
+  const CidLink = ({ hexCid, label }) => {
+    try {
+      const cidString = CidConverter.hexToString(hexCid);
+      const url = `https://ipfs.io/ipfs/${cidString}`;
+      
+      return (
+        <div className="flex items-center gap-2">
+          <span className="text-gray-500 text-xs">{label}:</span>
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-xs text-blue-600 hover:text-blue-800 hover:underline break-all"
+            title="Open in IPFS gateway"
+          >
+            {cidString}
+          </a>
+          <button
+            onClick={() => navigator.clipboard.writeText(cidString)}
+            className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition"
+            title="Copy CID"
+          >
+            📋
+          </button>
+        </div>
+      );
+    } catch (err) {
+      return (
+        <div className="flex items-center gap-2">
+          <span className="text-gray-500 text-xs">{label}:</span>
+          <span className="font-mono text-xs text-red-500">Invalid CID</span>
+        </div>
+      );
+    }
   };
 
   if (loading) {
@@ -168,35 +250,79 @@ export const Workflows = () => {
         <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
           <h2 className="text-xl font-medium mb-4">Workflow Details</h2>
           
-          <div className="space-y-3 text-sm">
-            <div className="grid grid-cols-4 gap-4 pb-3 border-b">
-              <div className="text-gray-500">Name:</div>
-              <div className="col-span-3 font-medium">{selectedRag.metadata.name}</div>
-            </div>
-            
-            {selectedRag.metadata.description && (
-              <div className="grid grid-cols-4 gap-4 pb-3 border-b">
-                <div className="text-gray-500">Description:</div>
-                <div className="col-span-3">{selectedRag.metadata.description}</div>
-              </div>
-            )}
-
-            <div className="grid grid-cols-4 gap-4 pb-3 border-b">
-              <div className="text-gray-500">Schema CID:</div>
-              <div className="col-span-3 font-mono text-xs break-all">
-                {CidConverter.hexToString(selectedRag.metadata.schemaCid)}
-              </div>
+          <div className="space-y-4">
+            {/* Name & Description */}
+            <div className="pb-4 border-b">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{selectedRag.metadata.name || 'Unnamed Workflow'}</h3>
+              {selectedRag.metadata.description && (
+                <p className="text-gray-600 text-sm">{selectedRag.metadata.description}</p>
+              )}
             </div>
 
+            {/* Metadata Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm pb-4 border-b">
+              <div>
+                <span className="text-gray-500">Publisher:</span>
+                <p className="font-mono text-xs mt-1 break-all">{selectedRag.metadata.publisherSS58 || selectedRag.metadata.publisher}</p>
+              </div>
+              <div>
+                <span className="text-gray-500">Created:</span>
+                <p className="mt-1">{new Date(selectedRag.metadata.createdAt * 1000).toLocaleString()}</p>
+              </div>
+              {selectedRag.metadata.expiresAt && (
+                <div>
+                  <span className="text-gray-500">Expires:</span>
+                  <p className="mt-1">{new Date(selectedRag.metadata.expiresAt * 1000).toLocaleString()}</p>
+                </div>
+              )}
+              {selectedRag.metadata.stakedAmount && selectedRag.metadata.stakedAmount !== '0' && (
+                <div>
+                  <span className="text-gray-500">Staked Amount:</span>
+                  <p className="mt-1 font-medium">{selectedRag.metadata.stakedAmount} units</p>
+                </div>
+              )}
+            </div>
+
+            {/* CIDs Section */}
+            <div className="space-y-3 pb-4 border-b">
+              <h4 className="font-medium text-gray-900">IPFS Resources</h4>
+              <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
+                <CidLink hexCid={selectedRag.metadata.instructionCid} label="Instructions" />
+                <CidLink hexCid={selectedRag.metadata.resourceCid} label="Resources" />
+                <CidLink hexCid={selectedRag.metadata.schemaCid} label="Schema" />
+              </div>
+            </div>
+
+            {/* Steps (for Master RAGs) */}
             {selectedRag.metadata.steps && selectedRag.metadata.steps.length > 0 && (
-              <div className="grid grid-cols-4 gap-4">
-                <div className="text-gray-500">Steps:</div>
-                <div className="col-span-3 space-y-1">
-                  {selectedRag.metadata.steps.map((step, i) => (
-                    <div key={i} className="text-xs font-mono">
-                      {i + 1}. {step.substring(0, 16)}...
-                    </div>
-                  ))}
+              <div className="space-y-2">
+                <h4 className="font-medium text-gray-900">
+                  Multi-Step Workflow ({selectedRag.metadata.steps.length} step{selectedRag.metadata.steps.length > 1 ? 's' : ''})
+                </h4>
+                <div className="space-y-2">
+                  {selectedRag.metadata.steps.map((stepHash, i) => {
+                    const stepRag = rags.find(r => r.hash === stepHash);
+                    return (
+                      <div 
+                        key={i} 
+                        className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition"
+                        onClick={() => stepRag && selectRag(stepRag)}
+                      >
+                        <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                          {i + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm">{stepRag?.metadata.name || 'Unknown Step'}</div>
+                          {stepRag?.metadata.description && (
+                            <div className="text-xs text-gray-600 mt-1">{stepRag.metadata.description}</div>
+                          )}
+                          <div className="text-xs font-mono text-blue-600 mt-1 break-all hover:underline">
+                            {stepHash}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -218,66 +344,22 @@ export const Workflows = () => {
 
           {schema && !loadingSchema && (
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Dynamic Form Fields */}
-              <div id="dynamic-form-fields" className="space-y-4">
-                {schema.properties && Object.entries(schema.properties).map(([key, prop]) => (
-                  <div key={key}>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {prop.title || key}
-                      {schema.required?.includes(key) && <span className="text-red-500 ml-1">*</span>}
-                    </label>
-                    
-                    {prop.type === 'string' && (
-                      <input
-                        type="text"
-                        value={formData[key] || ''}
-                        onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
-                        required={schema.required?.includes(key)}
-                        placeholder={prop.description}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
-                      />
-                    )}
-                    
-                    {prop.type === 'number' && (
-                      <input
-                        type="number"
-                        value={formData[key] || ''}
-                        onChange={(e) => setFormData({ ...formData, [key]: Number(e.target.value) })}
-                        required={schema.required?.includes(key)}
-                        placeholder={prop.description}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
-                      />
-                    )}
+              {/* Dynamic Form Fields - Generated by FormGenerator */}
+              <div 
+                ref={formContainerRef}
+                id="dynamic-form-fields" 
+                className="space-y-4"
+              />
 
-                    {prop.type === 'boolean' && (
-                      <input
-                        type="checkbox"
-                        checked={formData[key] || false}
-                        onChange={(e) => setFormData({ ...formData, [key]: e.target.checked })}
-                        className="w-4 h-4"
-                      />
-                    )}
-
-                    {prop.description && (
-                      <p className="text-xs text-gray-500 mt-1">{prop.description}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Submit Button (Disabled) */}
+              {/* Submit Button */}
               <div className="pt-4 border-t">
                 <button
                   type="submit"
                   disabled
                   className="w-full px-4 py-3 bg-gray-400 text-gray-200 rounded-lg cursor-not-allowed font-medium"
-                  title="Workflow execution is under development"
                 >
                   Submit (In Development)
                 </button>
-                <p className="text-xs text-gray-500 text-center mt-2">
-                  Workflow execution and signing will be implemented soon
-                </p>
               </div>
             </form>
           )}

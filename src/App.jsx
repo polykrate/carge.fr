@@ -3,6 +3,7 @@ import { AppProvider } from './contexts/AppContext';
 import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
 import { Workflows } from './pages/Workflows';
+import { QuickSign } from './pages/QuickSign';
 import { Verify } from './pages/Verify';
 import { About } from './pages/About';
 
@@ -14,6 +15,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/workflows" element={<Workflows />} />
+            <Route path="/quick-sign" element={<QuickSign />} />
             <Route path="/verify" element={<Verify />} />
             <Route path="/about" element={<About />} />
           </Routes>
