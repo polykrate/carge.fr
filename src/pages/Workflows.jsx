@@ -30,6 +30,7 @@ export const Workflows = () => {
   const [schema, setSchema] = useState(null);
   const [formData, setFormData] = useState({});
   const [error, setError] = useState(null);
+  const [isDetailsExpanded, setIsDetailsExpanded] = useState(false); // Accordion state for workflow details
   
   // Ref for form container
   const formContainerRef = useRef(null);
@@ -110,6 +111,7 @@ export const Workflows = () => {
       };
       
       setSelectedRag(ragWithSS58);
+      setIsDetailsExpanded(false); // Reset details accordion when selecting new workflow
       console.log('Selected RAG:', rag.metadata.name);
       
       // Determine which schema to load
@@ -287,87 +289,108 @@ export const Workflows = () => {
               )}
             </div>
 
-            {/* Metadata Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm pb-4 border-b">
-              <div>
-                <span className="text-gray-500">{t('workflows.publisher')}:</span>
-                <p className="font-mono text-xs mt-1 break-all">{selectedRag.metadata.publisherSS58 || selectedRag.metadata.publisher}</p>
-              </div>
-              <div>
-                <span className="text-gray-500">{t('workflows.createdAt')}:</span>
-                <a
-                  href={getBlockExplorerLink(selectedRag.metadata.createdAt)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-1 text-blue-600 hover:text-blue-800 hover:underline font-medium inline-block"
-                  title="View block in explorer"
-                >
-                  #{selectedRag.metadata.createdAt.toLocaleString()}
-                </a>
-              </div>
-              {selectedRag.metadata.expiresAt && (
-                <div>
-                  <span className="text-gray-500">{t('workflows.expiresAt')}:</span>
-                  <a
-                    href={getBlockExplorerLink(selectedRag.metadata.expiresAt)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-1 text-blue-600 hover:text-blue-800 hover:underline font-medium inline-block"
-                    title="View block in explorer"
-                  >
-                    #{selectedRag.metadata.expiresAt.toLocaleString()}
-                  </a>
-                </div>
-              )}
-              {selectedRag.metadata.stakedAmount && selectedRag.metadata.stakedAmount !== '0' && (
-                <div>
-                  <span className="text-gray-500">{t('workflows.staked')}:</span>
-                  <p className="mt-1 font-medium">{selectedRag.metadata.stakedAmount} {t('common.units')}</p>
-                </div>
-              )}
-            </div>
+            {/* Workflow Details Toggle */}
+            <button
+              onClick={() => setIsDetailsExpanded(!isDetailsExpanded)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-left"
+            >
+              <span className="font-medium text-gray-900">{t('workflows.detailsToggle')}</span>
+              <svg 
+                className={`w-5 h-5 text-gray-600 transition-transform ${isDetailsExpanded ? 'rotate-180' : ''}`}
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
 
-            {/* CIDs Section */}
-            <div className="space-y-3 pb-4 border-b">
-              <h4 className="font-medium text-gray-900">{t('workflows.ipfsResources')}</h4>
-              <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
-                <CidLink hexCid={selectedRag.metadata.instructionCid} label={t('workflows.instructions')} />
-                <CidLink hexCid={selectedRag.metadata.resourceCid} label={t('workflows.resources')} />
-                <CidLink hexCid={selectedRag.metadata.schemaCid} label={t('workflows.schema')} />
-              </div>
-            </div>
-
-            {/* Steps (for Master RAGs) */}
-            {selectedRag.metadata.steps && selectedRag.metadata.steps.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="font-medium text-gray-900">
-                  {t('workflows.multiStep')} ({selectedRag.metadata.steps.length} {selectedRag.metadata.steps.length > 1 ? t('workflows.steps') : t('workflows.step')})
-                </h4>
-                <div className="space-y-2">
-                  {selectedRag.metadata.steps.map((stepHash, i) => {
-                    const stepRag = allRags.find(r => r.hash === stepHash);
-                    return (
-                      <div 
-                        key={i} 
-                        className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition"
-                        onClick={() => stepRag && selectRag(stepRag)}
+            {/* Collapsible Details Section */}
+            {isDetailsExpanded && (
+              <div className="space-y-4 animate-slideDown">
+                {/* Metadata Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm pb-4 border-b">
+                  <div>
+                    <span className="text-gray-500">{t('workflows.publisher')}:</span>
+                    <p className="font-mono text-xs mt-1 break-all">{selectedRag.metadata.publisherSS58 || selectedRag.metadata.publisher}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">{t('workflows.createdAt')}:</span>
+                    <a
+                      href={getBlockExplorerLink(selectedRag.metadata.createdAt)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 text-blue-600 hover:text-blue-800 hover:underline font-medium inline-block"
+                      title="View block in explorer"
+                    >
+                      #{selectedRag.metadata.createdAt.toLocaleString()}
+                    </a>
+                  </div>
+                  {selectedRag.metadata.expiresAt && (
+                    <div>
+                      <span className="text-gray-500">{t('workflows.expiresAt')}:</span>
+                      <a
+                        href={getBlockExplorerLink(selectedRag.metadata.expiresAt)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 text-blue-600 hover:text-blue-800 hover:underline font-medium inline-block"
+                        title="View block in explorer"
                       >
-                        <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
-                          {i + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm">{stepRag?.metadata.name || t('workflows.unknownStep')}</div>
-                          {stepRag?.metadata.description && (
-                            <div className="text-xs text-gray-600 mt-1">{stepRag.metadata.description}</div>
-                          )}
-                          <div className="text-xs font-mono text-blue-600 mt-1 break-all hover:underline">
-                            {stepHash}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                        #{selectedRag.metadata.expiresAt.toLocaleString()}
+                      </a>
+                    </div>
+                  )}
+                  {selectedRag.metadata.stakedAmount && selectedRag.metadata.stakedAmount !== '0' && (
+                    <div>
+                      <span className="text-gray-500">{t('workflows.staked')}:</span>
+                      <p className="mt-1 font-medium">{selectedRag.metadata.stakedAmount} {t('common.units')}</p>
+                    </div>
+                  )}
                 </div>
+
+                {/* CIDs Section */}
+                <div className="space-y-3 pb-4 border-b">
+                  <h4 className="font-medium text-gray-900">{t('workflows.ipfsResources')}</h4>
+                  <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
+                    <CidLink hexCid={selectedRag.metadata.instructionCid} label={t('workflows.instructions')} />
+                    <CidLink hexCid={selectedRag.metadata.resourceCid} label={t('workflows.resources')} />
+                    <CidLink hexCid={selectedRag.metadata.schemaCid} label={t('workflows.schema')} />
+                  </div>
+                </div>
+
+                {/* Steps (for Master RAGs) */}
+                {selectedRag.metadata.steps && selectedRag.metadata.steps.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-gray-900">
+                      {t('workflows.multiStep')} ({selectedRag.metadata.steps.length} {selectedRag.metadata.steps.length > 1 ? t('workflows.steps') : t('workflows.step')})
+                    </h4>
+                    <div className="space-y-2">
+                      {selectedRag.metadata.steps.map((stepHash, i) => {
+                        const stepRag = allRags.find(r => r.hash === stepHash);
+                        return (
+                          <div 
+                            key={i} 
+                            className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition"
+                            onClick={() => stepRag && selectRag(stepRag)}
+                          >
+                            <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                              {i + 1}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-sm">{stepRag?.metadata.name || t('workflows.unknownStep')}</div>
+                              {stepRag?.metadata.description && (
+                                <div className="text-xs text-gray-600 mt-1">{stepRag.metadata.description}</div>
+                              )}
+                              <div className="text-xs font-mono text-blue-600 mt-1 break-all hover:underline">
+                                {stepHash}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
