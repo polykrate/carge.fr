@@ -4,6 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "description": "Web3 platform for executable compliance workflows with cryptographic audit trails",
+  "author": "Jean-François Meneust <contact@carge.fr>",
+  "license": "GPL-3.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/polykrate/carge.git"

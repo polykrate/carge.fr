@@ -162,7 +162,16 @@ If you find Carge useful, consider supporting development:
 
 Your support helps maintain and improve Carge. Thank you! 🙏
 
+## 👤 Author
+
+**Jean-François Meneust**
+- Company: Carge
+- Website: [carge.fr](http://carge.fr)
+- GitHub: [@polykrate](https://github.com/polykrate)
+
 ## 📄 License
+
+Copyright (C) 2025 Jean-François Meneust / Carge
 
 This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) file for details.
 
