@@ -51,7 +51,7 @@ const resources = {
         metric2: 'W3C',
         metric2Desc: 'Standard Compliant',
         metric3: 'IPFS',
-        metric3Desc: 'Permanent Storage',
+        metric3Desc: 'Decentralized Storage',
         
         // How it works
         howItWorksTitle: 'Simple. Powerful. Verifiable.',
@@ -351,7 +351,7 @@ const resources = {
         metric2: 'W3C',
         metric2Desc: 'Conforme aux Standards',
         metric3: 'IPFS',
-        metric3Desc: 'Stockage Permanent',
+        metric3Desc: 'Stockage Décentralisé',
         
         // Comment ça marche
         howItWorksTitle: 'Simple. Puissant. Vérifiable.',
