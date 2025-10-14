@@ -7,7 +7,7 @@ import { FormGenerator } from '../lib/core/form-generator.js';
 
 export const Workflows = () => {
   const { t } = useTranslation();
-  const { substrateClient, ipfsClient, selectedAccount } = useApp();
+  const { substrateClient, ipfsClient } = useApp();
   
   // Generate Polkadot.js Apps explorer link for a block number
   const getBlockExplorerLink = (blockNumber) => {
@@ -28,7 +28,6 @@ export const Workflows = () => {
   const [selectedRag, setSelectedRag] = useState(null);
   const [loadingSchema, setLoadingSchema] = useState(false);
   const [schema, setSchema] = useState(null);
-  const [formData, setFormData] = useState({});
   const [error, setError] = useState(null);
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false); // Accordion state for workflow details
   
@@ -38,7 +37,7 @@ export const Workflows = () => {
   // Convert hex address to SS58
   const hexToSS58 = async (hexAddress) => {
     try {
-      const { encodeAddress, decodeAddress } = await import('@polkadot/util-crypto');
+      const { encodeAddress } = await import('@polkadot/util-crypto');
       const { hexToU8a } = await import('@polkadot/util');
       
       // Remove 0x prefix if present
@@ -79,6 +78,7 @@ export const Workflows = () => {
   // Load RAGs on mount
   useEffect(() => {
     loadRags();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Generate form when schema is loaded
@@ -198,32 +198,27 @@ export const Workflows = () => {
       const url = `https://ipfs.io/ipfs/${cidString}`;
       
       return (
-        <div className="flex items-center gap-2">
-          <span className="text-gray-500 text-xs">{label}:</span>
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-mono text-xs text-blue-600 hover:text-blue-800 hover:underline break-all"
-            title="Open in IPFS gateway"
-          >
-            {cidString}
-          </a>
-          <button
-            onClick={() => navigator.clipboard.writeText(cidString)}
-            className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition"
-            title="Copy CID"
-          >
-            📋
-          </button>
-        </div>
+        <tr>
+          <td className="text-gray-500 text-xs py-1 pr-3">{label}</td>
+          <td className="font-mono text-xs py-1">
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 hover:underline break-all"
+              title="Open in IPFS gateway"
+            >
+              {cidString}
+            </a>
+          </td>
+        </tr>
       );
-    } catch (err) {
+    } catch {
       return (
-        <div className="flex items-center gap-2">
-          <span className="text-gray-500 text-xs">{label}:</span>
-          <span className="font-mono text-xs text-red-500">Invalid CID</span>
-        </div>
+        <tr>
+          <td className="text-gray-500 text-xs py-1 pr-3">{label}</td>
+          <td className="font-mono text-xs text-red-500 py-1">Invalid CID</td>
+        </tr>
       );
     }
   };
@@ -245,6 +240,25 @@ export const Workflows = () => {
       <h1 className="text-4xl font-light mb-4">{t('workflows.title')}</h1>
       <p className="text-gray-600 mb-8">{t('workflows.description')}</p>
 
+      {/* How Workflows Work */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+        <h2 className="text-xl font-semibold text-[#003399] mb-6">{t('workflows.howItWorksTitle')}</h2>
+        <div className="grid md:grid-cols-3 gap-6">
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('workflows.step1Title')}</h3>
+            <p className="text-sm text-gray-700 text-justify">{t('workflows.step1Desc')}</p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('workflows.step2Title')}</h3>
+            <p className="text-sm text-gray-700 text-justify">{t('workflows.step2Desc')}</p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('workflows.step3Title')}</h3>
+            <p className="text-sm text-gray-700 text-justify">{t('workflows.step3Desc')}</p>
+          </div>
+        </div>
+      </div>
+
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
           <p className="text-red-800">{error}</p>
@@ -257,7 +271,7 @@ export const Workflows = () => {
           <h2 className="text-xl font-medium">{t('workflows.available')}</h2>
           <button
             onClick={loadRags}
-            className="px-3 py-1.5 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition"
+            className="px-3 py-1.5 text-sm bg-[#003399] text-white rounded-lg hover:bg-[#002266] transition"
           >
             {t('workflows.refresh')}
           </button>
@@ -277,7 +291,7 @@ export const Workflows = () => {
                 onClick={() => selectRag(rag)}
                 className={`w-full text-left px-4 py-3 rounded-lg border transition ${
                   selectedRag?.hash === rag.hash
-                    ? 'border-gray-900 bg-gray-50'
+                    ? 'border-[#003399] bg-gray-50'
                     : 'border-gray-200 hover:border-gray-400'
                 }`}
               >
@@ -374,10 +388,14 @@ export const Workflows = () => {
                 {/* CIDs Section */}
                 <div className="space-y-3 pb-4 border-b">
                   <h4 className="font-medium text-gray-900">{t('workflows.ipfsResources')}</h4>
-                  <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
-                    <CidLink hexCid={selectedRag.metadata.instructionCid} label={t('workflows.instructions')} />
-                    <CidLink hexCid={selectedRag.metadata.resourceCid} label={t('workflows.resources')} />
-                    <CidLink hexCid={selectedRag.metadata.schemaCid} label={t('workflows.schema')} />
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <table className="w-full">
+                      <tbody>
+                        <CidLink hexCid={selectedRag.metadata.instructionCid} label={t('workflows.instructions')} />
+                        <CidLink hexCid={selectedRag.metadata.resourceCid} label={t('workflows.resources')} />
+                        <CidLink hexCid={selectedRag.metadata.schemaCid} label={t('workflows.schema')} />
+                      </tbody>
+                    </table>
                   </div>
                 </div>
 
@@ -404,9 +422,6 @@ export const Workflows = () => {
                               {stepRag?.metadata.description && (
                                 <div className="text-xs text-gray-600 mt-1">{stepRag.metadata.description}</div>
                               )}
-                              <div className="text-xs font-mono text-blue-600 mt-1 break-all hover:underline">
-                                {stepHash}
-                              </div>
                             </div>
                           </div>
                         );

@@ -277,56 +277,5 @@ export class MultiWalletConnector {
     }
   }
 
-  /**
-   * Get X25519 public key (for encryption)
-   * @param {string} address - Account address
-   * @param {string} password - Password (may be ignored by extension)
-   * @param {number} keyIndex - Key derivation index
-   * @returns {Promise<{publicKey: string}>}
-   */
-  async getX25519PublicKey(address, password, keyIndex = 0) {
-    try {
-      if (!window.polkadotExtensionDapp) {
-        throw new Error('Polkadot extension API not found');
-      }
-
-      const { web3FromAddress } = window.polkadotExtensionDapp;
-      
-      const injector = await web3FromAddress(address);
-      
-      // Not all wallets support this
-      if (!injector.signer || !injector.signer.signRaw) {
-        throw new Error('Wallet does not support key derivation');
-      }
-
-      // For now, we'll use the account's public key
-      // In production, you'd need proper X25519 key derivation
-      if (!window.polkadotUtilCrypto) {
-        throw new Error('Polkadot util-crypto not found');
-      }
-
-      const { decodeAddress } = window.polkadotUtilCrypto;
-      const publicKey = Buffer.from(decodeAddress(address)).toString('hex');
-      
-      return { publicKey: '0x' + publicKey };
-    } catch (error) {
-      console.error('Failed to get X25519 key:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Encrypt data (placeholder - needs proper implementation)
-   */
-  async encrypt(address, password, recipientPubKey, message) {
-    throw new Error('Encryption not yet implemented for multi-wallet');
-  }
-
-  /**
-   * Decrypt data (placeholder - needs proper implementation)
-   */
-  async decrypt(address, password, ciphertext, nonce, senderPublicKey, keyIndex) {
-    throw new Error('Decryption not yet implemented for multi-wallet');
-  }
 }
 

@@ -1,6 +1,31 @@
-# Carge - Law as Code
+# Carge - Code as Law
 
-A Web3 platform that transforms regulatory and technical processes into executable workflows with cryptographic audit trails.
+> **Built on the synergies of blockchain and LLMs**
+
+A Web3 platform that transforms regulatory and technical processes into executable workflows with cryptographic audit trails. Connect your existing systems via a local server interface - fully decentralized, with or without AI.
+
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Built with React](https://img.shields.io/badge/Built%20with-React-61DAFB?logo=react)](https://reactjs.org/)
+[![Powered by Polkadot](https://img.shields.io/badge/Powered%20by-Polkadot-E6007A?logo=polkadot)](https://polkadot.network/)
+
+## 🌐 Live Demo
+
+- **Website**: [https://carge.netlify.app](https://carge.netlify.app) *(update with your URL)*
+- **GitHub**: [https://github.com/polykrate](https://github.com/polykrate)
+
+## 📖 What is Carge?
+
+Carge enables organizations to:
+- **Transform processes into code**: AI-powered workflow generation from natural language
+- **Execute with proof**: Every action leaves a cryptographic audit trail on-chain
+- **Export to authorities**: Deploy as W3C Verifiable Credentials (EBSI) or NFT-gated access (Solana)
+- **Connect existing systems**: Local server interface for decentralized integration
+
+### Key Features
+- 🤖 **AI + Human collaboration**: Workflows executed together with cryptographic signatures
+- 🔗 **Decentralized**: No intermediaries, direct blockchain connection
+- 🔐 **Verifiable**: Immutable audit trails on Substrate + IPFS
+- 🌍 **Interoperable**: Works with legacy systems, ERPs, or modern SaaS
 
 ## 🚀 Tech Stack
 
@@ -104,6 +129,41 @@ Edit `src/lib/config.js` to configure:
 - ✅ Shared components (Header once)
 - ✅ Optimized builds with Vite
 
+## 🤝 Contributing
+
+We welcome contributions! Please see:
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines
+- [SECURITY.md](SECURITY.md) - Security policy and vulnerability reporting
+
+## 🗺️ Roadmap
+
+- **Q4 2025**: Testnet & Beta Access
+- **Q2 2026**: MVP & Public Launch with EBSI/Solana integration
+
+See the [project roadmap](https://github.com/polykrate/carge-react/issues) for detailed milestones.
+
+## 💝 Support the Project
+
+If you find Carge useful, consider supporting development:
+
+**Polkadot/Substrate Address:**
+```
+5C4kKzKyDuZTu3Qa89soZWdRfFRJzvTjVVDTNqAKPuzXcaRa
+```
+
+Your support helps maintain and improve Carge. Thank you! 🙏
+
 ## 📄 License
 
-GPL-3.0
+This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Links
+
+- **Website**: [carge.io](https://carge.io) *(update when ready)*
+- **GitHub**: [github.com/polykrate/carge](https://github.com/polykrate/carge)
+- **Discussions**: [GitHub Discussions](https://github.com/polykrate/carge/discussions)
+- **Issues**: [Report a bug](https://github.com/polykrate/carge/issues/new)
+
+---
+
+**Built with ❤️ on the synergies of blockchain and LLMs**

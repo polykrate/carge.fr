@@ -3,6 +3,27 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "description": "Web3 platform for executable compliance workflows with cryptographic audit trails",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/polykrate/carge-react.git"
+  },
+  "homepage": "https://github.com/polykrate/carge-react#readme",
+  "bugs": {
+    "url": "https://github.com/polykrate/carge-react/issues"
+  },
+  "keywords": [
+    "blockchain",
+    "polkadot",
+    "substrate",
+    "ipfs",
+    "web3",
+    "compliance",
+    "workflows",
+    "verifiable-credentials",
+    "ai",
+    "llm"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",

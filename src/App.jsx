@@ -17,7 +17,7 @@ const WalletDebug = lazy(() => import('./pages/WalletDebug').then(m => ({ defaul
 // Loading component
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#003399]"></div>
   </div>
 );
 

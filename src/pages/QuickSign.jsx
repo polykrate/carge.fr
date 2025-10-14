@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../contexts/AppContext';
-import { u8aToHex } from '@polkadot/util';
-import { showError, showSuccess, toastTx } from '../lib/toast';
+import { showError, toastTx } from '../lib/toast';
 import { quickSignSchema, validate, formatValidationErrors } from '../lib/validation';
 
 export const QuickSign = () => {
   const { t } = useTranslation();
-  const { substrateClient, selectedAccount, walletConnector } = useApp();
+  const { substrateClient, selectedAccount } = useApp();
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState('');
   const [fileHash, setFileHash] = useState('');
@@ -25,13 +24,34 @@ export const QuickSign = () => {
       setError(null);
       setResult(null);
 
-      // Read and hash file
+      // Read file
       console.log('📂 Reading file:', selectedFile.name);
       const text = await selectedFile.text();
       
-      // Calculate SHA-256 hash of file content
+      let contentToHash = text;
+      
+      // Try to parse as JSON proof first
+      try {
+        const proof = JSON.parse(text);
+        
+        // Check if it's a valid proof structure (has ragData field)
+        if (proof.ragData) {
+          console.log('✓ Valid proof JSON detected, extracting ragData for hashing...');
+          // Use the same method as ProofVerifier: JSON.stringify(proof.ragData)
+          contentToHash = JSON.stringify(proof.ragData);
+          console.log('→ Hashing ragData using JSON.stringify (same as ProofVerifier)');
+        } else {
+          // JSON but not a proof structure - hash the whole file
+          console.log('→ JSON file but not a proof structure, hashing full content...');
+        }
+      } catch {
+        // Not JSON - hash the raw file content
+        console.log('→ Not JSON, hashing file content as-is...');
+      }
+      
+      // Calculate SHA-256 hash of the content
       const encoder = new TextEncoder();
-      const data = encoder.encode(text);
+      const data = encoder.encode(contentToHash);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const fileHashHex = '0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -135,7 +155,7 @@ export const QuickSign = () => {
       if (!window.polkadotUtil) {
         throw new Error('Polkadot util not found');
       }
-      const { stringToU8a, u8aToHex, hexToU8a } = window.polkadotUtil;
+      const { stringToU8a, hexToU8a } = window.polkadotUtil;
       const fileHashBytes = hexToU8a(fileHash);
       const wrappedMessage = new Uint8Array([
         ...stringToU8a('<Bytes>'),
@@ -270,9 +290,28 @@ export const QuickSign = () => {
   return (
     <div className="container mx-auto px-6 py-12 max-w-4xl">
       <h1 className="text-4xl font-light mb-4">{t('quickSign.title')}</h1>
-      <p className="text-gray-600 mb-12">
+      <p className="text-gray-600 mb-8">
         {t('quickSign.description')}
       </p>
+
+      {/* How Identity Linking Works */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+        <h2 className="text-xl font-semibold text-[#003399] mb-6">{t('quickSign.howItWorksTitle')}</h2>
+        <div className="grid md:grid-cols-3 gap-6">
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('quickSign.step1Title')}</h3>
+            <p className="text-sm text-gray-700 text-justify">{t('quickSign.step1Desc')}</p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('quickSign.step2Title')}</h3>
+            <p className="text-sm text-gray-700 text-justify">{t('quickSign.step2Desc')}</p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('quickSign.step3Title')}</h3>
+            <p className="text-sm text-gray-700 text-justify">{t('quickSign.step3Desc')}</p>
+          </div>
+        </div>
+      </div>
 
       {/* File Upload */}
       <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
@@ -324,12 +363,12 @@ export const QuickSign = () => {
 
       {/* Wallet Check */}
       {!selectedAccount && fileName && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="flex items-center space-x-3">
-            <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <div className="text-sm text-yellow-800">
+            <div className="text-sm text-[#003399]">
               {t('quickSign.connectWallet')}
             </div>
           </div>
@@ -342,7 +381,7 @@ export const QuickSign = () => {
           <button
             onClick={handleSign}
             disabled={signing}
-            className="w-full px-6 py-4 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-6 py-4 bg-[#003399] hover:bg-[#002266] text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {signing ? t('quickSign.signing') : t('quickSign.signButton')}
           </button>
@@ -427,7 +466,7 @@ export const QuickSign = () => {
 
           <button
             onClick={resetForm}
-            className="w-full mt-4 px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition font-medium"
+            className="w-full mt-4 px-4 py-2 bg-[#003399] hover:bg-[#002266] text-white rounded-lg transition font-medium"
           >
             Sign Another File
           </button>

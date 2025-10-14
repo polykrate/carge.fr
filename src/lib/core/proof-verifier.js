@@ -272,7 +272,7 @@ export class ProofVerifier {
     let proof;
     try {
       proof = typeof proofJson === 'string' ? JSON.parse(proofJson) : proofJson;
-    } catch (e) {
+    } catch {
       throw new Error('Invalid JSON format');
     }
 

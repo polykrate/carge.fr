@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 export const WalletSelector = () => {
   const { t } = useTranslation();
-  const { installedWallets, connectWallet, setIsWalletSelectOpen, walletConnector } = useApp();
+  const { installedWallets, connectWallet, setIsWalletSelectOpen } = useApp();
 
   // Detect if mobile
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);

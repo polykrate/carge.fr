@@ -44,7 +44,7 @@ export const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition">
             <div className="text-2xl font-light">Carge</div>
-            <span className="text-xs text-gray-400">Law as Code</span>
+            <span className="text-xs text-gray-400">Code as Law</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -81,7 +81,7 @@ export const Header = () => {
             </Link>
           </nav>
 
-          {/* Right: Desktop Status & Wallet + Mobile Hamburger */}
+          {/* Right: Desktop Status & Wallet + Mobile Language + Mobile Hamburger */}
           <div className="flex items-center space-x-4">
             {/* Desktop Status Indicators */}
             <div className="hidden md:flex items-center space-x-3 mr-4">
@@ -116,6 +116,11 @@ export const Header = () => {
               <LanguageSelector />
             </div>
 
+            {/* Mobile Language Selector */}
+            <div className="md:hidden">
+              <LanguageSelector />
+            </div>
+
             {/* Desktop Wallet Button */}
             <div className="relative hidden md:block">
               <button
@@ -126,7 +131,7 @@ export const Header = () => {
                   toggleWalletMenu();
                 }}
                 type="button"
-                className="flex items-center space-x-2 px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition font-medium text-sm"
+                className="flex items-center space-x-2 px-4 py-2 bg-[#003399] hover:bg-[#002266] text-white rounded-lg transition font-medium text-sm"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -294,11 +299,6 @@ export const Header = () => {
               </a>
             </div>
 
-            {/* Mobile Language Selector */}
-            <div className="mb-4">
-              <LanguageSelector />
-            </div>
-
             {/* Mobile Wallet Button */}
             <button
               onClick={(e) => {
@@ -307,7 +307,7 @@ export const Header = () => {
                 toggleWalletMenu();
               }}
               type="button"
-              className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition font-medium text-sm"
+              className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-[#003399] hover:bg-[#002266] text-white rounded-lg transition font-medium text-sm"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path

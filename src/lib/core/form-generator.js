@@ -43,7 +43,7 @@ export class FormGenerator {
         // Nested object - create a section
         html += `
           <div class="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
-            <div class="font-medium text-gray-900 mb-2">${this.formatLabel(key)}${isRequired ? ' *' : ''}</div>
+            <div class="font-medium text-[#003399] mb-2">${this.formatLabel(key)}${isRequired ? ' *' : ''}</div>
             ${this.generateFields(prop, prop.properties, fieldName)}
           </div>
         `;
@@ -83,7 +83,7 @@ export class FormGenerator {
                 id="${id}" 
                 name="${fieldName}"
                 ${requiredAttr}
-                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003399]"
               >
                 <option value="">-- Select ${label} --</option>
                 ${prop.enum.map(opt => `<option value="${opt}">${this.formatLabel(opt)}</option>`).join('')}
@@ -103,7 +103,7 @@ export class FormGenerator {
                 id="${id}" 
                 name="${fieldName}"
                 ${requiredAttr}
-                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003399]"
               />
               ${helpText}
             </div>
@@ -123,7 +123,7 @@ export class FormGenerator {
                 ${prop.minLength ? `minlength="${prop.minLength}"` : ''}
                 ${prop.maxLength ? `maxlength="${prop.maxLength}"` : ''}
                 placeholder="${prop.placeholder || ''}"
-                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003399]"
               />
               ${helpText}
             </div>
@@ -143,7 +143,7 @@ export class FormGenerator {
                 ${prop.minLength ? `minlength="${prop.minLength}"` : ''}
                 ${prop.maxLength ? `maxlength="${prop.maxLength}"` : ''}
                 placeholder="${prop.placeholder || ''}"
-                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003399]"
               ></textarea>
               ${helpText}
               ${prop.maxLength ? `<div class="text-xs text-gray-400 mt-1">Max ${prop.maxLength} characters</div>` : ''}
@@ -165,7 +165,7 @@ export class FormGenerator {
                 ${prop.maxLength ? `maxlength="${prop.maxLength}"` : ''}
                 ${prop.pattern ? `pattern="${prop.pattern}"` : ''}
                 placeholder="${prop.placeholder || 'CID or hash'}"
-                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-gray-900"
+                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#003399]"
               />
               ${helpText}
               <div class="mt-2 flex gap-2">
@@ -204,7 +204,7 @@ export class FormGenerator {
                 ${prop.maxLength ? `maxlength="${prop.maxLength}"` : ''}
                 ${prop.pattern ? `pattern="${prop.pattern}"` : ''}
                 placeholder="${prop.placeholder || ''}"
-                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-gray-900"
+                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#003399]"
               />
               ${helpText}
             </div>
@@ -227,7 +227,7 @@ export class FormGenerator {
               ${prop.minimum !== undefined ? `min="${prop.minimum}"` : ''}
               ${prop.maximum !== undefined ? `max="${prop.maximum}"` : ''}
               ${prop.type === 'integer' ? 'step="1"' : ''}
-              class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+              class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003399]"
             />
             ${helpText}
           </div>
@@ -241,7 +241,7 @@ export class FormGenerator {
               type="checkbox" 
               id="${id}" 
               name="${fieldName}"
-              class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900"
+              class="w-4 h-4 text-[#003399] border-gray-300 rounded focus:ring-[#003399]"
             />
             <label class="ml-2 text-sm text-gray-700">
               ${label} ${requiredMark}
@@ -262,7 +262,7 @@ export class FormGenerator {
               id="${id}" 
               name="${fieldName}"
               ${requiredAttr}
-              class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+              class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003399]"
             />
             ${helpText}
           </div>

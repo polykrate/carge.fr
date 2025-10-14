@@ -13,6 +13,124 @@ export const Verify = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   
+  // Example proof JSON
+  const exampleProof = {
+    "ragData": {
+      "ragHash": "0x3bda44d8460eb05bee5487c433f3d8a9a2bbdc056f3622dac36810012a7972b8",
+      "stepHash": "0xc9ab2efad8f54abaf263987bc217ca4169a690ea8db7613099e27e2fe1b82afe",
+      "livrable": {
+        "entity": {
+          "entityType": "company",
+          "legalName": "CryptoTrading France SAS",
+          "country": "FR",
+          "registrationNumber": "85234567800015",
+          "legalStructure": "SAS",
+          "beneficialOwners": [
+            {
+              "name": "Sophie Bernard",
+              "ownershipPercentage": 55,
+              "nationality": "FR"
+            },
+            {
+              "name": "Lucas Moreau",
+              "ownershipPercentage": 45,
+              "nationality": "FR"
+            }
+          ]
+        },
+        "identity": {
+          "documentType": "national_id",
+          "documentNumber": "FR298765432",
+          "expiryDate": "2029-05-20",
+          "documentCid": "bafkreiyb3zl56brrvyrl27gkwklolhrxxjr3ez32fdxa2mtt4ddlsocr2q",
+          "proofOfAddressType": "utility_bill",
+          "proofOfAddressCid": "bafkreiho3a6qpuyjouxg6ot5ozdj4wiu24x2ur2oh7vbqlawdytsqn4zsg",
+          "proofOfAddressDate": "2025-09-15",
+          "sourceOfFunds": "business_income",
+          "pepStatus": false
+        },
+        "risk_profile": {
+          "operatingJurisdictions": [
+            "FR",
+            "DE",
+            "BE"
+          ],
+          "monthlyVolume": "100k_1m",
+          "transactionFrequency": "daily",
+          "cryptoActivities": [
+            "exchange_trading",
+            "defi_staking"
+          ],
+          "customerBase": "retail",
+          "highRiskJurisdictions": [],
+          "riskLevel": "medium",
+          "riskMitigationMeasures": [
+            "aml_program",
+            "transaction_monitoring",
+            "sanctions_screening",
+            "compliance_officer",
+            "kyc_verification"
+          ]
+        },
+        "wallet_monitoring": {
+          "wallets": [
+            {
+              "blockchain": "ethereum",
+              "address": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1",
+              "walletType": "hot_wallet",
+              "primaryUse": "business_operations"
+            },
+            {
+              "blockchain": "bitcoin",
+              "address": "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+              "walletType": "cold_wallet",
+              "primaryUse": "treasury"
+            }
+          ],
+          "transactionPatterns": "Daily exchange trading 10-50K EUR, weekly DeFi staking deposits 5-20K EUR, monthly treasury consolidation",
+          "counterpartyTypes": [
+            "regulated_exchange",
+            "defi_protocol"
+          ],
+          "alertThreshold": 50000,
+          "monitoringConsent": true,
+          "monitoringFrequency": "daily"
+        },
+        "compliance": {
+          "fullName": "CryptoTrading France SAS",
+          "aliases": [
+            "CTF"
+          ],
+          "sanctionsScreeningConsent": true,
+          "sanctionsScreeningResult": "clear",
+          "adverseMediaFound": false,
+          "criminalRecord": false,
+          "beneficialOwnerScreening": "all_clear",
+          "monitoringFrequency": "monthly",
+          "sarAcknowledgment": true,
+          "complianceOfficer": {
+            "name": "Sophie Bernard",
+            "email": "compliance@cryptotrading-fr.example",
+            "certification": "CAMS"
+          },
+          "attestations": {
+            "informationAccurate": true,
+            "noMaterialChanges": true,
+            "consentToMonitoring": true,
+            "consentToRegulatorSharing": true,
+            "amlProgramInPlace": true,
+            "understandSARObligations": true
+          }
+        }
+      }
+    }
+  };
+
+  const loadExampleProof = () => {
+    setJsonInput(JSON.stringify(exampleProof, null, 2));
+    setMode('json'); // Switch to JSON mode when loading example
+  };
+  
   // Generate Polkadot.js Apps explorer link for a block number
   const getBlockExplorerLink = (blockNumber) => {
     if (!substrateClient?.rpcUrl) return null;
@@ -29,7 +147,7 @@ export const Verify = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const toastId = showLoading('Verifying proof...');
+    const toastId = showLoading('Processing file...');
 
     try {
       setVerifying(true);
@@ -45,21 +163,23 @@ export const Verify = () => {
         
         // Check if it's a valid proof structure (has ragData field)
         if (proof.ragData) {
-          console.log('Valid proof JSON detected, verifying...');
-          await verifyProof(proof);
+          console.log('✓ Valid proof JSON detected, verifying...');
+          await verifyProof(proof, toastId);
         } else {
           // JSON but not a proof structure - hash the file content
-          console.log('JSON file but not a proof structure, hashing content...');
-          await verifyFileHash(text, file.name);
+          console.log('→ JSON file but not a proof structure, hashing content...');
+          await verifyFileHash(text, file.name, toastId);
         }
-      } catch (parseError) {
+      } catch {
         // Not JSON - hash the raw file content
-        console.log('Not JSON, hashing file content...');
-        await verifyFileHash(text, file.name);
+        console.log('→ Not JSON, hashing file content...');
+        await verifyFileHash(text, file.name, toastId);
       }
     } catch (err) {
       console.error('File upload error:', err);
       setError(err.message || 'Failed to process file');
+      dismiss(toastId);
+      showError(err.message || 'Failed to process file');
     } finally {
       setVerifying(false);
     }
@@ -68,22 +188,26 @@ export const Verify = () => {
   const handleJsonSubmit = async (e) => {
     e.preventDefault();
     
+    const toastId = showLoading('Verifying proof...');
+    
     try {
       setVerifying(true);
       setError(null);
       setResult(null);
 
       const proof = JSON.parse(jsonInput);
-      await verifyProof(proof);
+      await verifyProof(proof, toastId);
     } catch (err) {
       console.error('JSON verification error:', err);
       setError(err.message || 'Failed to verify proof');
+      dismiss(toastId);
+      showError(err.message || 'Failed to verify proof');
     } finally {
       setVerifying(false);
     }
   };
 
-  const verifyProof = async (proof) => {
+  const verifyProof = async (proof, toastId) => {
     try {
       console.log('Starting proof verification...');
       const verifier = new ProofVerifier(substrateClient);
@@ -145,7 +269,7 @@ export const Verify = () => {
     }
   };
 
-  const verifyFileHash = async (content, filename) => {
+  const verifyFileHash = async (content, filename, toastId) => {
     try {
       console.log('Verifying file hash for:', filename);
       
@@ -176,10 +300,10 @@ export const Verify = () => {
       
       if (trail) {
         const signatureValid = trail.signatureValid ?? false;
-        console.log('File hash found on blockchain!');
-        console.log('Signature valid:', signatureValid);
+        console.log('✓ File hash found on blockchain!');
+        console.log('✓ Signature valid:', signatureValid);
         
-        setResult({
+        const result = {
           isValid: signatureValid,
           message: signatureValid 
             ? `File hash found on blockchain with valid signature!`
@@ -194,10 +318,20 @@ export const Verify = () => {
             signature: trail.substrateSignature,
             signatureValid: signatureValid ? 'Valid' : 'Invalid',
           }
-        });
+        };
+        
+        setResult(result);
+        
+        if (result.isValid) {
+          dismiss(toastId);
+          showSuccess('File hash verified successfully!');
+        } else {
+          dismiss(toastId);
+          showError(result.message);
+        }
       } else {
-        console.log('File hash not found on blockchain');
-        setResult({
+        console.log('✗ File hash not found on blockchain');
+        const result = {
           isValid: false,
           message: 'File hash not found on blockchain',
           details: {
@@ -206,10 +340,16 @@ export const Verify = () => {
             filename,
             status: 'Not found in blockchain storage'
           }
-        });
+        };
+        
+        setResult(result);
+        dismiss(toastId);
+        showError(result.message);
       }
     } catch (err) {
       console.error('File hash verification error:', err);
+      dismiss(toastId);
+      showError(err.message || 'File hash verification failed');
       throw err;
     }
   };
@@ -217,20 +357,48 @@ export const Verify = () => {
   return (
     <div className="container mx-auto px-6 py-12 max-w-4xl">
       <h1 className="text-4xl font-light mb-4">{t('verify.title')}</h1>
-      <p className="text-gray-600 mb-12">
+      <p className="text-gray-600 mb-8">
         {t('verify.description')}
       </p>
 
+      {/* Type of Proof */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+        <h2 className="text-xl font-semibold text-[#003399] mb-6">{t('verify.howItWorksTitle')}</h2>
+        <div className="grid md:grid-cols-3 gap-6">
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('verify.step1Title')}</h3>
+            <p className="text-sm text-gray-700 text-justify">{t('verify.step1Desc')}</p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('verify.step2Title')}</h3>
+            <p className="text-sm text-gray-700 text-justify">{t('verify.step2Desc')}</p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('verify.step3Title')}</h3>
+            <p className="text-sm text-gray-700 text-justify">{t('verify.step3Desc')}</p>
+          </div>
+        </div>
+      </div>
+
       {/* Mode Tabs */}
       <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-        <h2 className="text-xl font-medium mb-4">{t('verify.title')}</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-medium">{t('verify.title')}</h2>
+          <button
+            type="button"
+            onClick={loadExampleProof}
+            className="px-4 py-2 text-sm bg-[#003399] text-white rounded-lg hover:bg-[#002266] transition font-medium"
+          >
+            {t('verify.testExample')}
+          </button>
+        </div>
 
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => setMode('file')}
             className={`px-4 py-2 rounded-lg transition ${
               mode === 'file'
-                ? 'bg-gray-900 text-white'
+                ? 'bg-[#003399] text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -240,7 +408,7 @@ export const Verify = () => {
             onClick={() => setMode('json')}
             className={`px-4 py-2 rounded-lg transition ${
               mode === 'json'
-                ? 'bg-gray-900 text-white'
+                ? 'bg-[#003399] text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -273,11 +441,12 @@ export const Verify = () => {
         {/* JSON Paste Mode */}
         {mode === 'json' && (
           <form onSubmit={handleJsonSubmit}>
+            <label className="text-sm text-gray-600 block mb-2">{t('verify.pasteDesc')}</label>
             <textarea
               value={jsonInput}
               onChange={(e) => setJsonInput(e.target.value)}
               placeholder={t('verify.pasteDesc')}
-              className="w-full h-64 p-4 border border-gray-300 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 mb-4"
+              className="w-full h-64 p-4 border border-gray-300 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[#003399] mb-4"
               disabled={verifying}
               aria-label="Proof JSON input"
               aria-describedby="json-description"
@@ -285,7 +454,7 @@ export const Verify = () => {
             <button
               type="submit"
               disabled={verifying || !jsonInput.trim()}
-              className="w-full px-4 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 bg-[#003399] hover:bg-[#002266] text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {verifying ? t('verify.verifying') : t('verify.verifyButton')}
             </button>

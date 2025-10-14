@@ -37,7 +37,7 @@ export const About = () => {
         <div className="bg-gray-50 p-6 rounded-lg">
           <ul className="space-y-2 text-sm text-gray-700">
             <li>
-              <strong>Blockchain:</strong> Substrate Parachain on Polkadot (Tanssi Ragchain)
+              <strong>Blockchain:</strong> Substrate Parachain on Polkadot (Tanssi parachain)
             </li>
             <li>
               <strong>Storage:</strong> IPFS (Helia browser client)
@@ -59,13 +59,54 @@ export const About = () => {
           {t('about.openSourceDesc')}
         </p>
 
+        <h2 className="text-2xl font-medium mt-8 mb-4">{t('about.legalReferences')}</h2>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-4">
+          <div className="mb-6">
+            <h3 className="font-semibold text-[#003399] mb-2">{t('about.legalRef1Title')}</h3>
+            <p className="text-sm text-gray-700 text-justify mb-2">
+              {t('about.legalRef1Desc')}
+            </p>
+            <a 
+              href="https://eur-lex.europa.eu/eli/reg/2024/1183" 
+              target="_blank" 
+              rel="noreferrer"
+              className="text-xs text-[#003399] hover:underline flex items-center gap-1"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              {t('about.legalRef1Link')}
+            </a>
+          </div>
+          <div>
+            <h3 className="font-semibold text-[#003399] mb-2">{t('about.legalRef2Title')}</h3>
+            <p className="text-sm text-gray-700 text-justify mb-2">
+              {t('about.legalRef2Desc')}
+            </p>
+            <a 
+              href="https://www.doctrine.fr/d/TJ/Marseille/2025/U5266E268A3AFBC83910E" 
+              target="_blank" 
+              rel="noreferrer"
+              className="text-xs text-[#003399] hover:underline flex items-center gap-1"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              {t('about.legalRef2Link')}
+            </a>
+          </div>
+        </div>
+
         <h2 className="text-2xl font-medium mt-8 mb-4">{t('about.contact')}</h2>
         <p className="text-gray-700">
           {t('about.contactDesc')}{' '}
-          <a href="https://github.com" className="text-blue-600 hover:underline" target="_blank" rel="noreferrer">
+          <a href="https://github.com/polykrate" className="text-blue-600 hover:underline" target="_blank" rel="noreferrer">
             {t('about.github')}
-          </a>{' '}
-          {t('about.or')}
+          </a>
+          {' '}{t('about.or')}{' '}
+          <a href="https://www.linkedin.com/company/carge-fr" className="text-blue-600 hover:underline" target="_blank" rel="noreferrer">
+            {t('about.linkedin')}
+          </a>.
         </p>
       </div>
     </div>

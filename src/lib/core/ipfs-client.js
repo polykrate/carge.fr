@@ -239,7 +239,7 @@ export class IpfsClient {
         console.log(`✅ Downloaded ${result.length} bytes via Helia`);
         return result;
       } catch (error) {
-        console.warn('⚠️ Helia download failed, using gateway');
+        console.warn('⚠️ Helia download failed, using gateway:', error.message);
       }
     }
 

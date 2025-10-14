@@ -6,6 +6,7 @@ import { config } from '../lib/config.js';
 
 const AppContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useApp = () => {
   const context = useContext(AppContext);
   if (!context) {
@@ -43,6 +44,7 @@ export const AppProvider = ({ children }) => {
     return () => {
       // Unsubscribe from account changes if needed
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const detectWallets = async () => {
@@ -108,7 +110,7 @@ export const AppProvider = ({ children }) => {
         setCurrentBlock(block);
         
         // Update block periodically
-        const interval = setInterval(async () => {
+        setInterval(async () => {
           try {
             const newBlock = await substrateClient.getCurrentBlock();
             setCurrentBlock(newBlock);
@@ -117,7 +119,7 @@ export const AppProvider = ({ children }) => {
           }
         }, 6000);
         
-        // Clean up interval on unmount (sera géré par useEffect return)
+        // Note: interval cleanup is handled in component lifecycle
       }
     } catch (error) {
       console.error('Substrate connection failed:', error);

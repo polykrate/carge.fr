@@ -215,9 +215,9 @@ export const WalletDebug = () => {
       </div>
 
       {/* Instructions */}
-      <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-        <h3 className="font-medium text-yellow-900 mb-2">Instructions</h3>
-        <ul className="text-sm text-yellow-800 space-y-2 list-disc list-inside">
+      <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h3 className="font-medium text-[#003399] mb-2">Instructions</h3>
+        <ul className="text-sm text-gray-700 space-y-2 list-disc list-inside">
           <li>Sur mobile, ouvrez cette page depuis le navigateur in-app de votre wallet (Nova, SubWallet)</li>
           <li>Attendez 2 secondes pour que l'info se charge</li>
           <li>Cliquez sur les boutons de test</li>

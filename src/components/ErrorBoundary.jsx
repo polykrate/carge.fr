@@ -6,7 +6,7 @@ export class ErrorBoundary extends Component {
     this.state = { hasError: false, error: null, errorInfo: null };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 
@@ -37,7 +37,7 @@ export class ErrorBoundary extends Component {
               We're sorry, but something unexpected happened. The error has been logged and we'll look into it.
             </p>
             
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {import.meta.env.MODE === 'development' && this.state.error && (
               <details className="mb-6 text-left">
                 <summary className="cursor-pointer text-sm text-gray-700 font-medium mb-2">
                   Error Details (Development Only)
@@ -56,7 +56,7 @@ export class ErrorBoundary extends Component {
             <div className="space-y-2">
               <button
                 onClick={this.handleReset}
-                className="w-full px-4 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium"
+                className="w-full px-4 py-3 bg-[#003399] text-white rounded-lg hover:bg-[#002266] transition font-medium"
               >
                 Return to Home
               </button>

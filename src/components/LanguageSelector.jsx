@@ -14,7 +14,7 @@ export const LanguageSelector = () => {
         onClick={() => changeLanguage('en')}
         className={`px-2 py-1 text-xs font-medium rounded transition ${
           i18n.language === 'en'
-            ? 'bg-gray-900 text-white'
+            ? 'bg-[#003399] text-white'
             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
         }`}
         title="Switch to English"
@@ -25,7 +25,7 @@ export const LanguageSelector = () => {
         onClick={() => changeLanguage('fr')}
         className={`px-2 py-1 text-xs font-medium rounded transition ${
           i18n.language === 'fr'
-            ? 'bg-gray-900 text-white'
+            ? 'bg-[#003399] text-white'
             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
         }`}
         title="Passer au français"

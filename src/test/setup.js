@@ -11,6 +11,7 @@ afterEach(() => {
 });
 
 // Mock crypto.subtle for Node environment if needed
+/* eslint-disable no-undef */
 if (!global.crypto || !global.crypto.subtle) {
   const nodeCrypto = await import('crypto');
   
@@ -34,6 +35,7 @@ if (!global.crypto || !global.crypto.subtle) {
 
 // Mock fetch
 global.fetch = vi.fn();
+/* eslint-enable no-undef */
 
 // Mock window.injectedWeb3 for wallet tests
 if (typeof window !== 'undefined') {
