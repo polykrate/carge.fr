@@ -41,9 +41,9 @@ const resources = {
       home: {
         title: 'CARGE',
         subtitle: 'Code as Law',
-        badge: 'Built on the synergies of blockchain and LLMs',
-        heroTitle: 'From Administrative Chaos to Verifiable Workflows',
-        heroDesc: 'Send your processes to AI. AI codes them on-chain. Execute together with cryptographic proof. Export to regulatory authorities when complete.',
+        badge: 'Merging control and execution',
+        heroTitle: 'Encode Your Process on the Blockchain, Work with Everyone',
+        heroDesc: 'AI will reshape employment, but businesses are just processes. Put them on-chain with blockchain as PKI - create something more agile than any company. Decentralized collaboration beats centralized control.',
         ctaStart: 'Start a Workflow',
         ctaVerify: 'Verify Proof',
         metric1: '100%',
@@ -55,13 +55,13 @@ const resources = {
         
         // How it works
         howItWorksTitle: 'Simple. Powerful. Verifiable.',
-        howItWorksDesc: 'Transform administrative and technical processes into executable workflows in three simple steps',
-        step1Title: 'Send to AI',
-        step1Desc: 'Send your processes, administrative documents, or management controls to the AI. Natural language, PDFs, spreadsheets - whatever you have.',
-        step2Title: 'AI Codes the Workflow',
-        step2Desc: 'The AI uses MCP to code structured workflows on-chain. Solo or collaborative, it guides you through each step and signs attestations at completion.',
-        step3Title: 'Execute Together',
-        step3Desc: 'Humans and AI execute workflows together, each action leaving a cryptographic audit trail. Submit to regulatory authorities when complete.',
+        howItWorksDesc: 'Transform your processes into executable workflows in two simple steps',
+        step1Title: 'Encode the Process',
+        step1Desc: 'Send your processes, documents, or controls to AI. It codes structured workflows on-chain using MCP. Natural language, PDFs, spreadsheets - AI transforms them into executable steps. Solo or collaborative, cryptographically signed.',
+        step2Title: 'Execute Together',
+        step2Desc: 'Humans and AI execute workflows together. Each action creates a cryptographic audit trail - no one can alter what happened.',
+        step3Title: 'Store for Audit',
+        step3Desc: 'Every execution is permanently stored on IPFS with blockchain proof. Complete transparency for auditors and regulatory authorities. Immutable evidence of who did what, when.',
         
         // Use Cases
         useCasesTitle: 'Real-World Applications',
@@ -341,9 +341,9 @@ const resources = {
       home: {
         title: 'CARGE',
         subtitle: 'Le Code fait Loi',
-        badge: 'Construit sur les synergies de la blockchain et des LLM',
-        heroTitle: 'Du Chaos Administratif aux Workflows Vérifiables',
-        heroDesc: 'Envoyez vos processus à l\'IA. L\'IA les code sur la chaîne. Exécutez ensemble avec preuve cryptographique. Soumettez aux autorités de régulation une fois terminé.',
+        badge: 'Fusion du contrôle et de l\'exécution',
+        heroTitle: 'Encodez Vos Processus sur la Blockchain, Travaillez avec Tous',
+        heroDesc: 'L\'IA va remodeler l\'emploi, mais les entreprises ne sont que des processus. Mettez-les on-chain avec la blockchain comme PKI - créez quelque chose de plus agile que n\'importe quelle entreprise. La collaboration décentralisée bat le contrôle centralisé.',
         ctaStart: 'Démarrer un Workflow',
         ctaVerify: 'Vérifier une Preuve',
         metric1: '100%',
@@ -355,13 +355,13 @@ const resources = {
         
         // Comment ça marche
         howItWorksTitle: 'Simple. Puissant. Vérifiable.',
-        howItWorksDesc: 'Transformez vos processus administratifs et techniques en workflows exécutables en trois étapes simples',
-        step1Title: 'Envoyer à l\'IA',
-        step1Desc: 'Envoyez vos processus, documents administratifs ou contrôles de gestion à l\'IA. Langage naturel, PDF, tableurs - tout ce que vous avez.',
-        step2Title: 'L\'IA Code le Workflow',
-        step2Desc: 'L\'IA utilise MCP pour coder des workflows structurés sur la chaîne. Solo ou collaboratif, elle guide à travers chaque étape et signe des attestations à la fin.',
-        step3Title: 'Exécuter Ensemble',
-        step3Desc: 'Humains et IA exécutent les workflows ensemble, chaque action laissant une trace cryptographique. Soumettez aux autorités de régulation une fois terminé.',
+        howItWorksDesc: 'Transformez vos processus en workflows exécutables en deux étapes simples',
+        step1Title: 'Encoder le Processus',
+        step1Desc: 'Envoyez vos processus, documents ou contrôles à l\'IA. Elle code des workflows structurés on-chain via MCP. Langage naturel, PDF, tableurs - l\'IA les transforme en étapes exécutables. Solo ou collaboratif, signé cryptographiquement.',
+        step2Title: 'Exécuter Ensemble',
+        step2Desc: 'Humains et IA exécutent les workflows ensemble. Chaque action crée une trace d\'audit cryptographique - personne ne peut altérer ce qui s\'est passé.',
+        step3Title: 'Stocker pour Audit',
+        step3Desc: 'Chaque exécution est stockée définitivement sur IPFS avec preuve blockchain. Transparence totale pour auditeurs et autorités réglementaires. Preuve immuable de qui a fait quoi, quand.',
         
         // Cas d'usage
         useCasesTitle: 'Applications Concrètes',
