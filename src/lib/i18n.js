@@ -55,7 +55,7 @@ const resources = {
         
         // How it works
         howItWorksTitle: 'Simple. Powerful. Verifiable.',
-        howItWorksDesc: 'Transform your processes into executable workflows in two simple steps',
+        howItWorksDesc: 'Transform your processes into verifiable audit trails in two simple steps',
         step1Title: 'Encode the Process',
         step1Desc: 'Send your processes, documents, or controls to AI. It codes structured workflows on-chain using MCP. Natural language, PDFs, spreadsheets - AI transforms them into executable steps. Solo or collaborative, cryptographically signed.',
         step2Title: 'Execute Together',
@@ -234,9 +234,9 @@ const resources = {
       // About page
       about: {
         title: 'About Carge',
-        subtitle: 'Code as Law - Turning regulatory processes into executable workflows',
+        subtitle: 'Code as Law - Turning regulatory processes into verifiable audit trails',
         whatIs: 'What is Carge?',
-        whatIsDesc: 'Carge is a Web3 platform that transforms regulatory and technical processes into executable workflows with cryptographic audit trails. By combining AI, blockchain technology, and electronic signatures, we create a complete trust infrastructure for administrative compliance.',
+        whatIsDesc: 'Carge is a Web3 platform that transforms regulatory and technical processes into verifiable audit trails. Every step is cryptographically signed - you can reconstruct who did what, when. By combining AI, blockchain technology, and electronic signatures, we create a complete trust infrastructure for administrative compliance.',
         features: 'Key Features',
         feature1: 'AI-Powered Workflow Generation',
         feature1Desc: 'Transform natural language requirements into executable compliance workflows',
@@ -355,7 +355,7 @@ const resources = {
         
         // Comment ça marche
         howItWorksTitle: 'Simple. Puissant. Vérifiable.',
-        howItWorksDesc: 'Transformez vos processus en workflows exécutables en deux étapes simples',
+        howItWorksDesc: 'Transformez vos processus en pistes d\'audit vérifiables en deux étapes simples',
         step1Title: 'Encoder le Processus',
         step1Desc: 'Envoyez vos processus, documents ou contrôles à l\'IA. Elle code des workflows structurés on-chain via MCP. Langage naturel, PDF, tableurs - l\'IA les transforme en étapes exécutables. Solo ou collaboratif, signé cryptographiquement.',
         step2Title: 'Exécuter Ensemble',
@@ -534,9 +534,9 @@ const resources = {
       // Page À propos
       about: {
         title: 'À propos de Carge',
-        subtitle: 'Le Code fait Loi - Transformer les processus réglementaires en workflows exécutables',
+        subtitle: 'Le Code fait Loi - Transformer les processus réglementaires en pistes d\'audit vérifiables',
         whatIs: 'Qu\'est-ce que Carge ?',
-        whatIsDesc: 'Carge est une plateforme Web3 qui transforme vos processus réglementaires et techniques en workflows exécutables avec traçabilité cryptographique. En combinant IA, blockchain et signatures électroniques, nous créons une infrastructure de confiance complète pour votre conformité administrative.',
+        whatIsDesc: 'Carge est une plateforme Web3 qui transforme vos processus réglementaires et techniques en pistes d\'audit vérifiables. Chaque étape est signée cryptographiquement - vous pouvez reconstituer qui a fait quoi, quand. En combinant IA, blockchain et signatures électroniques, nous créons une infrastructure de confiance complète pour votre conformité administrative.',
         features: 'Nos fonctionnalités',
         feature1: 'Génération de workflows par IA',
         feature1Desc: 'Transformez vos exigences en langage naturel en workflows de conformité exécutables',
