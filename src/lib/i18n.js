@@ -63,6 +63,22 @@ const resources = {
         step3Title: 'Execute Together',
         step3Desc: 'Humans and AI execute workflows together, each action leaving a cryptographic audit trail. Submit to regulatory authorities when complete.',
         
+        // Use Cases
+        useCasesTitle: 'Real-World Applications',
+        useCasesDesc: 'From logistics to compliance, Carge transforms critical processes into verifiable workflows',
+        useCase1Title: 'Logistics Audit',
+        useCase1Desc: 'Track every shipment movement with cryptographic proof. Real-time traceability from warehouse to delivery with immutable audit trails.',
+        useCase2Title: 'Legal Archiving',
+        useCase2Desc: 'Permanent, tamper-proof document archiving on IPFS with blockchain timestamps. Full compliance with legal retention requirements.',
+        useCase3Title: 'Supply Chain',
+        useCase3Desc: 'End-to-end product traceability. Each step cryptographically signed - from raw materials to final consumer.',
+        useCase4Title: 'Quality Certification',
+        useCase4Desc: 'ISO audits, quality controls, and certifications with verifiable proof. Export directly to certification bodies.',
+        useCase5Title: 'Administrative Procedures',
+        useCase5Desc: 'Permits, authorizations, regulatory submissions - all workflows automated with cryptographic validation at each step.',
+        useCase6Title: 'Management Control',
+        useCase6Desc: 'Financial audits, budget tracking, expense validation. Full transparency with immutable records for auditors.',
+        
         // Interoperability
         interopTitle: 'Connect Your Existing Systems',
         interopDesc: 'Carge integrates seamlessly with your current infrastructure. Exchange certified information with or without AI.',
@@ -346,6 +362,22 @@ const resources = {
         step2Desc: 'L\'IA utilise MCP pour coder des workflows structurés sur la chaîne. Solo ou collaboratif, elle guide à travers chaque étape et signe des attestations à la fin.',
         step3Title: 'Exécuter Ensemble',
         step3Desc: 'Humains et IA exécutent les workflows ensemble, chaque action laissant une trace cryptographique. Soumettez aux autorités de régulation une fois terminé.',
+        
+        // Cas d'usage
+        useCasesTitle: 'Applications Concrètes',
+        useCasesDesc: 'De la logistique à la conformité, Carge transforme les processus critiques en workflows vérifiables',
+        useCase1Title: 'Audit Logistique',
+        useCase1Desc: 'Suivez chaque mouvement d\'expédition avec preuve cryptographique. Traçabilité en temps réel de l\'entrepôt à la livraison avec pistes d\'audit immuables.',
+        useCase2Title: 'Archivage Légal',
+        useCase2Desc: 'Archivage permanent et inaltérable de documents sur IPFS avec horodatage blockchain. Conformité totale aux exigences de conservation légale.',
+        useCase3Title: 'Chaîne d\'Approvisionnement',
+        useCase3Desc: 'Traçabilité produit de bout en bout. Chaque étape signée cryptographiquement - des matières premières au consommateur final.',
+        useCase4Title: 'Certification Qualité',
+        useCase4Desc: 'Audits ISO, contrôles qualité et certifications avec preuve vérifiable. Export direct vers les organismes certificateurs.',
+        useCase5Title: 'Procédures Administratives',
+        useCase5Desc: 'Permis, autorisations, soumissions réglementaires - tous les workflows automatisés avec validation cryptographique à chaque étape.',
+        useCase6Title: 'Contrôle de Gestion',
+        useCase6Desc: 'Audits financiers, suivi budgétaire, validation des dépenses. Transparence totale avec enregistrements immuables pour les auditeurs.',
         
         // Interopérabilité
         interopTitle: 'Connectez Vos Systèmes Existants',
