@@ -55,13 +55,13 @@ const resources = {
         
         // How it works
         howItWorksTitle: 'Simple. Powerful. Verifiable.',
-        howItWorksDesc: 'Transform your processes into verifiable audit trails in two simple steps',
+        howItWorksDesc: 'Turn your internal processes into encrypted verifiable audit trails',
         step1Title: 'Encode the Process',
-        step1Desc: 'Send your processes, documents, or controls to AI. It codes structured workflows on-chain using MCP. Natural language, PDFs, spreadsheets - AI transforms them into executable steps. Solo or collaborative, cryptographically signed.',
+        step1Desc: 'Send your processes, documents, or controls to AI. It codes structured workflows on-chain using its local MCP. Natural language, PDFs, spreadsheets - whatever you have.',
         step2Title: 'Execute Together',
-        step2Desc: 'Humans and AI execute workflows together. Each action creates a cryptographic audit trail - no one can alter what happened.',
+        step2Desc: 'Humans and AI execute workflows together - each doing what they do best. Each action creates a cryptographic audit trail that no one can alter.',
         step3Title: 'Store for Audit',
-        step3Desc: 'Every execution is permanently stored on IPFS with blockchain proof. Complete transparency for auditors and regulatory authorities. Immutable evidence of who did what, when.',
+        step3Desc: 'Every execution is archived on the blockchain. Complete transparency for auditors and regulatory authorities. Immutable evidence of who did what, when.',
         
         // Use Cases
         useCasesTitle: 'Real-World Applications',
@@ -355,13 +355,13 @@ const resources = {
         
         // Comment ça marche
         howItWorksTitle: 'Simple. Puissant. Vérifiable.',
-        howItWorksDesc: 'Transformez vos processus en pistes d\'audit vérifiables en deux étapes simples',
+        howItWorksDesc: 'Transformez vos processus internes en pistes d\'audit cryptées et vérifiables',
         step1Title: 'Encoder le Processus',
-        step1Desc: 'Envoyez vos processus, documents ou contrôles à l\'IA. Elle code des workflows structurés on-chain via MCP. Langage naturel, PDF, tableurs - l\'IA les transforme en étapes exécutables. Solo ou collaboratif, signé cryptographiquement.',
+        step1Desc: 'Envoyez vos processus, documents ou contrôles à l\'IA. Elle code des workflows structurés on-chain via son MCP local. Langage naturel, PDF, tableurs - tout ce que vous avez.',
         step2Title: 'Exécuter Ensemble',
-        step2Desc: 'Humains et IA exécutent les workflows ensemble. Chaque action crée une trace d\'audit cryptographique - personne ne peut altérer ce qui s\'est passé.',
+        step2Desc: 'Humains et IA exécutent les workflows ensemble - chacun faisant ce qu\'il fait de mieux. Chaque action crée une trace d\'audit cryptographique que personne ne peut altérer.',
         step3Title: 'Stocker pour Audit',
-        step3Desc: 'Chaque exécution est stockée définitivement sur IPFS avec preuve blockchain. Transparence totale pour auditeurs et autorités réglementaires. Preuve immuable de qui a fait quoi, quand.',
+        step3Desc: 'Chaque exécution est archivée sur la blockchain. Transparence totale pour auditeurs et autorités réglementaires. Preuve immuable de qui a fait quoi, quand.',
         
         // Cas d'usage
         useCasesTitle: 'Applications Concrètes',
