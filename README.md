@@ -10,8 +10,8 @@ A Web3 platform that transforms regulatory and technical processes into executab
 
 ## 🌐 Live Demo
 
-- **Website**: [https://carge.netlify.app](https://carge.netlify.app) *(update with your URL)*
-- **GitHub**: [https://github.com/polykrate](https://github.com/polykrate)
+- **Website**: [http://carge.fr](http://carge.fr)
+- **GitHub**: [https://github.com/polykrate/carge](https://github.com/polykrate/carge)
 
 ## 📖 What is Carge?
 
@@ -76,15 +76,24 @@ Output: `dist/` folder ready for deployment
 
 ## 🌐 Deployment
 
-### Netlify (Recommended)
+### Netlify
 
-1. Build the project: `npm run build`
+The project is deployed at [carge.fr](http://carge.fr) using Netlify.
+
+**Steps:**
+1. Build: `npm run build`
 2. Deploy the `dist/` folder to Netlify
-3. The `netlify.toml` file handles SPA routing
+3. Configure custom domain in Netlify dashboard
+4. The `netlify.toml` file handles SPA routing automatically
+
+**Custom Domain Setup:**
+- Add your domain in Netlify: Site settings → Domain management
+- Configure DNS records to point to Netlify
+- SSL certificate is automatically provisioned
 
 ### Manual Deployment
 
-Upload the `dist/` folder to any static hosting provider.
+Upload the `dist/` folder to any static hosting provider that supports SPA routing.
 
 ## 📁 Project Structure
 
@@ -159,7 +168,7 @@ This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) 
 
 ## 🔗 Links
 
-- **Website**: [carge.io](https://carge.io) *(update when ready)*
+- **Website**: [carge.fr](http://carge.fr)
 - **GitHub**: [github.com/polykrate/carge](https://github.com/polykrate/carge)
 - **Discussions**: [GitHub Discussions](https://github.com/polykrate/carge/discussions)
 - **Issues**: [Report a bug](https://github.com/polykrate/carge/issues/new)

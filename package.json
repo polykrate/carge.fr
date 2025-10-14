@@ -6,11 +6,11 @@
   "description": "Web3 platform for executable compliance workflows with cryptographic audit trails",
   "repository": {
     "type": "git",
-    "url": "https://github.com/polykrate/carge-react.git"
+    "url": "https://github.com/polykrate/carge.git"
   },
-  "homepage": "https://github.com/polykrate/carge-react#readme",
+  "homepage": "http://carge.fr",
   "bugs": {
-    "url": "https://github.com/polykrate/carge-react/issues"
+    "url": "https://github.com/polykrate/carge/issues"
   },
   "keywords": [
     "blockchain",
