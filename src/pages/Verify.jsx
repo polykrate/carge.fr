@@ -1,17 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../contexts/AppContext';
 import { ProofVerifier } from '../lib/core/proof-verifier.js';
+import { RagClient } from '../lib/core/rag-client.js';
+import { CidConverter } from '../lib/core/cid-converter.js';
+import { FormGenerator } from '../lib/core/form-generator.js';
 import { showError, showSuccess, showLoading, dismiss } from '../lib/toast';
 
 export const Verify = () => {
   const { t } = useTranslation();
-  const { substrateClient } = useApp();
+  const { substrateClient, ipfsClient } = useApp();
   const [mode, setMode] = useState('file'); // 'file' or 'json'
   const [jsonInput, setJsonInput] = useState('');
   const [verifying, setVerifying] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  
+  // Workflow continuation states
+  const [allRags, setAllRags] = useState([]);
+  const [nextStepSchema, setNextStepSchema] = useState(null);
+  const [workflowInfo, setWorkflowInfo] = useState(null); // { masterRag, currentStep, nextStepRag, livrable }
+  const [loadingNextStep, setLoadingNextStep] = useState(false);
+  const formContainerRef = useRef(null);
   
   // Example proof JSON
   const exampleProof = {
@@ -131,6 +141,32 @@ export const Verify = () => {
     setMode('json'); // Switch to JSON mode when loading example
   };
   
+  // Load all RAGs on mount (needed for workflow continuation)
+  useEffect(() => {
+    const loadRags = async () => {
+      try {
+        console.log('Loading RAGs from blockchain for workflow detection...');
+        const ragClient = new RagClient(substrateClient);
+        const loadedRags = await ragClient.getAllRags();
+        setAllRags(loadedRags);
+        console.log(`Loaded ${loadedRags.length} RAGs`);
+      } catch (err) {
+        console.error('Failed to load RAGs:', err);
+      }
+    };
+    
+    if (substrateClient) {
+      loadRags();
+    }
+  }, [substrateClient]);
+
+  // Generate form when schema is loaded
+  useEffect(() => {
+    if (nextStepSchema && formContainerRef.current) {
+      FormGenerator.generateForm(nextStepSchema, 'next-step-form-fields');
+    }
+  }, [nextStepSchema]);
+
   // Generate Polkadot.js Apps explorer link for a block number
   const getBlockExplorerLink = (blockNumber) => {
     if (!substrateClient?.rpcUrl) return null;
@@ -254,6 +290,17 @@ export const Verify = () => {
       
       setResult(result);
       
+      // If proof is valid and contains workflow data, try to load next step
+      if (result.isValid && proof.ragData && proof.ragData.ragHash && proof.ragData.stepHash && proof.ragData.livrable) {
+        console.log('✓ Valid workflow proof detected, attempting to load next step...');
+        try {
+          await loadNextWorkflowStep(proof.ragData);
+        } catch (err) {
+          console.error('Failed to load next workflow step:', err);
+          // Don't fail the whole verification, just log it
+        }
+      }
+      
       if (result.isValid) {
         dismiss(toastId);
         showSuccess('Proof verified successfully!');
@@ -266,6 +313,86 @@ export const Verify = () => {
       dismiss(toastId);
       showError(err.message || 'Verification failed');
       throw err;
+    }
+  };
+
+  const loadNextWorkflowStep = async (ragData) => {
+    try {
+      setLoadingNextStep(true);
+      
+      const { ragHash, stepHash, livrable } = ragData;
+      console.log('Loading workflow continuation:', { ragHash, stepHash });
+      
+      // Find the master RAG
+      const masterRag = allRags.find(r => r.hash === ragHash);
+      if (!masterRag) {
+        console.warn(`Master workflow not found. RAG Hash: ${ragHash}`);
+        return;
+      }
+
+      if (!masterRag.metadata.steps || masterRag.metadata.steps.length === 0) {
+        console.warn('This is not a multi-step workflow');
+        return;
+      }
+
+      // Find current step index
+      const currentStepIndex = masterRag.metadata.steps.findIndex(
+        hash => hash === stepHash
+      );
+      
+      if (currentStepIndex === -1) {
+        console.warn('Current step not found in workflow');
+        return;
+      }
+
+      // Check if there's a next step
+      if (currentStepIndex >= masterRag.metadata.steps.length - 1) {
+        console.log('This is the last step of the workflow. No next step available.');
+        setWorkflowInfo({
+          masterRag,
+          currentStep: currentStepIndex + 1,
+          totalSteps: masterRag.metadata.steps.length,
+          livrable,
+          isLastStep: true
+        });
+        return;
+      }
+
+      const nextStepHash = masterRag.metadata.steps[currentStepIndex + 1];
+      const nextStepRag = allRags.find(r => r.hash === nextStepHash);
+      
+      if (!nextStepRag) {
+        console.warn(`Next step RAG not found. Hash: ${nextStepHash}`);
+        return;
+      }
+
+      console.log(`✓ Moving from step ${currentStepIndex + 1} to ${currentStepIndex + 2}`);
+      console.log('Next step:', nextStepRag.metadata.name);
+
+      // Load next step's schema from IPFS
+      const cidString = CidConverter.hexToString(nextStepRag.metadata.schemaCid);
+      console.log('📦 Loading next step schema from IPFS:', cidString);
+      
+      const schemaText = await ipfsClient.downloadText(cidString);
+      const schemaObj = JSON.parse(schemaText);
+      
+      console.log('✓ Schema loaded successfully');
+      setNextStepSchema(schemaObj);
+      
+      setWorkflowInfo({
+        masterRag,
+        currentStep: currentStepIndex + 2, // Next step (1-indexed)
+        totalSteps: masterRag.metadata.steps.length,
+        nextStepRag,
+        livrable,
+        isLastStep: false
+      });
+
+    } catch (err) {
+      console.error('Failed to load next workflow step:', err);
+      throw err;
+    } finally {
+      setLoadingNextStep(false);
     }
   };
 
@@ -541,6 +668,104 @@ export const Verify = () => {
                 ))}
               </div>
             </div>
+          )}
+        </div>
+      )}
+
+      {/* Workflow Continuation Section */}
+      {workflowInfo && (
+        <div className="bg-white border border-gray-200 rounded-lg p-6 mt-8">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-xl font-semibold">🔄 Workflow Continuation</h2>
+            <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+              Step {workflowInfo.currentStep - 1} / {workflowInfo.totalSteps}
+            </span>
+          </div>
+
+          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <p className="text-sm text-gray-600 mb-2">
+              <strong>Workflow:</strong> {workflowInfo.masterRag?.metadata?.name || 'Unknown'}
+            </p>
+            {workflowInfo.masterRag?.metadata?.description && (
+              <p className="text-sm text-gray-600">
+                <strong>Description:</strong> {workflowInfo.masterRag.metadata.description}
+              </p>
+            )}
+          </div>
+
+          {/* Previous Step Data */}
+          <div className="mb-6">
+            <h3 className="font-semibold text-gray-900 mb-3">📋 Completed Step Data:</h3>
+            <div className="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
+              <pre className="text-xs text-gray-700 whitespace-pre-wrap font-mono">
+                {JSON.stringify(workflowInfo.livrable, null, 2)}
+              </pre>
+            </div>
+          </div>
+
+          {/* Next Step Form or Completion Message */}
+          {workflowInfo.isLastStep ? (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+              <div className="text-4xl mb-3">✅</div>
+              <h3 className="text-lg font-semibold text-green-900 mb-2">Workflow Complete!</h3>
+              <p className="text-sm text-green-700">
+                This was the final step of the workflow. All steps have been completed.
+              </p>
+            </div>
+          ) : (
+            <>
+              {loadingNextStep ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin text-2xl">⏳</div>
+                  <span className="ml-3 text-gray-600">Loading next step from IPFS...</span>
+                </div>
+              ) : nextStepSchema ? (
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-4">
+                    📝 Step {workflowInfo.currentStep}: {workflowInfo.nextStepRag?.metadata?.name || 'Next Step'}
+                  </h3>
+                  
+                  {workflowInfo.nextStepRag?.metadata?.description && (
+                    <p className="text-sm text-gray-600 mb-4">
+                      {workflowInfo.nextStepRag.metadata.description}
+                    </p>
+                  )}
+
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    const data = FormGenerator.getFormData('next-step-form-fields');
+                    const validation = FormGenerator.validateForm(data, nextStepSchema);
+                    if (!validation.valid) {
+                      alert('Please fill all required fields:\n' + validation.errors.join('\n'));
+                      return;
+                    }
+                    alert('Workflow execution is under development. This will sign and submit to blockchain.\n\nData: ' + JSON.stringify(data, null, 2));
+                  }}>
+                    {/* Dynamic Form Fields */}
+                    <div 
+                      ref={formContainerRef}
+                      id="next-step-form-fields" 
+                      className="space-y-4 mb-6"
+                    />
+
+                    {/* Submit Button */}
+                    <div className="pt-4 border-t">
+                      <button
+                        type="submit"
+                        disabled
+                        className="w-full px-4 py-3 bg-gray-400 text-gray-200 rounded-lg cursor-not-allowed font-medium"
+                      >
+                        Submit Next Step (In Development)
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No next step schema available</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
