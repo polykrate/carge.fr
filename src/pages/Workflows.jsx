@@ -4,10 +4,21 @@ import { useApp } from '../contexts/AppContext';
 import { RagClient } from '../lib/core/rag-client.js';
 import { CidConverter } from '../lib/core/cid-converter.js';
 import { FormGenerator } from '../lib/core/form-generator.js';
+import { showError, toastTx } from '../lib/toast';
+import {
+  waitForPolkadot,
+  connectToApi,
+  getWalletSigner,
+  signContentHash,
+  calculateHash,
+  submitCryptoTrail,
+  handleTransactionResult,
+  downloadProofFile
+} from '../lib/core/blockchain-utils.js';
 
 export const Workflows = () => {
   const { t } = useTranslation();
-  const { substrateClient, ipfsClient } = useApp();
+  const { substrateClient, ipfsClient, selectedAccount } = useApp();
   
   // Generate Polkadot.js Apps explorer link for a block number
   const getBlockExplorerLink = (blockNumber) => {
@@ -30,6 +41,8 @@ export const Workflows = () => {
   const [schema, setSchema] = useState(null);
   const [error, setError] = useState(null);
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false); // Accordion state for workflow details
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult] = useState(null);
   
   // Ref for form container
   const formContainerRef = useRef(null);
@@ -177,18 +190,138 @@ export const Workflows = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const submitWorkflow = async (e) => {
     e.preventDefault();
-    const data = FormGenerator.getFormData('dynamic-form-fields');
-    console.log('Form data:', data);
     
-    const validation = FormGenerator.validateForm(data, schema);
+    // Validate form data against schema using Zod
+    const formData = FormGenerator.getFormData('dynamic-form-fields');
+    const validation = FormGenerator.validateForm(formData, schema);
+    
     if (!validation.valid) {
-      alert('Please fill all required fields:\n' + validation.errors.join('\n'));
+      showError('Please fill all required fields:\n' + validation.errors.join('\n'));
       return;
     }
-    
-    alert('Workflow execution is under development. This will sign and submit to blockchain.\n\nData: ' + JSON.stringify(data, null, 2));
+
+    // Check wallet connection
+    if (!selectedAccount) {
+      showError('Please connect your wallet to start the workflow');
+      return;
+    }
+
+    const toastId = toastTx.signing();
+    let api = null;
+
+    try {
+      setSubmitting(true);
+      setError(null);
+      setResult(null);
+
+      console.log('📝 Starting workflow...');
+      console.log('Form data:', formData);
+      console.log('Selected RAG:', selectedRag);
+
+      // Determine the step hash (first step)
+      let stepHash;
+      if (selectedRag.metadata.steps && selectedRag.metadata.steps.length > 0) {
+        // Master RAG - use first step hash
+        stepHash = selectedRag.metadata.steps[0];
+        console.log('Master RAG - using first step hash:', stepHash);
+      } else {
+        // Simple RAG - use its own hash
+        stepHash = selectedRag.hash;
+        console.log('Simple RAG - using own hash:', stepHash);
+      }
+
+      // Create RAG object with workflow hash, first step hash, and form data as livrable
+      // DIFFÉRENCE avec "continue workflow": pas de livrable précédent, juste formData
+      const ragData = {
+        ragHash: selectedRag.hash,
+        stepHash: stepHash,
+        livrable: formData  // Pas de merge, juste les données du formulaire
+      };
+
+      console.log('RAG data:', ragData);
+
+      // Calculate hash of the RAG data (not the full proof object)
+      const ragDataString = JSON.stringify(ragData);
+      const contentHash = await calculateHash(ragDataString);
+
+      console.log('Content hash (ragData):', contentHash);
+
+      // Wait for Polkadot.js to be ready
+      await waitForPolkadot();
+
+      // Create API connection
+      api = await connectToApi(substrateClient.rpcUrl);
+
+      // Get wallet signer
+      const injector = await getWalletSigner(selectedAccount);
+      
+      // Sign the content hash
+      const signature = await signContentHash(injector.signer, selectedAccount, contentHash);
+      
+      // Update toast to broadcasting
+      toastTx.broadcasting(toastId);
+      
+      // Submit crypto trail transaction
+      const unsub = await submitCryptoTrail({
+        api,
+        accountAddress: selectedAccount,
+        signer: injector.signer,
+        contentHash,
+        signature,
+        onStatusChange: (txResult) => {
+          // Handle transaction errors
+          const error = handleTransactionResult(txResult, api);
+          if (error) {
+            toastTx.error(error.message, toastId);
+            setError(error.message);
+            setSubmitting(false);
+            unsub();
+            api.disconnect();
+            return;
+          }
+          
+          // Handle success (transaction in block)
+          if (txResult.status.isInBlock) {
+            console.log('✅ Transaction included in block:', txResult.status.asInBlock.toHex());
+            
+            // Download proof file
+            downloadProofFile(ragData, contentHash);
+            
+            toastTx.success('Workflow started successfully! Proof downloaded.', toastId);
+            
+            setResult({
+              success: true,
+              message: 'Workflow step 1 completed and proof created!',
+              details: {
+                contentHash,
+                workflowName: selectedRag.metadata.name,
+                stepName: allRags.find(r => r.hash === stepHash)?.metadata?.name || 'Step 1',
+                blockHash: txResult.status.asInBlock.toHex(),
+                proofDownloaded: true
+              }
+            });
+            
+            setSubmitting(false);
+            unsub();
+            api.disconnect();
+          }
+        }
+      });
+
+    } catch (err) {
+      console.error('Workflow submission error:', err);
+      const errorMsg = err.message || 'Failed to submit workflow';
+      toastTx.error(errorMsg, toastId);
+      setError(errorMsg);
+      setSubmitting(false);
+      
+      // Cleanup API connection on error
+      if (api) {
+        api.disconnect();
+      }
+    }
   };
 
   // Helper to create clickable CID link
@@ -448,7 +581,7 @@ export const Workflows = () => {
           )}
 
           {schema && !loadingSchema && (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={submitWorkflow} className="space-y-4">
               {/* Dynamic Form Fields - Generated by FormGenerator */}
               <div 
                 ref={formContainerRef}
@@ -456,17 +589,82 @@ export const Workflows = () => {
                 className="space-y-4"
               />
 
+              {/* Wallet Check */}
+              {!selectedAccount && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center space-x-3">
+                    <svg className="w-5 h-5 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <div className="text-sm text-[#003399]">
+                      Please connect your wallet to start the workflow
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Submit Button */}
               <div className="pt-4 border-t">
                 <button
                   type="submit"
-                  disabled
-                  className="w-full px-4 py-3 bg-gray-400 text-gray-200 rounded-lg cursor-not-allowed font-medium"
+                  disabled={submitting || !selectedAccount}
+                  className="w-full px-4 py-3 bg-[#003399] hover:bg-[#002266] text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Submit (In Development)
+                  {submitting ? 'Submitting...' : 'Start Workflow'}
                 </button>
+                <p className="text-xs text-gray-500 text-center mt-3">
+                  This will sign your data with your wallet and submit it to the blockchain.
+                </p>
               </div>
             </form>
+          )}
+
+          {/* Success Result */}
+          {result && result.success && (
+            <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-6">
+              <div className="flex items-center space-x-3 mb-4">
+                <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <div className="font-medium text-lg text-green-900">Workflow Started Successfully!</div>
+                  <div className="text-sm text-green-700">{result.message}</div>
+                </div>
+              </div>
+
+              <div className="mt-4 bg-white rounded-lg p-4">
+                <h3 className="font-medium mb-3">Proof Details</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex flex-col">
+                    <span className="text-gray-500 font-medium">Workflow:</span>
+                    <span className="text-gray-700 mt-1">{result.details.workflowName}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-gray-500 font-medium">Step:</span>
+                    <span className="text-gray-700 mt-1">{result.details.stepName}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-gray-500 font-medium">Content Hash:</span>
+                    <span className="font-mono text-xs text-gray-700 break-all mt-1">{result.details.contentHash}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-gray-500 font-medium">Block Hash:</span>
+                    <span className="font-mono text-xs text-gray-700 break-all mt-1">{result.details.blockHash}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-gray-500 font-medium">Proof File:</span>
+                    <span className="text-gray-700 mt-1">✅ Downloaded (proof_{result.details.contentHash.slice(0, 10)}...json)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-gray-700">
+                  💡 <strong>Next step:</strong> To continue the workflow, go to the <strong>Verify</strong> page and upload or paste your proof file. 
+                  The system will automatically detect the workflow and show you the next step.
+                </p>
+              </div>
+            </div>
           )}
         </div>
       )}
