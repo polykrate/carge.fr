@@ -202,7 +202,7 @@ export const Verify = () => {
       setError(null);
       setResult(null);
 
-      console.log('📂 Processing file:', file.name);
+      console.log('Processing file:', file.name);
       const text = await file.text();
       
       // Try to parse as JSON proof first
@@ -211,16 +211,16 @@ export const Verify = () => {
         
         // Check if it's a valid proof structure (has ragData field)
         if (proof.ragData) {
-          console.log('✓ Valid proof JSON detected, verifying...');
+          console.log('Valid proof JSON detected, verifying...');
           await verifyProof(proof, toastId);
         } else {
           // JSON but not a proof structure - hash the file content
-          console.log('→ JSON file but not a proof structure, hashing content...');
+          console.log('JSON file but not a proof structure, hashing content...');
           await verifyFileHash(text, file.name, toastId);
         }
       } catch {
         // Not JSON - hash the raw file content
-        console.log('→ Not JSON, hashing file content...');
+        console.log('Not JSON, hashing file content...');
         await verifyFileHash(text, file.name, toastId);
       }
     } catch (err) {
@@ -309,7 +309,7 @@ export const Verify = () => {
       
       // If proof is valid and contains workflow data, try to load next step
       if (result.isValid && proof.ragData && proof.ragData.ragHash && proof.ragData.stepHash && proof.ragData.livrable) {
-        console.log('✓ Valid workflow proof detected, attempting to load next step...');
+        console.log('Valid workflow proof detected, attempting to load next step...');
         try {
           await loadNextWorkflowStep(proof.ragData);
         } catch (err) {
@@ -383,17 +383,17 @@ export const Verify = () => {
         return;
       }
 
-      console.log(`✓ Moving from step ${currentStepIndex + 1} to ${currentStepIndex + 2}`);
+      console.log(`Moving from step ${currentStepIndex + 1} to ${currentStepIndex + 2}`);
       console.log('Next step:', nextStepRag.metadata.name);
 
       // Load next step's schema from IPFS
       const cidString = CidConverter.hexToString(nextStepRag.metadata.schemaCid);
-      console.log('📦 Loading next step schema from IPFS:', cidString);
+      console.log('Loading next step schema from IPFS:', cidString);
       
       const schemaText = await ipfsClient.downloadText(cidString);
       const schemaObj = JSON.parse(schemaText);
       
-      console.log('✓ Schema loaded successfully');
+      console.log('Schema loaded successfully');
       setNextStepSchema(schemaObj);
       
       setWorkflowInfo({
@@ -437,7 +437,7 @@ export const Verify = () => {
     try {
       setSubmittingStep(true);
 
-      console.log('📝 Submitting next workflow step...');
+      console.log('Submitting next workflow step...');
       console.log('Form data:', formData);
       console.log('Previous livrable:', workflowInfo.livrable);
 
@@ -499,7 +499,7 @@ export const Verify = () => {
           
           // Handle success (transaction in block)
           if (txResult.status.isInBlock) {
-            console.log('✅ Transaction included in block:', txResult.status.asInBlock.toHex());
+            console.log('Transaction included in block:', txResult.status.asInBlock.toHex());
             
             // Download proof file
             downloadProofFile(ragData, contentHash);
@@ -573,8 +573,8 @@ export const Verify = () => {
       
       if (trail) {
         const signatureValid = trail.signatureValid ?? false;
-        console.log('✓ File hash found on blockchain!');
-        console.log('✓ Signature valid:', signatureValid);
+        console.log('File hash found on blockchain!');
+        console.log('Signature valid:', signatureValid);
         
         const result = {
           isValid: signatureValid,
@@ -854,7 +854,7 @@ export const Verify = () => {
       {workflowInfo && (
         <div className="bg-white border border-gray-200 rounded-lg p-6 mt-8">
           <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-xl font-semibold">🔄 Workflow Continuation</h2>
+            <h2 className="text-xl font-semibold">Workflow Continuation</h2>
             <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
               Step {workflowInfo.currentStep - 1} / {workflowInfo.totalSteps}
             </span>
@@ -873,7 +873,7 @@ export const Verify = () => {
 
           {/* Previous Step Data */}
           <div className="mb-6">
-            <h3 className="font-semibold text-gray-900 mb-3">📋 Completed Step Data:</h3>
+            <h3 className="font-semibold text-gray-900 mb-3">Completed Step Data:</h3>
             <div className="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
               <pre className="text-xs text-gray-700 whitespace-pre-wrap font-mono">
                 {JSON.stringify(workflowInfo.livrable, null, 2)}
@@ -884,7 +884,7 @@ export const Verify = () => {
           {/* Next Step Form or Completion Message */}
           {workflowInfo.isLastStep ? (
             <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-              <div className="text-4xl mb-3">✅</div>
+              <div className="text-4xl mb-3"></div>
               <h3 className="text-lg font-semibold text-green-900 mb-2">Workflow Complete!</h3>
               <p className="text-sm text-green-700">
                 This was the final step of the workflow. All steps have been completed.
@@ -894,13 +894,13 @@ export const Verify = () => {
             <>
               {loadingNextStep ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin text-2xl">⏳</div>
+                  <div className="animate-spin text-2xl">...</div>
                   <span className="ml-3 text-gray-600">Loading next step from IPFS...</span>
                 </div>
               ) : nextStepSchema ? (
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-4">
-                    📝 Step {workflowInfo.currentStep}: {workflowInfo.nextStepRag?.metadata?.name || 'Next Step'}
+                    Step {workflowInfo.currentStep}: {workflowInfo.nextStepRag?.metadata?.name || 'Next Step'}
                   </h3>
                   
                   {workflowInfo.nextStepRag?.metadata?.description && (

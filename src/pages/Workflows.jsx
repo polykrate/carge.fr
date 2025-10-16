@@ -156,7 +156,7 @@ export const Workflows = () => {
       let schemaCidHex;
       if (rag.metadata.steps && rag.metadata.steps.length > 0) {
         // Master RAG - load first step's schema
-        console.log('🔗 Master RAG detected, loading first step schema');
+        console.log('Master RAG detected, loading first step schema');
         const firstStepHash = rag.metadata.steps[0];
         
         // Find the step RAG in ALL RAGs (not just displayed masters)
@@ -165,7 +165,7 @@ export const Workflows = () => {
           throw new Error(`First step RAG not found. Looking for hash: ${firstStepHash}`);
         }
         
-        console.log(`✅ Found step RAG: ${stepRag.metadata?.name || 'Unnamed'}`);
+        console.log(`Found step RAG: ${stepRag.metadata?.name || 'Unnamed'}`);
         schemaCidHex = stepRag.metadata.schemaCid;
       } else {
         // Simple RAG - load its own schema
@@ -174,7 +174,7 @@ export const Workflows = () => {
       
       // Convert hex CID to string
       const cidString = CidConverter.hexToString(schemaCidHex);
-      console.log('📦 Loading schema from IPFS:', cidString);
+      console.log('Loading schema from IPFS:', cidString);
       
       // Download schema from IPFS via Helia
       const schemaText = await ipfsClient.downloadText(cidString);
@@ -216,7 +216,7 @@ export const Workflows = () => {
       setError(null);
       setResult(null);
 
-      console.log('📝 Starting workflow...');
+      console.log('Starting workflow...');
       console.log('Form data:', formData);
       console.log('Selected RAG:', selectedRag);
 
@@ -284,7 +284,7 @@ export const Workflows = () => {
           
           // Handle success (transaction in block)
           if (txResult.status.isInBlock) {
-            console.log('✅ Transaction included in block:', txResult.status.asInBlock.toHex());
+            console.log('Transaction included in block:', txResult.status.asInBlock.toHex());
             
             // Download proof file
             downloadProofFile(ragData, contentHash);
@@ -361,7 +361,7 @@ export const Workflows = () => {
       <div className="container mx-auto px-6 py-12 max-w-4xl">
         <h1 className="text-4xl font-light mb-4">{t('workflows.title')}</h1>
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin text-4xl">⏳</div>
+          <div className="animate-spin text-4xl">...</div>
           <span className="ml-4 text-gray-600">{t('common.loading')}</span>
         </div>
       </div>
@@ -412,7 +412,7 @@ export const Workflows = () => {
 
         {displayRags.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            <div className="text-4xl mb-2">📋</div>
+            <div className="text-4xl mb-2"></div>
             <p>{t('workflows.noWorkflows')}</p>
             <p className="text-sm mt-2">{t('workflows.tryRefresh')}</p>
           </div>
@@ -575,7 +575,7 @@ export const Workflows = () => {
 
           {loadingSchema && (
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin text-2xl">⏳</div>
+              <div className="animate-spin text-2xl">...</div>
               <span className="ml-3 text-gray-600">Loading schema from IPFS...</span>
             </div>
           )}
@@ -653,14 +653,14 @@ export const Workflows = () => {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-gray-500 font-medium">Proof File:</span>
-                    <span className="text-gray-700 mt-1">✅ Downloaded (proof_{result.details.contentHash.slice(0, 10)}...json)</span>
+                    <span className="text-gray-700 mt-1">Downloaded (proof_{result.details.contentHash.slice(0, 10)}...json)</span>
                   </div>
                 </div>
               </div>
 
               <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                 <p className="text-sm text-gray-700">
-                  💡 <strong>Next step:</strong> To continue the workflow, go to the <strong>Verify</strong> page and upload or paste your proof file. 
+                  <strong>Next step:</strong> To continue the workflow, go to the <strong>Verify</strong> page and upload or paste your proof file. 
                   The system will automatically detect the workflow and show you the next step.
                 </p>
               </div>

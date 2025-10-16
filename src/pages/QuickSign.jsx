@@ -34,7 +34,7 @@ export const QuickSign = () => {
       setResult(null);
 
       // Read file
-      console.log('📂 Reading file:', selectedFile.name);
+      console.log('Reading file:', selectedFile.name);
       const text = await selectedFile.text();
       
       let contentToHash = text;
@@ -45,17 +45,17 @@ export const QuickSign = () => {
         
         // Check if it's a valid proof structure (has ragData field)
         if (proof.ragData) {
-          console.log('✓ Valid proof JSON detected, extracting ragData for hashing...');
+          console.log('Valid proof JSON detected, extracting ragData for hashing...');
           // Use the same method as ProofVerifier: JSON.stringify(proof.ragData)
           contentToHash = JSON.stringify(proof.ragData);
-          console.log('→ Hashing ragData using JSON.stringify (same as ProofVerifier)');
+          console.log('Hashing ragData using JSON.stringify (same as ProofVerifier)');
         } else {
           // JSON but not a proof structure - hash the whole file
-          console.log('→ JSON file but not a proof structure, hashing full content...');
+          console.log('JSON file but not a proof structure, hashing full content...');
         }
       } catch {
         // Not JSON - hash the raw file content
-        console.log('→ Not JSON, hashing file content as-is...');
+        console.log('Not JSON, hashing file content as-is...');
       }
       
       // Calculate SHA-256 hash of the content
