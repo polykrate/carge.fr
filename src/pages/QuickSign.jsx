@@ -3,6 +3,15 @@ import { useTranslation } from 'react-i18next';
 import { useApp } from '../contexts/AppContext';
 import { showError, toastTx } from '../lib/toast';
 import { quickSignSchema, validate, formatValidationErrors } from '../lib/validation';
+import {
+  waitForPolkadot,
+  connectToApi,
+  getWalletSigner,
+  signContentHash,
+  calculateWrappedHash,
+  submitCryptoTrail,
+  handleTransactionResult
+} from '../lib/core/blockchain-utils.js';
 
 export const QuickSign = () => {
   const { t } = useTranslation();
@@ -80,6 +89,7 @@ export const QuickSign = () => {
     }
 
     const toastId = toastTx.signing();
+    let api = null;
 
     try {
       setSigning(true);
@@ -94,172 +104,78 @@ export const QuickSign = () => {
       await waitForPolkadot();
 
       // Create API connection
-      console.log('Connecting to Substrate API...');
-      const { ApiPromise, WsProvider } = await import('@polkadot/api');
-      const wsProvider = new WsProvider(substrateClient.rpcUrl.replace('https://', 'wss://').replace('http://', 'ws://'));
-      const api = await ApiPromise.create({ provider: wsProvider });
-      
-      console.log('API connected');
+      api = await connectToApi(substrateClient.rpcUrl);
 
-      // Get the injector from the selected account
-      // CRITICAL: Use CDN-loaded API (works on both desktop and mobile)
-      if (!window.polkadotExtensionDapp) {
-        throw new Error('Polkadot extension API not found');
+      // Get wallet signer
+      const injector = await getWalletSigner(selectedAccount);
+      
+      // Sign the file hash
+      const signature = await signContentHash(injector.signer, selectedAccount, fileHash);
+      
+      // Calculate the wrapped message hash for display
+      const wrappedMessageHash = await calculateWrappedHash(fileHash);
+      
+      // Verify the signature locally
+      if (window.polkadotUtilCrypto) {
+        const { signatureVerify } = window.polkadotUtilCrypto;
+        const verified = signatureVerify(fileHash, signature, selectedAccount);
+        console.log('Local signature verification:', verified.isValid ? 'VALID' : 'INVALID');
       }
-      
-      // Ensure web3Enable has been called (should be done in detectWallets, but safety check)
-      const { web3Enable, web3FromAddress } = window.polkadotExtensionDapp;
-      await web3Enable('Carge'); // Safe to call multiple times
-      
-      const injector = await web3FromAddress(selectedAccount);
-      
-      if (!injector || !injector.signer) {
-        throw new Error('Failed to get wallet signer');
-      }
-
-      // Get signer for transaction signing (not for content signing)
-      const signer = injector.signer;
-      
-      // IMPORTANT: In browser with Polkadot.js extension, we can't replicate account.sign()
-      // directly. The extension's signRaw wraps messages in "<Bytes>...</Bytes>" which changes
-      // what gets signed. Instead, we need to use the Polkadot API to sign properly.
-      
-      console.log('Preparing to sign content hash...');
-      console.log('Content hash:', fileHash);
-      
-      // Use CDN-loaded util-crypto
-      if (!window.polkadotUtilCrypto) {
-        throw new Error('Polkadot util-crypto not found');
-      }
-      const { signatureVerify, cryptoWaitReady } = window.polkadotUtilCrypto;
-      await cryptoWaitReady();
-      
-      // Sign the file hash with the wallet
-      // The extension will wrap it as: <Bytes>0x...fileHash...</Bytes> before signing
-      console.log('Signing file hash:', fileHash);
-      
-      const signResult = await signer.signRaw({
-        address: selectedAccount,
-        data: fileHash,
-        type: 'bytes'
-      });
-
-      const signature = signResult.signature;
-      console.log('Signature obtained:', signature);
-      console.log('Signature length:', signature.length, 'chars (includes 0x prefix)');
       
       // Update toast to broadcasting
       toastTx.broadcasting(toastId);
       
-      // Calculate the wrapped message hash for display (what was actually signed)
-      if (!window.polkadotUtil) {
-        throw new Error('Polkadot util not found');
-      }
-      const { stringToU8a, hexToU8a } = window.polkadotUtil;
-      const fileHashBytes = hexToU8a(fileHash);
-      const wrappedMessage = new Uint8Array([
-        ...stringToU8a('<Bytes>'),
-        ...fileHashBytes,
-        ...stringToU8a('</Bytes>')
-      ]);
-      const wrappedHashBuffer = await crypto.subtle.digest('SHA-256', wrappedMessage);
-      const wrappedHashArray = Array.from(new Uint8Array(wrappedHashBuffer));
-      const wrappedMessageHash = '0x' + wrappedHashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      
-      // Verify the signature locally
-      const verified = signatureVerify(fileHash, signature, selectedAccount);
-      console.log('Local signature verification:', verified.isValid ? 'VALID' : 'INVALID');
-      
       // The contentHash stored on-chain is the fileHash
-      // The pallet will reconstruct the wrapped message for verification
       const contentHash = fileHash;
 
-      // For Quick Sign, we don't encrypt or store on IPFS
-      // We just create a trail with the hash
-      const emptyHex = '0x' + '00'.repeat(52); // 52 bytes for encryptedCid
-      const emptyPubkey = '0x' + '00'.repeat(32); // 32 bytes for ephemeral pubkey
-      const emptyNonce = '0x' + '00'.repeat(12); // 12 bytes for nonces
-
-      console.log('Submitting crypto trail to blockchain...');
-      console.log('Transaction parameters:');
-      console.log('  - contentHash (file hash):', contentHash);
-      console.log('  - signature:', signature);
-      console.log('  - account:', selectedAccount);
-      console.log('  - note: pallet will reconstruct wrapped message for verification');
-      
-      // Create and submit transaction
-      const tx = api.tx.cryptoTrail.storeTrail(
-        emptyHex,        // encryptedCid (empty for quick sign)
-        emptyPubkey,     // ephemeralPubkey (empty)
-        emptyNonce,      // cidNonce (empty)
-        emptyNonce,      // contentNonce (empty)
-        contentHash,     // contentHash (hash of wrapped message)
-        signature        // signature
-      );
-
-      // Sign and send transaction
-      console.log('Transaction created, awaiting signature...');
-      
-      const unsub = await tx.signAndSend(selectedAccount, { signer }, (result) => {
-        console.log('Transaction status:', result.status.type);
-        console.log('Full result:', {
-          status: result.status.toHuman(),
-          events: result.events?.length || 0,
-          dispatchError: result.dispatchError?.toHuman()
-        });
-        
-        // Check for errors
-        if (result.dispatchError) {
-          let errorMessage = 'Transaction failed';
-          
-          if (result.dispatchError.isModule) {
-            // Module error
-            const decoded = api.registry.findMetaError(result.dispatchError.asModule);
-            errorMessage = `${decoded.section}.${decoded.name}: ${decoded.docs.join(' ')}`;
-            console.error('Module error:', errorMessage);
-          } else {
-            // Other error
-            errorMessage = result.dispatchError.toString();
-            console.error('Dispatch error:', errorMessage);
+      // Submit crypto trail transaction
+      const unsub = await submitCryptoTrail({
+        api,
+        accountAddress: selectedAccount,
+        signer: injector.signer,
+        contentHash,
+        signature,
+        onStatusChange: (result) => {
+          // Handle transaction errors
+          const error = handleTransactionResult(result, api);
+          if (error) {
+            toastTx.error(error.message, toastId);
+            setError(error.message);
+            setSigning(false);
+            unsub();
+            api.disconnect();
+            return;
           }
           
-          toastTx.error(errorMessage, toastId);
-          setError(errorMessage);
-          setSigning(false);
-          unsub();
-          api.disconnect();
-          return;
-        }
-        
-        if (result.status.isInBlock) {
-          console.log('Transaction included in block:', result.status.asInBlock.toHex());
-          console.log('Events:', result.events.map(e => e.event.method).join(', '));
-          
-          setResult({
-            success: true,
-            blockHash: result.status.asInBlock.toHex(),
-            contentHash: contentHash,  // File hash
-            wrappedMessageHash: wrappedMessageHash,  // Hash of wrapped message
-            fileName: fileName,
-            signer: selectedAccount
-          });
-          
-          toastTx.success('Crypto trail created successfully!', toastId);
-          setSigning(false);
-          unsub();
-          
-          // Disconnect API
-          api.disconnect();
-        } else if (result.status.isFinalized) {
-          console.log('Transaction finalized in block:', result.status.asFinalized.toHex());
-        } else if (result.status.isInvalid || result.status.isDropped || result.status.isUsurped) {
-          console.error('Transaction invalid/dropped/usurped');
-          const errorMsg = `Transaction ${result.status.type}`;
-          toastTx.error(errorMsg, toastId);
-          setError(errorMsg);
-          setSigning(false);
-          unsub();
-          api.disconnect();
+          // Handle success (transaction in block)
+          if (result.status.isInBlock) {
+            console.log('Transaction included in block:', result.status.asInBlock.toHex());
+            console.log('Events:', result.events.map(e => e.event.method).join(', '));
+            
+            setResult({
+              success: true,
+              blockHash: result.status.asInBlock.toHex(),
+              contentHash: contentHash,
+              wrappedMessageHash: wrappedMessageHash,
+              fileName: fileName,
+              signer: selectedAccount
+            });
+            
+            toastTx.success('Crypto trail created successfully!', toastId);
+            setSigning(false);
+            unsub();
+            api.disconnect();
+          } else if (result.status.isFinalized) {
+            console.log('Transaction finalized in block:', result.status.asFinalized.toHex());
+          } else if (result.status.isInvalid || result.status.isDropped || result.status.isUsurped) {
+            console.error('Transaction invalid/dropped/usurped');
+            const errorMsg = `Transaction ${result.status.type}`;
+            toastTx.error(errorMsg, toastId);
+            setError(errorMsg);
+            setSigning(false);
+            unsub();
+            api.disconnect();
+          }
         }
       });
 
@@ -269,14 +185,12 @@ export const QuickSign = () => {
       toastTx.error(errorMsg, toastId);
       setError(errorMsg);
       setSigning(false);
+      
+      // Cleanup API connection on error
+      if (api) {
+        api.disconnect();
+      }
     }
-  };
-
-  const waitForPolkadot = async () => {
-    while (!window.polkadotUtil || !window.polkadotUtilCrypto) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    await window.polkadotUtilCrypto.cryptoWaitReady();
   };
 
   const resetForm = () => {

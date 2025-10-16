@@ -5,22 +5,34 @@ import { ProofVerifier } from '../lib/core/proof-verifier.js';
 import { RagClient } from '../lib/core/rag-client.js';
 import { CidConverter } from '../lib/core/cid-converter.js';
 import { FormGenerator } from '../lib/core/form-generator.js';
-import { showError, showSuccess, showLoading, dismiss } from '../lib/toast';
+import { showError, showSuccess, showLoading, dismiss, toastTx } from '../lib/toast';
+import {
+  waitForPolkadot,
+  connectToApi,
+  getWalletSigner,
+  signContentHash,
+  calculateHash,
+  submitCryptoTrail,
+  handleTransactionResult,
+  downloadProofFile
+} from '../lib/core/blockchain-utils.js';
 
 export const Verify = () => {
   const { t } = useTranslation();
-  const { substrateClient, ipfsClient } = useApp();
+  const { substrateClient, ipfsClient, selectedAccount } = useApp();
   const [mode, setMode] = useState('file'); // 'file' or 'json'
   const [jsonInput, setJsonInput] = useState('');
   const [verifying, setVerifying] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [proofData, setProofData] = useState(null); // Store the proof data for workflow continuation
   
   // Workflow continuation states
   const [allRags, setAllRags] = useState([]);
   const [nextStepSchema, setNextStepSchema] = useState(null);
   const [workflowInfo, setWorkflowInfo] = useState(null); // { masterRag, currentStep, nextStepRag, livrable }
   const [loadingNextStep, setLoadingNextStep] = useState(false);
+  const [submittingStep, setSubmittingStep] = useState(false);
   const formContainerRef = useRef(null);
   
   // Example proof JSON
@@ -290,6 +302,11 @@ export const Verify = () => {
       
       setResult(result);
       
+      // Store proof data for workflow continuation
+      if (result.isValid && proof.ragData) {
+        setProofData(proof.ragData);
+      }
+      
       // If proof is valid and contains workflow data, try to load next step
       if (result.isValid && proof.ragData && proof.ragData.ragHash && proof.ragData.stepHash && proof.ragData.livrable) {
         console.log('✓ Valid workflow proof detected, attempting to load next step...');
@@ -393,6 +410,135 @@ export const Verify = () => {
       throw err;
     } finally {
       setLoadingNextStep(false);
+    }
+  };
+
+  const submitNextStep = async (e) => {
+    e.preventDefault();
+    
+    // Validate form data against schema using Zod
+    const formData = FormGenerator.getFormData('next-step-form-fields');
+    const validation = FormGenerator.validateForm(formData, nextStepSchema);
+    
+    if (!validation.valid) {
+      showError('Please fill all required fields:\n' + validation.errors.join('\n'));
+      return;
+    }
+
+    // Check wallet connection
+    if (!selectedAccount) {
+      showError('Please connect your wallet to submit the next step');
+      return;
+    }
+
+    const toastId = toastTx.signing();
+    let api = null;
+
+    try {
+      setSubmittingStep(true);
+
+      console.log('📝 Submitting next workflow step...');
+      console.log('Form data:', formData);
+      console.log('Previous livrable:', workflowInfo.livrable);
+
+      // Merge data: previous livrable + new form data (new takes priority)
+      const mergedLivrable = {
+        ...workflowInfo.livrable,
+        ...formData
+      };
+
+      console.log('Merged livrable:', mergedLivrable);
+
+      // Create RAG object with workflow hash, NEXT step hash, and merged livrable
+      const ragData = {
+        ragHash: workflowInfo.masterRag.hash,
+        stepHash: workflowInfo.nextStepRag.hash, // IMPORTANT: next step hash, not current
+        livrable: mergedLivrable
+      };
+
+      console.log('RAG data:', ragData);
+
+      // Calculate hash of the RAG data (not the full proof object)
+      const ragDataString = JSON.stringify(ragData);
+      const contentHash = await calculateHash(ragDataString);
+
+      console.log('Content hash (ragData):', contentHash);
+
+      // Wait for Polkadot.js to be ready
+      await waitForPolkadot();
+
+      // Create API connection
+      api = await connectToApi(substrateClient.rpcUrl);
+
+      // Get wallet signer
+      const injector = await getWalletSigner(selectedAccount);
+      
+      // Sign the content hash
+      const signature = await signContentHash(injector.signer, selectedAccount, contentHash);
+      
+      // Update toast to broadcasting
+      toastTx.broadcasting(toastId);
+      
+      // Submit crypto trail transaction
+      const unsub = await submitCryptoTrail({
+        api,
+        accountAddress: selectedAccount,
+        signer: injector.signer,
+        contentHash,
+        signature,
+        onStatusChange: (txResult) => {
+          // Handle transaction errors
+          const error = handleTransactionResult(txResult, api);
+          if (error) {
+            toastTx.error(error.message, toastId);
+            setSubmittingStep(false);
+            unsub();
+            api.disconnect();
+            return;
+          }
+          
+          // Handle success (transaction in block)
+          if (txResult.status.isInBlock) {
+            console.log('✅ Transaction included in block:', txResult.status.asInBlock.toHex());
+            
+            // Download proof file
+            downloadProofFile(ragData, contentHash);
+            
+            toastTx.success('Workflow step submitted successfully! Proof downloaded.', toastId);
+            
+            // Reset workflow state and show success message
+            setWorkflowInfo(null);
+            setNextStepSchema(null);
+            setProofData(null);
+            
+            setResult({
+              isValid: true,
+              message: 'Workflow step completed and proof created!',
+              details: {
+                contentHash,
+                stepName: workflowInfo.nextStepRag.metadata.name,
+                blockHash: txResult.status.asInBlock.toHex(),
+                proofDownloaded: true
+              }
+            });
+            
+            setSubmittingStep(false);
+            unsub();
+            api.disconnect();
+          }
+        }
+      });
+
+    } catch (err) {
+      console.error('Step submission error:', err);
+      const errorMsg = err.message || 'Failed to submit step';
+      toastTx.error(errorMsg, toastId);
+      setSubmittingStep(false);
+      
+      // Cleanup API connection on error
+      if (api) {
+        api.disconnect();
+      }
     }
   };
 
@@ -669,6 +815,38 @@ export const Verify = () => {
               </div>
             </div>
           )}
+
+          {/* Continue Workflow Button for valid RAG proofs */}
+          {result.isValid && proofData && proofData.ragHash && proofData.stepHash && (
+            <div className="mt-6 pt-6 border-t border-green-200">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm font-medium text-gray-700">
+                    This is a valid workflow proof
+                  </span>
+                </div>
+                {!workflowInfo && !loadingNextStep && (
+                  <button
+                    onClick={() => loadNextWorkflowStep(proofData)}
+                    className="px-6 py-2 bg-[#003399] hover:bg-[#002266] text-white rounded-lg transition font-medium text-sm flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Continue Workflow
+                  </button>
+                )}
+              </div>
+              {workflowInfo && (
+                <div className="mt-2 text-xs text-gray-600">
+                  ↓ Workflow continuation loaded below
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -731,16 +909,7 @@ export const Verify = () => {
                     </p>
                   )}
 
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    const data = FormGenerator.getFormData('next-step-form-fields');
-                    const validation = FormGenerator.validateForm(data, nextStepSchema);
-                    if (!validation.valid) {
-                      alert('Please fill all required fields:\n' + validation.errors.join('\n'));
-                      return;
-                    }
-                    alert('Workflow execution is under development. This will sign and submit to blockchain.\n\nData: ' + JSON.stringify(data, null, 2));
-                  }}>
+                  <form onSubmit={submitNextStep}>
                     {/* Dynamic Form Fields */}
                     <div 
                       ref={formContainerRef}
@@ -748,15 +917,32 @@ export const Verify = () => {
                       className="space-y-4 mb-6"
                     />
 
+                    {/* Wallet Check */}
+                    {!selectedAccount && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <div className="flex items-center space-x-3">
+                          <svg className="w-5 h-5 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                          <div className="text-sm text-[#003399]">
+                            Please connect your wallet to submit the next step
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Submit Button */}
                     <div className="pt-4 border-t">
                       <button
                         type="submit"
-                        disabled
-                        className="w-full px-4 py-3 bg-gray-400 text-gray-200 rounded-lg cursor-not-allowed font-medium"
+                        disabled={submittingStep || !selectedAccount}
+                        className="w-full px-4 py-3 bg-[#003399] hover:bg-[#002266] text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Submit Next Step (In Development)
+                        {submittingStep ? 'Submitting...' : 'Submit Next Step'}
                       </button>
+                      <p className="text-xs text-gray-500 text-center mt-3">
+                        This will merge your data with previous steps, sign it with your wallet, and submit to the blockchain.
+                      </p>
                     </div>
                   </form>
                 </div>
