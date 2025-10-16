@@ -2,6 +2,8 @@
 // IPFS CLIENT - Hybrid (Helia P2P + HTTP Gateway Fallback)
 // ============================================================================
 
+import { config } from '../config.js';
+
 export class IpfsClient {
   constructor() {
     this.helia = null;
@@ -256,6 +258,43 @@ export class IpfsClient {
   async downloadJson(cid) {
     const text = await this.downloadText(cid);
     return JSON.parse(text);
+  }
+
+  /**
+   * Upload file to IPFS via Kudo node
+   * @param {Uint8Array} data - File data to upload
+   * @returns {Promise<string>} CID of uploaded file
+   */
+  async uploadFile(data) {
+    console.log(`Uploading file to IPFS (${data.length} bytes)...`);
+    
+    try {
+      const formData = new FormData();
+      const blob = new Blob([data], { type: 'application/octet-stream' });
+      formData.append('file', blob, 'encrypted-rag-data');
+      
+      const response = await fetch(config.IPFS_UPLOAD_URL, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      const cid = result.Hash || result.cid || result.CID;
+      
+      if (!cid) {
+        throw new Error('No CID returned from upload');
+      }
+      
+      console.log(`File uploaded to IPFS: ${cid}`);
+      return cid;
+    } catch (error) {
+      console.error('Failed to upload to IPFS:', error);
+      throw new Error(`IPFS upload failed: ${error.message}`);
+    }
   }
 
   /**

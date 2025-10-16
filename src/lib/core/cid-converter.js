@@ -80,5 +80,67 @@ export class CidConverter {
       return false;
     }
   }
+
+  /**
+   * Convert CID string to blockchain format (36 bytes)
+   * @param {string} cidString - CID string (e.g., "bafybeigdyrzt5..." or "Qm...")
+   * @returns {Uint8Array} - 36 bytes for blockchain storage
+   */
+  static toChainFormat(cidString) {
+    try {
+      let cid = CID.parse(cidString);
+      
+      // Auto-convert CIDv0 to CIDv1 (Kubo/IPFS often returns v0)
+      if (cid.version === 0) {
+        console.log('Converting CID v0 to v1 for blockchain compatibility');
+        cid = cid.toV1();
+      }
+      
+      // Verify it's CIDv1 with 36 bytes
+      if (cid.version !== 1) {
+        throw new Error(`Invalid CID version: expected v1, got v${cid.version}`);
+      }
+      
+      if (cid.bytes.length !== 36) {
+        throw new Error(`Invalid CID size: expected 36 bytes, got ${cid.bytes.length}`);
+      }
+      
+      return cid.bytes;
+    } catch (error) {
+      throw new Error(`Failed to convert CID to chain format: ${error.message}`);
+    }
+  }
+
+  /**
+   * Reconstruct CID string from blockchain bytes
+   * @param {Uint8Array} cidBytes - 36 bytes from blockchain
+   * @returns {string} - CID string
+   */
+  static fromChainFormat(cidBytes) {
+    try {
+      if (cidBytes.length !== 36) {
+        throw new Error(`Invalid CID bytes: expected 36 bytes, got ${cidBytes.length}`);
+      }
+      
+      const cid = CID.decode(cidBytes);
+      return cid.toString();
+    } catch (error) {
+      throw new Error(`Failed to convert CID from chain format: ${error.message}`);
+    }
+  }
+
+  /**
+   * Validate if CID can be converted to blockchain format
+   * @param {string} cidString - CID to validate
+   * @returns {boolean} - True if compatible with blockchain
+   */
+  static isValidForChain(cidString) {
+    try {
+      const cid = CID.parse(cidString);
+      return cid.version === 1 && cid.bytes.length === 36;
+    } catch {
+      return false;
+    }
+  }
 }
 

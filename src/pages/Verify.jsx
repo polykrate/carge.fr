@@ -9,10 +9,7 @@ import { showError, showSuccess, showLoading, dismiss, toastTx } from '../lib/to
 import {
   waitForPolkadot,
   connectToApi,
-  getWalletSigner,
-  signContentHash,
-  calculateHash,
-  submitCryptoTrail,
+  submitRagWorkflowStep,
   handleTransactionResult,
   downloadProofFile
 } from '../lib/core/blockchain-utils.js';
@@ -33,7 +30,15 @@ export const Verify = () => {
   const [workflowInfo, setWorkflowInfo] = useState(null); // { masterRag, currentStep, nextStepRag, livrable }
   const [loadingNextStep, setLoadingNextStep] = useState(false);
   const [submittingStep, setSubmittingStep] = useState(false);
+  const [recipientAddress, setRecipientAddress] = useState('');
   const formContainerRef = useRef(null);
+  
+  // Auto-fill recipient address with connected wallet address
+  useEffect(() => {
+    if (selectedAccount) {
+      setRecipientAddress(selectedAccount);
+    }
+  }, [selectedAccount]);
   
   // Example proof JSON
   const exampleProof = {
@@ -440,6 +445,7 @@ export const Verify = () => {
       console.log('Submitting next workflow step...');
       console.log('Form data:', formData);
       console.log('Previous livrable:', workflowInfo.livrable);
+      console.log('Recipient:', recipientAddress);
 
       // Merge data: previous livrable + new form data (new takes priority)
       const mergedLivrable = {
@@ -458,34 +464,22 @@ export const Verify = () => {
 
       console.log('RAG data:', ragData);
 
-      // Calculate hash of the RAG data (not the full proof object)
-      const ragDataString = JSON.stringify(ragData);
-      const contentHash = await calculateHash(ragDataString);
-
-      console.log('Content hash (ragData):', contentHash);
-
       // Wait for Polkadot.js to be ready
       await waitForPolkadot();
 
       // Create API connection
       api = await connectToApi(substrateClient.rpcUrl);
 
-      // Get wallet signer
-      const injector = await getWalletSigner(selectedAccount);
-      
-      // Sign the content hash
-      const signature = await signContentHash(injector.signer, selectedAccount, contentHash);
-      
       // Update toast to broadcasting
       toastTx.broadcasting(toastId);
       
-      // Submit crypto trail transaction
-      const unsub = await submitCryptoTrail({
+      // Submit RAG workflow step (automatically handles encryption if needed)
+      const { unsub, contentHash, ipfsCid, useEncryption } = await submitRagWorkflowStep({
+        ragData,
+        recipientAddress,
+        selectedAccount,
         api,
-        accountAddress: selectedAccount,
-        signer: injector.signer,
-        contentHash,
-        signature,
+        ipfsClient,
         onStatusChange: (txResult) => {
           // Handle transaction errors
           const error = handleTransactionResult(txResult, api);
@@ -504,7 +498,10 @@ export const Verify = () => {
             // Download proof file
             downloadProofFile(ragData, contentHash);
             
-            toastTx.success('Workflow step submitted successfully! Proof downloaded.', toastId);
+            const successMsg = useEncryption 
+              ? 'Workflow step submitted successfully! Encrypted proof sent to recipient.'
+              : 'Workflow step submitted successfully!';
+            toastTx.success(successMsg, toastId);
             
             // Reset workflow state and show success message
             setWorkflowInfo(null);
@@ -513,12 +510,17 @@ export const Verify = () => {
             
             setResult({
               isValid: true,
-              message: 'Workflow step completed and proof created!',
+              message: useEncryption 
+                ? 'Workflow step completed and encrypted proof sent!'
+                : 'Workflow step completed!',
               details: {
                 contentHash,
+                ipfsCid: ipfsCid || 'N/A (simple mode)',
+                recipient: recipientAddress || 'Self',
                 stepName: workflowInfo.nextStepRag.metadata.name,
                 blockHash: txResult.status.asInBlock.toHex(),
-                proofDownloaded: true
+                proofDownloaded: true,
+                encrypted: useEncryption
               }
             });
             
@@ -916,6 +918,24 @@ export const Verify = () => {
                       id="next-step-form-fields" 
                       className="space-y-4 mb-6"
                     />
+
+                    {/* Recipient Address */}
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3 mb-6">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Recipient Address *
+                      </label>
+                      <input
+                        type="text"
+                        value={recipientAddress}
+                        onChange={(e) => setRecipientAddress(e.target.value)}
+                        placeholder="5Exxx... or 0x..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#003399] focus:border-transparent"
+                        required
+                      />
+                      <p className="text-xs text-gray-500">
+                        Enter the Substrate address of the next recipient in the workflow
+                      </p>
+                    </div>
 
                     {/* Wallet Check */}
                     {!selectedAccount && (

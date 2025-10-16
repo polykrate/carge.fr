@@ -192,6 +192,251 @@ export function handleTransactionResult(result, api) {
 }
 
 /**
+ * Submit an encrypted crypto trail transaction to the blockchain
+ * @param {Object} params - Transaction parameters
+ * @param {ApiPromise} params.api - Connected API instance
+ * @param {string} params.accountAddress - SS58 account address
+ * @param {Object} params.signer - Wallet signer
+ * @param {string} params.encryptedCid - Encrypted CID (0x prefixed hex)
+ * @param {string} params.ephemeralPubkey - Ephemeral public key (0x prefixed hex)
+ * @param {string} params.cidNonce - CID nonce (0x prefixed hex)
+ * @param {string} params.contentNonce - Content nonce (0x prefixed hex)
+ * @param {string} params.contentHash - Content hash (0x prefixed)
+ * @param {string} params.signature - Signature (0x prefixed)
+ * @param {Function} params.onStatusChange - Callback for transaction status updates
+ * @returns {Promise<Function>} Unsubscribe function
+ */
+export async function submitEncryptedCryptoTrail({
+  api,
+  accountAddress,
+  signer,
+  encryptedCid,
+  ephemeralPubkey,
+  cidNonce,
+  contentNonce,
+  contentHash,
+  signature,
+  onStatusChange
+}) {
+  console.log('Submitting encrypted crypto trail to blockchain...');
+  console.log('  - contentHash:', contentHash);
+  console.log('  - signature:', signature);
+  console.log('  - encryptedCid:', encryptedCid.slice(0, 20) + '...');
+  console.log('  - ephemeralPubkey:', ephemeralPubkey);
+  console.log('  - account:', accountAddress);
+  
+  // Create transaction with encryption parameters
+  const tx = api.tx.cryptoTrail.storeTrail(
+    encryptedCid,
+    ephemeralPubkey,
+    cidNonce,
+    contentNonce,
+    contentHash,
+    signature
+  );
+
+  console.log('Transaction created, awaiting signature...');
+  
+  // Submit transaction with callback
+  const unsub = await tx.signAndSend(accountAddress, { signer }, (result) => {
+    if (onStatusChange) {
+      onStatusChange(result);
+    }
+  });
+
+  return unsub;
+}
+
+/**
+ * Generate random bytes as hex string
+ * @param {number} length - Number of bytes
+ * @returns {string} Hex string with 0x prefix
+ */
+function generateRandomBytes(length) {
+  const bytes = new Uint8Array(length);
+  crypto.getRandomValues(bytes);
+  return '0x' + Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Generate a random CID v1 raw (36 bytes before encryption, 52 after)
+ * CID v1 format: version (1) + codec (1) + multihash (34)
+ * Multihash: hash_type (1) + hash_length (1) + hash (32)
+ * @returns {Uint8Array} 36-byte CID v1 raw
+ */
+function generateRandomCidV1() {
+  const cid = new Uint8Array(36);
+  cid[0] = 0x01; // CID version 1
+  cid[1] = 0x55; // Codec: raw (0x55)
+  cid[2] = 0x12; // Multihash type: sha2-256 (0x12)
+  cid[3] = 0x20; // Multihash length: 32 bytes (0x20)
+  
+  // Random 32-byte hash
+  const randomHash = new Uint8Array(32);
+  crypto.getRandomValues(randomHash);
+  cid.set(randomHash, 4);
+  
+  return cid;
+}
+
+/**
+ * Submit a RAG workflow step to the blockchain
+ * Automatically handles encryption if recipient is different, or uses simple mode if same/empty
+ * @param {Object} params - Workflow submission parameters
+ * @param {Object} params.ragData - RAG data object (ragHash, stepHash, livrable)
+ * @param {string} params.recipientAddress - Recipient address (or empty/same as sender for simple mode)
+ * @param {string} params.selectedAccount - Sender account address
+ * @param {Object} params.api - Connected API instance
+ * @param {Object} params.ipfsClient - IPFS client instance
+ * @param {Function} params.onStatusChange - Callback for transaction status updates
+ * @returns {Promise<Object>} Result object with transaction details
+ */
+export async function submitRagWorkflowStep({
+  ragData,
+  recipientAddress,
+  selectedAccount,
+  api,
+  ipfsClient,
+  onStatusChange
+}) {
+  const { 
+    getPkiProfile, 
+    encryptRagData, 
+    generateEphemeralKeypair, 
+    deriveSharedSecret, 
+    hexToBytes, 
+    bytesToHex, 
+    generateNonce, 
+    encrypt 
+  } = await import('./encryption-utils.js');
+  
+  const { CidConverter } = await import('./cid-converter.js');
+  
+  // Calculate content hash
+  const ragDataJson = JSON.stringify(ragData);
+  const contentHash = await calculateHash(ragDataJson);
+  
+  // Get wallet signer
+  const injector = await getWalletSigner(selectedAccount);
+  
+  // Sign the content hash
+  const signature = await signContentHash(injector.signer, selectedAccount, contentHash);
+  
+  // Decide mode: encryption or simple
+  const useEncryption = recipientAddress && 
+                        recipientAddress.trim() !== '' && 
+                        recipientAddress !== selectedAccount;
+  
+  let encryptedCid, ephemeralPubkey, cidNonce, contentNonce, ipfsCid;
+  
+  if (useEncryption) {
+    console.log('Using ENCRYPTED mode (different recipient)');
+    
+    // Get recipient's PKI profile
+    console.log('Fetching PKI profile for recipient...');
+    const pkiProfile = await getPkiProfile(api, recipientAddress);
+    
+    if (!pkiProfile) {
+      throw new Error('Recipient does not have a PKI profile on-chain. They must register first.');
+    }
+    
+    console.log('PKI profile found:', pkiProfile);
+    
+    // Encrypt RAG data
+    const {
+      encryptedContent,
+      ephemeralPublicKey,
+      contentNonce: encContentNonce
+    } = await encryptRagData(ragData, pkiProfile.exchangeKey);
+    
+    console.log('RAG data encrypted');
+    
+    // Upload encrypted content to IPFS
+    console.log('Uploading encrypted content to IPFS...');
+    const uploadResult = await ipfsClient.uploadFile(encryptedContent);
+    ipfsCid = uploadResult.Hash;
+    console.log('Uploaded to IPFS:', ipfsCid);
+    
+    // Generate ephemeral keypair for CID encryption
+    const ephemeralKeypair = generateEphemeralKeypair();
+    
+    // Derive shared secret for CID encryption
+    const sharedSecret = deriveSharedSecret(
+      ephemeralKeypair.secretKey,
+      hexToBytes(pkiProfile.exchangeKey)
+    );
+    
+    // Convert CID to chain format (36 bytes)
+    const cidBytes = CidConverter.toChainFormat(ipfsCid);
+    
+    // Encrypt the CID
+    const cidNonceBytes = generateNonce();
+    const encryptedCidBytes = encrypt(cidBytes, sharedSecret, cidNonceBytes);
+    
+    // Convert to hex for blockchain
+    encryptedCid = bytesToHex(encryptedCidBytes);
+    ephemeralPubkey = bytesToHex(ephemeralPublicKey);
+    cidNonce = bytesToHex(cidNonceBytes);
+    contentNonce = bytesToHex(encContentNonce);
+    
+    console.log('Encryption parameters prepared');
+    
+  } else {
+    console.log('Using SIMPLE mode (same recipient or empty)');
+    
+    // Generate random parameters (only hash and signature matter)
+    const randomCidBytes = generateRandomCidV1(); // 36 bytes
+    
+    // Generate random nonces and keys
+    const randomContentNonceBytes = new Uint8Array(12);
+    crypto.getRandomValues(randomContentNonceBytes);
+    
+    const randomCidNonceBytes = new Uint8Array(12);
+    crypto.getRandomValues(randomCidNonceBytes);
+    
+    const randomEphemeralKey = new Uint8Array(32);
+    crypto.getRandomValues(randomEphemeralKey);
+    
+    // "Encrypt" CID with random key (just to get 52 bytes)
+    const randomSharedSecret = new Uint8Array(32);
+    crypto.getRandomValues(randomSharedSecret);
+    const encryptedCidBytes = encrypt(randomCidBytes, randomSharedSecret, randomCidNonceBytes);
+    
+    // Convert to hex
+    encryptedCid = bytesToHex(encryptedCidBytes);
+    ephemeralPubkey = bytesToHex(randomEphemeralKey);
+    cidNonce = bytesToHex(randomCidNonceBytes);
+    contentNonce = bytesToHex(randomContentNonceBytes);
+    
+    ipfsCid = null; // No real IPFS upload in simple mode
+    
+    console.log('Random parameters generated (simple mode)');
+  }
+  
+  // Submit transaction
+  console.log('Submitting to blockchain...');
+  const unsub = await submitEncryptedCryptoTrail({
+    api,
+    accountAddress: selectedAccount,
+    signer: injector.signer,
+    encryptedCid,
+    ephemeralPubkey,
+    cidNonce,
+    contentNonce,
+    contentHash,
+    signature,
+    onStatusChange
+  });
+  
+  return {
+    unsub,
+    contentHash,
+    ipfsCid,
+    useEncryption
+  };
+}
+
+/**
  * Create and download a proof file
  * @param {Object} ragData - RAG data object
  * @param {string} contentHash - Content hash for filename

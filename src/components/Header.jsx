@@ -18,6 +18,7 @@ export const Header = () => {
     isWalletSelectOpen,
     substrateConnected,
     ipfsReady,
+    kudoNodeAvailable,
     currentBlock,
     config,
     toggleWalletMenu,
@@ -102,14 +103,17 @@ export const Header = () => {
 
               {/* IPFS */}
               <a
-                href="https://ipfs.tech/"
+                href={kudoNodeAvailable ? "http://127.0.0.1:5001/webui" : "https://ipfs.tech/"}
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center space-x-2 px-3 py-1.5 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-sm"
-                title="Learn more about IPFS"
+                title={kudoNodeAvailable ? "Kubo node active - CIDs broadcasted to IPFS network (click to open WebUI)" : "Kubo node unavailable - using public IPFS gateway"}
               >
                 <div className={`w-2 h-2 rounded-full ${ipfsReady ? 'bg-green-500' : 'bg-orange-500'}`}></div>
                 <span className="text-gray-500 text-xs">IPFS</span>
+                <span className={`text-xs font-medium ${kudoNodeAvailable ? 'text-green-600' : 'text-gray-600'}`}>
+                  {kudoNodeAvailable ? 'Public' : 'Local'}
+                </span>
               </a>
               
               {/* Language Selector */}
@@ -288,14 +292,17 @@ export const Header = () => {
 
               {/* IPFS */}
               <a
-                href="https://ipfs.tech/"
+                href={kudoNodeAvailable ? "http://127.0.0.1:5001/webui" : "https://ipfs.tech/"}
                 target="_blank"
                 rel="noreferrer"
                 className="flex-1 flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-sm"
-                title="Learn more about IPFS"
+                title={kudoNodeAvailable ? "Kubo node active - CIDs broadcasted to IPFS network (click to open WebUI)" : "Kubo node unavailable - using public IPFS gateway"}
               >
                 <div className={`w-2 h-2 rounded-full ${ipfsReady ? 'bg-green-500' : 'bg-orange-500'}`}></div>
                 <span className="text-gray-500 text-xs">IPFS</span>
+                <span className={`text-xs font-medium ${kudoNodeAvailable ? 'text-green-600' : 'text-gray-600'}`}>
+                  {kudoNodeAvailable ? 'Public' : 'Local'}
+                </span>
               </a>
             </div>
 

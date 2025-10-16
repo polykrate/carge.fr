@@ -8,10 +8,7 @@ import { showError, toastTx } from '../lib/toast';
 import {
   waitForPolkadot,
   connectToApi,
-  getWalletSigner,
-  signContentHash,
-  calculateHash,
-  submitCryptoTrail,
+  submitRagWorkflowStep,
   handleTransactionResult,
   downloadProofFile
 } from '../lib/core/blockchain-utils.js';
@@ -43,9 +40,17 @@ export const Workflows = () => {
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false); // Accordion state for workflow details
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
+  const [recipientAddress, setRecipientAddress] = useState('');
   
   // Ref for form container
   const formContainerRef = useRef(null);
+  
+  // Auto-fill recipient address with connected wallet address
+  useEffect(() => {
+    if (selectedAccount) {
+      setRecipientAddress(selectedAccount);
+    }
+  }, [selectedAccount]);
   
   // Convert hex address to SS58
   const hexToSS58 = async (hexAddress) => {
@@ -219,6 +224,7 @@ export const Workflows = () => {
       console.log('Starting workflow...');
       console.log('Form data:', formData);
       console.log('Selected RAG:', selectedRag);
+      console.log('Recipient:', recipientAddress);
 
       // Determine the step hash (first step)
       let stepHash;
@@ -233,20 +239,13 @@ export const Workflows = () => {
       }
 
       // Create RAG object with workflow hash, first step hash, and form data as livrable
-      // DIFFÉRENCE avec "continue workflow": pas de livrable précédent, juste formData
       const ragData = {
         ragHash: selectedRag.hash,
         stepHash: stepHash,
-        livrable: formData  // Pas de merge, juste les données du formulaire
+        livrable: formData
       };
 
       console.log('RAG data:', ragData);
-
-      // Calculate hash of the RAG data (not the full proof object)
-      const ragDataString = JSON.stringify(ragData);
-      const contentHash = await calculateHash(ragDataString);
-
-      console.log('Content hash (ragData):', contentHash);
 
       // Wait for Polkadot.js to be ready
       await waitForPolkadot();
@@ -254,22 +253,16 @@ export const Workflows = () => {
       // Create API connection
       api = await connectToApi(substrateClient.rpcUrl);
 
-      // Get wallet signer
-      const injector = await getWalletSigner(selectedAccount);
-      
-      // Sign the content hash
-      const signature = await signContentHash(injector.signer, selectedAccount, contentHash);
-      
       // Update toast to broadcasting
       toastTx.broadcasting(toastId);
       
-      // Submit crypto trail transaction
-      const unsub = await submitCryptoTrail({
+      // Submit RAG workflow step (automatically handles encryption if needed)
+      const { unsub, contentHash, ipfsCid, useEncryption } = await submitRagWorkflowStep({
+        ragData,
+        recipientAddress,
+        selectedAccount,
         api,
-        accountAddress: selectedAccount,
-        signer: injector.signer,
-        contentHash,
-        signature,
+        ipfsClient,
         onStatusChange: (txResult) => {
           // Handle transaction errors
           const error = handleTransactionResult(txResult, api);
@@ -289,17 +282,25 @@ export const Workflows = () => {
             // Download proof file
             downloadProofFile(ragData, contentHash);
             
-            toastTx.success('Workflow started successfully! Proof downloaded.', toastId);
+            const successMsg = useEncryption 
+              ? 'Workflow started successfully! Encrypted proof sent to recipient.'
+              : 'Workflow started successfully!';
+            toastTx.success(successMsg, toastId);
             
             setResult({
               success: true,
-              message: 'Workflow step 1 completed and proof created!',
+              message: useEncryption 
+                ? 'Workflow step 1 completed and encrypted proof sent!'
+                : 'Workflow step 1 completed!',
               details: {
                 contentHash,
+                ipfsCid: ipfsCid || 'N/A (simple mode)',
+                recipient: recipientAddress || 'Self',
                 workflowName: selectedRag.metadata.name,
                 stepName: allRags.find(r => r.hash === stepHash)?.metadata?.name || 'Step 1',
                 blockHash: txResult.status.asInBlock.toHex(),
-                proofDownloaded: true
+                proofDownloaded: true,
+                encrypted: useEncryption
               }
             });
             
@@ -588,6 +589,24 @@ export const Workflows = () => {
                 id="dynamic-form-fields" 
                 className="space-y-4"
               />
+
+              {/* Recipient Address */}
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3">
+                <label className="block text-sm font-medium text-gray-700">
+                  Recipient Address *
+                </label>
+                <input
+                  type="text"
+                  value={recipientAddress}
+                  onChange={(e) => setRecipientAddress(e.target.value)}
+                  placeholder="5Exxx... or 0x..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#003399] focus:border-transparent"
+                  required
+                />
+                <p className="text-xs text-gray-500">
+                  Enter the Substrate address of the workflow recipient
+                </p>
+              </div>
 
               {/* Wallet Check */}
               {!selectedAccount && (

@@ -32,17 +32,27 @@ export const AppProvider = ({ children }) => {
   // Connection status
   const [substrateConnected, setSubstrateConnected] = useState(false);
   const [ipfsReady, setIpfsReady] = useState(false);
+  const [kudoNodeAvailable, setKudoNodeAvailable] = useState(false);
   const [currentBlock, setCurrentBlock] = useState(null);
 
   // Initialize services on mount
   useEffect(() => {
-    initializeApp();
+    let blockUpdateInterval = null;
+    
+    const initialize = async () => {
+      blockUpdateInterval = await initializeApp();
+    };
+    
+    initialize();
     detectWallets();
     setupAccountChangeListener();
     
     // Cleanup on unmount
     return () => {
-      // Unsubscribe from account changes if needed
+      if (blockUpdateInterval) {
+        clearInterval(blockUpdateInterval);
+        console.log('🧹 Block update interval cleaned up');
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -51,6 +61,45 @@ export const AppProvider = ({ children }) => {
     const wallets = await walletConnector.detectInstalledWallets();
     setInstalledWallets(wallets);
     console.log('📱 Detected wallets:', wallets.map(w => w.name).join(', '));
+  };
+
+  const checkKudoNodeAvailability = async () => {
+    if (!config.IPFS_UPLOAD_URL || 
+        (!config.IPFS_UPLOAD_URL.includes('localhost') && 
+         !config.IPFS_UPLOAD_URL.includes('127.0.0.1') && 
+         !config.IPFS_UPLOAD_URL.includes('::1'))) {
+      // Not configured for local node
+      setKudoNodeAvailable(false);
+      return;
+    }
+
+    try {
+      console.log('🔍 Checking Kubo node availability...');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+      
+      const response = await fetch('http://127.0.0.1:5001/api/v0/version', {
+        method: 'POST',
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Kubo node available:', data.Version);
+        setKudoNodeAvailable(true);
+      } else {
+        console.log('⚠️ Kubo node returned error:', response.status);
+        setKudoNodeAvailable(false);
+      }
+    } catch (error) {
+      console.log('⚠️ Kubo node not available:', error.message);
+      setKudoNodeAvailable(false);
+    }
+
+    // Recheck every 30 seconds
+    setTimeout(checkKudoNodeAvailability, 30000);
   };
 
   const setupAccountChangeListener = async () => {
@@ -100,6 +149,8 @@ export const AppProvider = ({ children }) => {
   };
 
   const initializeApp = async () => {
+    let blockUpdateInterval = null;
+    
     // Connect to Substrate
     try {
       const connected = await substrateClient.connect();
@@ -110,7 +161,7 @@ export const AppProvider = ({ children }) => {
         setCurrentBlock(block);
         
         // Update block periodically
-        setInterval(async () => {
+        blockUpdateInterval = setInterval(async () => {
           try {
             const newBlock = await substrateClient.getCurrentBlock();
             setCurrentBlock(newBlock);
@@ -119,7 +170,7 @@ export const AppProvider = ({ children }) => {
           }
         }, 6000);
         
-        // Note: interval cleanup is handled in component lifecycle
+        console.log('✅ Block update interval started');
       }
     } catch (error) {
       console.error('Substrate connection failed:', error);
@@ -139,6 +190,9 @@ export const AppProvider = ({ children }) => {
       console.log('💡 IPFS will use HTTP gateway fallback');
       setIpfsReady(false);
     });
+
+    // Check if Kubo node is available
+    checkKudoNodeAvailability();
 
     // Auto-connect wallet on mobile or restore saved state on desktop
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -207,6 +261,8 @@ export const AppProvider = ({ children }) => {
     } catch (error) {
       console.error('❌ Failed to auto-connect wallet:', error);
     }
+    
+    return blockUpdateInterval;
   };
 
   const connectWallet = async (walletId = 'polkadot-js') => {
@@ -273,6 +329,7 @@ export const AppProvider = ({ children }) => {
     isWalletSelectOpen,
     substrateConnected,
     ipfsReady,
+    kudoNodeAvailable,
     currentBlock,
     
     // Actions
