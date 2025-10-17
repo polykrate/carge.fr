@@ -97,6 +97,7 @@ Open an issue with:
 - Update README.md if needed
 - Add JSDoc comments to functions
 - Update i18n translations (EN + FR)
+- Remember: IPFS is decentralized but NOT permanent - always clarify pinning requirements
 
 ## 🔐 Security
 

@@ -1,5 +1,17 @@
 // ============================================================================
-// IPFS CLIENT - Hybrid (Helia P2P + HTTP Gateway Fallback)
+// IPFS CLIENT - Dual Mode (Helia P2P Client + Local Kubo Node)
+// ============================================================================
+// 
+// ⚠️ IMPORTANT: IPFS is DECENTRALIZED but NOT PERMANENT by default
+// - Data persists only while at least one node hosts (pins) it
+// - Use pinning services (Pinata, Web3.Storage, Infura) for production
+// - The blockchain stores CIDs - actual data needs separate pinning
+//
+// Two modes available:
+// 1. Helia P2P - Lightweight browser IPFS client (P2P connections)
+// 2. Kubo Node - Full IPFS node on localhost:5001 (public gateway)
+//
+// NO external HTTP gateways - fully decentralized approach
 // ============================================================================
 
 import { config } from '../config.js';
@@ -10,16 +22,6 @@ export class IpfsClient {
     this.fs = null;
     this.isReady = false;
     this.initPromise = null;
-    
-    // Public IPFS gateways (fallback) - Ordered by reliability
-    this.gateways = [
-      'https://ipfs.io/ipfs',
-      'https://dweb.link/ipfs',
-      'https://gateway.pinata.cloud/ipfs',
-      'https://cloudflare-ipfs.com/ipfs',
-      'https://ipfs.eth.aragon.network/ipfs',
-      'https://gateway.ipfs.io/ipfs',
-    ];
   }
 
   /**
@@ -111,55 +113,43 @@ export class IpfsClient {
       return await Promise.race([initHelia, timeout]);
     } catch (error) {
       console.warn('⚠️ Helia initialization failed or timed out:', error.message);
-      console.log('📡 Will use HTTP gateway fallback');
+      console.log('📡 Will use local Kubo node as fallback');
       this.isReady = false;
       return false;
     }
   }
 
   /**
-   * Télécharge depuis HTTP gateway (fallback)
+   * Télécharge depuis le noeud Kubo local (fallback si Helia échoue)
+   * @param {string} cid - CID IPFS
+   * @returns {Promise<string>} - Contenu du fichier
    */
-  async downloadViaGateway(cid, timeout = 20000) {
-    const errors = [];
+  async downloadViaKubo(cid) {
+    try {
+      console.log(`📡 Attempting download via local Kubo node...`);
+      
+      // Utiliser l'API Kubo pour cat (lecture)
+      const kuboGatewayUrl = config.IPFS_UPLOAD_URL.replace('/api/v0/add', '');
+      const response = await fetch(`${kuboGatewayUrl}/api/v0/cat?arg=${cid}`, {
+        method: 'POST',
+      });
 
-    for (const gateway of this.gateways) {
-      try {
-        console.log(`📡 Trying gateway: ${gateway}`);
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-        const response = await fetch(`${gateway}/${cid}`, {
-          signal: controller.signal,
-          headers: {
-            'Accept': 'application/octet-stream, text/plain, */*',
-          },
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const text = await response.text();
-        console.log(`✅ Downloaded ${text.length} bytes via gateway`);
-        return text;
-      } catch (error) {
-        console.warn(`❌ Gateway ${gateway} failed:`, error.message);
-        errors.push({ gateway, error: error.message });
-        // Petit délai avant d'essayer le prochain gateway
-        await new Promise(resolve => setTimeout(resolve, 500));
-        continue;
+      if (!response.ok) {
+        throw new Error(`Kubo cat failed: ${response.status} ${response.statusText}`);
       }
-    }
 
-    throw new Error(`All gateways failed: ${JSON.stringify(errors)}`);
+      const text = await response.text();
+      console.log(`✅ Downloaded ${text.length} bytes via Kubo node`);
+      return text;
+    } catch (error) {
+      console.error('❌ Kubo download failed:', error.message);
+      throw new Error(`Local Kubo node unavailable: ${error.message}`);
+    }
   }
 
   /**
-   * Télécharge du texte depuis un CID (avec fallback automatique)
+   * Télécharge du texte depuis un CID
+   * Essaie d'abord Helia P2P, puis le noeud Kubo local
    * @param {string} cid - CID IPFS
    * @returns {Promise<string>}
    */
@@ -194,18 +184,19 @@ export class IpfsClient {
         return content;
       } catch (error) {
         console.warn('⚠️ Helia download failed:', error.message);
-        console.log('📡 Falling back to HTTP gateway...');
+        console.log('📡 Falling back to local Kubo node...');
       }
     } else {
-      console.log('⚠️ Helia not ready, using HTTP gateway directly');
+      console.log('⚠️ Helia not ready, trying local Kubo node directly');
     }
 
-    // Fallback sur gateway HTTP
-    return await this.downloadViaGateway(cid);
+    // Fallback sur le noeud Kubo local
+    return await this.downloadViaKubo(cid);
   }
 
   /**
    * Télécharge un fichier binaire
+   * Essaie d'abord Helia P2P, puis le noeud Kubo local
    * @param {string} cid - CID IPFS
    * @returns {Promise<Uint8Array>}
    */
@@ -224,7 +215,7 @@ export class IpfsClient {
         })();
 
         const timeout = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Timeout')), 8000)
+          setTimeout(() => reject(new Error('Timeout')), 15000)
         );
 
         await Promise.race([downloadPromise, timeout]);
@@ -241,12 +232,12 @@ export class IpfsClient {
         console.log(`✅ Downloaded ${result.length} bytes via Helia`);
         return result;
       } catch (error) {
-        console.warn('⚠️ Helia download failed, using gateway:', error.message);
+        console.warn('⚠️ Helia download failed, trying Kubo:', error.message);
       }
     }
 
-    // Fallback gateway
-    const text = await this.downloadViaGateway(cid);
+    // Fallback sur le noeud Kubo local
+    const text = await this.downloadViaKubo(cid);
     return new TextEncoder().encode(text);
   }
 
@@ -261,9 +252,14 @@ export class IpfsClient {
   }
 
   /**
-   * Upload file to IPFS via Kudo node
+   * Upload file to IPFS via Kubo node
+   * ⚠️ WARNING: This only uploads to local node. For data persistence:
+   * - Pin the returned CID on your Kubo node
+   * - Use a pinning service for production (Pinata, Web3.Storage, etc.)
+   * - The blockchain stores only the CID, not the data itself
+   * 
    * @param {Uint8Array} data - File data to upload
-   * @returns {Promise<string>} CID of uploaded file
+   * @returns {Promise<string>} CID of uploaded file (must be pinned for persistence!)
    */
   async uploadFile(data) {
     console.log(`Uploading file to IPFS (${data.length} bytes)...`);

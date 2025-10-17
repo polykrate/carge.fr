@@ -124,6 +124,27 @@ Edit `src/lib/config.js` to configure:
 - IPFS gateway
 - Chain name
 
+### ⚠️ Important: IPFS Data Persistence
+
+**IPFS is decentralized but NOT permanent by default.**
+
+- **Decentralized**: Data is distributed across multiple nodes without central authority
+- **Not Permanent**: Files are only available while at least one node hosts (pins) them
+- **Pinning Required**: To ensure data persistence, content must be pinned on:
+  - Your local IPFS node
+  - A pinning service (Pinata, Web3.Storage, Infura IPFS, etc.)
+  - Multiple nodes for redundancy
+
+**Best Practices:**
+1. **Pin critical data** on multiple reliable nodes
+2. **Use pinning services** for production deployments
+3. **Monitor pinning status** regularly
+4. **Consider blockchain anchors** for critical content hashes (already on-chain in Carge)
+
+The blockchain stores only the CID (Content Identifier) - the actual data must be pinned separately to remain accessible.
+
+📖 **For detailed information, see**: [IPFS Persistence Guide](public/docs/IPFS-PERSISTENCE.md)
+
 ## 📝 Compared to HTML Version
 
 **Old (HTML):**
