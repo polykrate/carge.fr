@@ -858,7 +858,7 @@ export const Verify = () => {
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-xl font-semibold">Workflow Continuation</h2>
             <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-              {workflowInfo.currentStep - 1} completed / {workflowInfo.totalSteps} steps
+              Step {workflowInfo.currentStep} / {workflowInfo.totalSteps}
             </span>
           </div>
 
