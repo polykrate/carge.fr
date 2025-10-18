@@ -34,6 +34,7 @@ export const AppProvider = ({ children }) => {
   const [ipfsReady, setIpfsReady] = useState(false);
   const [kudoNodeAvailable, setKudoNodeAvailable] = useState(false);
   const [currentBlock, setCurrentBlock] = useState(null);
+  const [heliaPeerCount, setHeliaPeerCount] = useState(0);
 
   // Initialize services on mount
   useEffect(() => {
@@ -100,6 +101,18 @@ export const AppProvider = ({ children }) => {
 
     // Recheck every 30 seconds
     setTimeout(checkKudoNodeAvailability, 30000);
+  };
+
+  const updateHeliaPeerCount = () => {
+    try {
+      if (ipfsClient && ipfsClient.helia?.libp2p) {
+        const peers = ipfsClient.helia.libp2p.getPeers();
+        setHeliaPeerCount(peers.length);
+      }
+    } catch (error) {
+      // Silent fail - not critical
+      setHeliaPeerCount(0);
+    }
   };
 
   const setupAccountChangeListener = async () => {
@@ -182,6 +195,9 @@ export const AppProvider = ({ children }) => {
       setIpfsReady(ready);
       if (ready) {
         console.log('✅ IPFS P2P ready');
+        // Start monitoring peer count
+        updateHeliaPeerCount();
+        setInterval(() => updateHeliaPeerCount(), 10000); // Update every 10s
       } else {
         console.log('💡 IPFS will use HTTP gateway fallback');
       }
@@ -331,6 +347,7 @@ export const AppProvider = ({ children }) => {
     ipfsReady,
     kudoNodeAvailable,
     currentBlock,
+    heliaPeerCount,
     
     // Actions
     connectWallet,

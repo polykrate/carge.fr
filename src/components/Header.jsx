@@ -20,6 +20,7 @@ export const Header = () => {
     ipfsReady,
     kudoNodeAvailable,
     currentBlock,
+    heliaPeerCount,
     config,
     toggleWalletMenu,
     selectAccount,
@@ -106,14 +107,73 @@ export const Header = () => {
                 href={kudoNodeAvailable ? "http://127.0.0.1:5001/webui" : "https://ipfs.tech/"}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center space-x-2 px-3 py-1.5 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-sm"
-                title={kudoNodeAvailable ? "Kubo node active - CIDs broadcasted to IPFS network (click to open WebUI)" : "Kubo node unavailable - using public IPFS gateway"}
+                className="flex items-center space-x-2 px-3 py-1.5 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-sm group relative"
+                title=""
               >
                 <div className={`w-2 h-2 rounded-full ${ipfsReady ? 'bg-green-500' : 'bg-orange-500'}`}></div>
                 <span className="text-gray-500 text-xs">IPFS</span>
-                <span className={`text-xs font-medium ${kudoNodeAvailable ? 'text-green-600' : 'text-gray-600'}`}>
-                  {kudoNodeAvailable ? 'Public' : 'Local'}
+                <span className={`text-xs font-medium ${kudoNodeAvailable ? 'text-green-600' : 'text-orange-600'}`}>
+                  {kudoNodeAvailable ? 'Broadcast' : 'Limited'}
                 </span>
+                
+                {/* Tooltip détaillé au survol */}
+                <div className="invisible group-hover:visible absolute top-full left-0 mt-2 w-72 bg-gray-900 text-white text-xs rounded-lg shadow-xl z-50 p-3">
+                  <div className="mb-2 font-semibold border-b border-gray-700 pb-2">
+                    {kudoNodeAvailable ? 'IPFS Broadcast Mode' : 'IPFS Limited Mode'}
+                  </div>
+                  
+                  <div className="space-y-1 mb-2">
+                    <div className="font-medium text-gray-300">Download Sources:</div>
+                    {ipfsReady && (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-green-400">✓</span>
+                        <span>Helia P2P ({heliaPeerCount} peer{heliaPeerCount !== 1 ? 's' : ''})</span>
+                      </div>
+                    )}
+                    {kudoNodeAvailable && (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-green-400">✓</span>
+                        <span>Kubo Local (localhost:5001)</span>
+                      </div>
+                    )}
+                    <div className="flex items-center space-x-2">
+                      <span className="text-blue-400">✓</span>
+                      <span>ipfs.io gateway</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-blue-400">✓</span>
+                      <span>cloudflare-ipfs.com</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-blue-400">✓</span>
+                      <span>dweb.link gateway</span>
+                    </div>
+                  </div>
+                  
+                  <div className="text-gray-400 text-xs pt-2 border-t border-gray-700">
+                    {kudoNodeAvailable 
+                      ? 'Can upload & broadcast CIDs to IPFS network' 
+                      : (
+                        <>
+                          Download only (browser limitations)
+                          <br />
+                          <span className="text-gray-300">
+                            Run a{' '}
+                            <a 
+                              href="https://docs.ipfs.tech/how-to/command-line-quick-start/" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-400 hover:text-blue-300 underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              Kubo node
+                            </a>
+                            {' '}to broadcast
+                          </span>
+                        </>
+                      )}
+                  </div>
+                </div>
               </a>
               
               {/* Language Selector */}
@@ -295,14 +355,73 @@ export const Header = () => {
                 href={kudoNodeAvailable ? "http://127.0.0.1:5001/webui" : "https://ipfs.tech/"}
                 target="_blank"
                 rel="noreferrer"
-                className="flex-1 flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-sm"
-                title={kudoNodeAvailable ? "Kubo node active - CIDs broadcasted to IPFS network (click to open WebUI)" : "Kubo node unavailable - using public IPFS gateway"}
+                className="flex-1 flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-sm group relative"
+                title=""
               >
                 <div className={`w-2 h-2 rounded-full ${ipfsReady ? 'bg-green-500' : 'bg-orange-500'}`}></div>
                 <span className="text-gray-500 text-xs">IPFS</span>
-                <span className={`text-xs font-medium ${kudoNodeAvailable ? 'text-green-600' : 'text-gray-600'}`}>
-                  {kudoNodeAvailable ? 'Public' : 'Local'}
+                <span className={`text-xs font-medium ${kudoNodeAvailable ? 'text-green-600' : 'text-orange-600'}`}>
+                  {kudoNodeAvailable ? 'Broadcast' : 'Limited'}
                 </span>
+                
+                {/* Tooltip détaillé au survol (mobile) */}
+                <div className="invisible group-hover:visible absolute top-full left-0 mt-2 w-72 bg-gray-900 text-white text-xs rounded-lg shadow-xl z-50 p-3">
+                  <div className="mb-2 font-semibold border-b border-gray-700 pb-2">
+                    {kudoNodeAvailable ? 'IPFS Broadcast Mode' : 'IPFS Limited Mode'}
+                  </div>
+                  
+                  <div className="space-y-1 mb-2">
+                    <div className="font-medium text-gray-300">Download Sources:</div>
+                    {ipfsReady && (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-green-400">✓</span>
+                        <span>Helia P2P ({heliaPeerCount} peer{heliaPeerCount !== 1 ? 's' : ''})</span>
+                      </div>
+                    )}
+                    {kudoNodeAvailable && (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-green-400">✓</span>
+                        <span>Kubo Local (localhost:5001)</span>
+                      </div>
+                    )}
+                    <div className="flex items-center space-x-2">
+                      <span className="text-blue-400">✓</span>
+                      <span>ipfs.io gateway</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-blue-400">✓</span>
+                      <span>cloudflare-ipfs.com</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-blue-400">✓</span>
+                      <span>dweb.link gateway</span>
+                    </div>
+                  </div>
+                  
+                  <div className="text-gray-400 text-xs pt-2 border-t border-gray-700">
+                    {kudoNodeAvailable 
+                      ? 'Can upload & broadcast CIDs to IPFS network' 
+                      : (
+                        <>
+                          Download only (browser limitations)
+                          <br />
+                          <span className="text-gray-300">
+                            Run a{' '}
+                            <a 
+                              href="https://docs.ipfs.tech/how-to/command-line-quick-start/" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-400 hover:text-blue-300 underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              Kubo node
+                            </a>
+                            {' '}to broadcast
+                          </span>
+                        </>
+                      )}
+                  </div>
+                </div>
               </a>
             </div>
 

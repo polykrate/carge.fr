@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { useApp } from '../contexts/AppContext';
 import { ProofVerifier } from '../lib/core/proof-verifier.js';
 import { RagClient } from '../lib/core/rag-client.js';
-import { CidConverter } from '../lib/core/cid-converter.js';
 import { FormGenerator } from '../lib/core/form-generator.js';
 import { showError, showSuccess, showLoading, dismiss, toastTx } from '../lib/toast';
 import {
@@ -391,12 +390,9 @@ export const Verify = () => {
       console.log(`Moving from step ${currentStepIndex + 1} to ${currentStepIndex + 2}`);
       console.log('Next step:', nextStepRag.metadata.name);
 
-      // Load next step's schema from IPFS
-      const cidString = CidConverter.hexToString(nextStepRag.metadata.schemaCid);
-      console.log('Loading next step schema from IPFS:', cidString);
-      
-      const schemaText = await ipfsClient.downloadText(cidString);
-      const schemaObj = JSON.parse(schemaText);
+      // Load next step's schema from IPFS (hex CID)
+      console.log('Loading next step schema from IPFS (hex CID):', nextStepRag.metadata.schemaCid);
+      const schemaObj = await ipfsClient.downloadJsonFromHex(nextStepRag.metadata.schemaCid);
       
       console.log('Schema loaded successfully');
       setNextStepSchema(schemaObj);

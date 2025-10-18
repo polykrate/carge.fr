@@ -177,13 +177,9 @@ export const Workflows = () => {
         schemaCidHex = rag.metadata.schemaCid;
       }
       
-      // Convert hex CID to string
-      const cidString = CidConverter.hexToString(schemaCidHex);
-      console.log('Loading schema from IPFS:', cidString);
-      
-      // Download schema from IPFS via Helia
-      const schemaText = await ipfsClient.downloadText(cidString);
-      const schemaObj = JSON.parse(schemaText);
+      // Download and parse schema from IPFS (hex CID)
+      console.log('Loading schema from IPFS (hex CID):', schemaCidHex);
+      const schemaObj = await ipfsClient.downloadJsonFromHex(schemaCidHex);
       
       console.log('Schema loaded:', schemaObj);
       setSchema(schemaObj);

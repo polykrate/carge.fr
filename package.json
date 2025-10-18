@@ -36,6 +36,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@chainsafe/libp2p-noise": "^17.0.0",
+    "@chainsafe/libp2p-yamux": "^8.0.1",
     "@helia/unixfs": "^6.0.1",
     "@libp2p/bootstrap": "^12.0.6",
     "@libp2p/circuit-relay-v2": "^4.0.5",
@@ -49,8 +51,11 @@
     "@stablelib/chacha20poly1305": "^2.0.1",
     "@stablelib/random": "^2.0.1",
     "@stablelib/x25519": "^2.0.1",
+    "blockstore-idb": "^3.0.1",
+    "datastore-idb": "^4.0.1",
     "helia": "^6.0.1",
     "i18next": "^25.6.0",
+    "multiformats": "^13.4.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hot-toast": "^2.6.0",

@@ -11,6 +11,11 @@ export const config = {
   // IPFS/Helia
   IPFS_GATEWAY: 'https://ipfs.io',
   IPFS_UPLOAD_URL: 'http://127.0.0.1:5001/api/v0/add', // IPFS Kubo node upload endpoint
+  IPFS_PUBLIC_GATEWAYS: [
+    'https://ipfs.io/ipfs/',
+    'https://cloudflare-ipfs.com/ipfs/',
+    'https://dweb.link/ipfs/',
+  ],
 
   // App
   APP_NAME: 'Carge',
