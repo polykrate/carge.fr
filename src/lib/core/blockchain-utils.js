@@ -346,12 +346,22 @@ export async function submitRagWorkflowStep({
     const recipientExchangeKey = hexToBytes(pkiProfile.exchangeKey);
     console.log('Recipient exchange key length:', recipientExchangeKey.length, 'bytes (expected: 32)');
     
-    // Encrypt RAG data
-    const {
-      encryptedContent,
-      ephemeralPublicKey,
-      contentNonce: encContentNonce
-    } = encryptRagData(ragData, recipientExchangeKey);
+    // Generate ONE ephemeral keypair for BOTH content AND CID (like TypeScript implementation)
+    const ephemeralKeypair = generateEphemeralKeypair();
+    console.log('Generated ephemeral keypair for encryption');
+    
+    // Derive shared secret using ECDH
+    const sharedSecret = deriveSharedSecret(
+      ephemeralKeypair.secretKey,
+      recipientExchangeKey
+    );
+    
+    // Encrypt RAG data with the shared secret
+    const contentNonce = generateNonce();
+    const ragJson = JSON.stringify(ragData);
+    const encoder = new TextEncoder();
+    const ragBytes = encoder.encode(ragJson);
+    const encryptedContent = encrypt(ragBytes, sharedSecret, contentNonce);
     
     console.log('RAG data encrypted');
     
@@ -366,29 +376,24 @@ export async function submitRagWorkflowStep({
     
     console.log('Uploaded to IPFS:', ipfsCid);
     
-    // Generate ephemeral keypair for CID encryption
-    const ephemeralKeypair = generateEphemeralKeypair();
-    
-    // Derive shared secret for CID encryption
-    const sharedSecret = deriveSharedSecret(
-      ephemeralKeypair.secretKey,
-      hexToBytes(pkiProfile.exchangeKey)
-    );
-    
     // Convert CID to chain format (36 bytes)
     console.log('Converting CID to chain format:', ipfsCid);
     const cidBytes = CidConverter.toChainFormat(ipfsCid);
     console.log('CID converted to', cidBytes.length, 'bytes');
     
-    // Encrypt the CID
-    const cidNonceBytes = generateNonce();
-    const encryptedCidBytes = encrypt(cidBytes, sharedSecret, cidNonceBytes);
+    // Encrypt the CID with the SAME shared secret (critical!)
+    const cidNonce = generateNonce();
+    const encryptedCidBytes = encrypt(cidBytes, sharedSecret, cidNonce);
     
     // Convert to hex for blockchain
     encryptedCid = bytesToHex(encryptedCidBytes);
-    ephemeralPubkey = bytesToHex(ephemeralPublicKey);
-    cidNonce = bytesToHex(cidNonceBytes);
-    contentNonce = bytesToHex(encContentNonce);
+    ephemeralPubkey = bytesToHex(ephemeralKeypair.publicKey);
+    cidNonce = bytesToHex(cidNonce);
+    contentNonce = bytesToHex(contentNonce);
+    
+    // Clean up sensitive data from memory
+    ephemeralKeypair.secretKey.fill(0);
+    sharedSecret.fill(0);
     
     console.log('Encryption parameters prepared');
     
