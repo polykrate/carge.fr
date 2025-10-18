@@ -47,9 +47,9 @@ export class IpfsClient {
     try {
       console.log('🚀 Initializing Helia (P2P IPFS) with optimized config...');
       
-      // Timeout de 10 secondes pour l'initialisation
+      // Timeout de 30 secondes pour l'initialisation (active dial + WebRTC NAT traversal prend du temps)
       const timeout = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Helia init timeout')), 10000)
+        setTimeout(() => reject(new Error('Helia init timeout')), 30000)
       );
 
       const initHelia = (async () => {
@@ -86,16 +86,27 @@ export class IpfsClient {
             },
             // Transports compatibles navigateur (ordre important: WebRTC > WebSockets)
             transports: [
-              webRTC(),               // WebRTC pour connexions P2P directes entre navigateurs
-              webSockets(),           // WebSockets pour bootstrap nodes
+              webRTC({
+                // Configuration STUN/TURN pour NAT traversal
+                rtcConfiguration: {
+                  iceServers: [
+                    // Serveurs STUN publics pour découvrir son adresse publique
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:global.stun.twilio.com:3478' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                  ]
+                }
+              }),               // WebRTC pour connexions P2P directes entre navigateurs
+              webSockets(),     // WebSockets pour bootstrap nodes
               circuitRelayTransport({ // Circuit Relay pour se connecter via des relais
-                discoverRelays: 1,
+                discoverRelays: 3, // Découvrir encore plus de relais
               })
             ],
             // Chiffrement et multiplexage
             connectionEncryption: [noise()],
             streamMuxers: [yamux()],
-            // Peer discovery avec bootstrap étendu
+            // Peer discovery avec bootstrap étendu + mDNS local
             peerDiscovery: [
               bootstrap({
                 list: [
@@ -104,39 +115,98 @@ export class IpfsClient {
                   '/dns4/node1.preload.ipfs.io/tcp/443/wss/p2p/Qmbut9Ywz9YEDrz8ySBSgWyJk41Uvm2QJPhwDJzJyGFsD6',
                   '/dns4/node2.preload.ipfs.io/tcp/443/wss/p2p/QmV7gnbW5VTcJ3oyM2Xk1rdFBJ3kTkvxc87UFGsun29STS',
                   '/dns4/node3.preload.ipfs.io/tcp/443/wss/p2p/QmY7JB6MQXhxHvq7dBDh4HpbH29v4yE9JRadAVpndvzySN',
-                  // Ajout de bootstrap nodes supplémentaires
+                  // Bootstrap nodes libp2p (WebSocket Secure + WebRTC support)
                   '/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN',
                   '/dnsaddr/bootstrap.libp2p.io/p2p/QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa',
                   '/dnsaddr/bootstrap.libp2p.io/p2p/QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb',
                   '/dnsaddr/bootstrap.libp2p.io/p2p/QmcZf59bWwK5XFi76CZX8cbJ4BhTzzA3gU1ZjYZcYW3dwt',
+                  // Circuit Relay nodes publics
+                  '/dns4/relay.libp2p.io/tcp/443/wss/p2p/QmWDn2LY8nannvSWJzruUYoLZ4vV83vfCBwd8DipvdbbN1',
+                  '/dns4/relay.libp2p.io/tcp/443/wss/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ',
+                  // Additional WebRTC-compatible bootstrap nodes
+                  '/dns4/sjc-1.bootstrap.libp2p.io/tcp/443/wss/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN',
+                  '/dns4/ams-1.bootstrap.libp2p.io/tcp/443/wss/p2p/QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb',
                 ]
               })
             ],
-            // Connection Manager optimisé
+            // Connection Manager optimisé pour meilleure connectivité
             connectionManager: {
-              maxConnections: 50,        // Plus de connexions
-              minConnections: 5,         // Minimum plus élevé pour meilleure redondance
-              pollInterval: 5000,        // Vérifier les connexions toutes les 5s
-              autoDialInterval: 10000,   // Auto-dial vers des peers toutes les 10s
+              maxConnections: 150,       // Beaucoup plus de connexions possibles
+              minConnections: 15,        // Minimum plus élevé pour garantir connectivité
+              pollInterval: 3000,        // Vérifier les connexions toutes les 3s (plus fréquent)
+              autoDialInterval: 5000,    // Auto-dial vers des peers toutes les 5s (plus agressif)
+              dialTimeout: 30000,        // Timeout plus long pour dial (30s)
             }
           },
           start: true,
         };
 
-        console.log('🔧 Creating Helia with WebRTC + WebSockets + Circuit Relay...');
+        console.log('🔧 Creating Helia with WebRTC (STUN) + WebSockets + Circuit Relay...');
         this.helia = await createHelia(heliaConfig);
         this.fs = unixfs(this.helia);
         
-        // Attendre un peu pour que les connexions se fassent
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        // Écouter les événements de connexion pour debug
+        this.helia.libp2p.addEventListener('peer:connect', (evt) => {
+          console.log(`🔗 Peer connected: ${evt.detail.toString()}`);
+        });
+        
+        this.helia.libp2p.addEventListener('peer:disconnect', (evt) => {
+          console.log(`🔌 Peer disconnected: ${evt.detail.toString()}`);
+        });
+        
+        // CONNECTER ACTIVEMENT aux bootstrap nodes dès le départ
+        console.log('🚀 Actively dialing bootstrap nodes...');
+        const bootstrapAddrs = [
+          '/dns4/node0.preload.ipfs.io/tcp/443/wss/p2p/QmZMxNdpMkewiVZLMRxaNxUeZpDUb34pWjZ1kZvsd16Zic',
+          '/dns4/node1.preload.ipfs.io/tcp/443/wss/p2p/Qmbut9Ywz9YEDrz8ySBSgWyJk41Uvm2QJPhwDJzJyGFsD6',
+          '/dns4/node2.preload.ipfs.io/tcp/443/wss/p2p/QmV7gnbW5VTcJ3oyM2Xk1rdFBJ3kTkvxc87UFGsun29STS',
+          '/dns4/node3.preload.ipfs.io/tcp/443/wss/p2p/QmY7JB6MQXhxHvq7dBDh4HpbH29v4yE9JRadAVpndvzySN',
+          '/dns4/relay.libp2p.io/tcp/443/wss/p2p/QmWDn2LY8nannvSWJzruUYoLZ4vV83vfCBwd8DipvdbbN1',
+          '/dns4/relay.libp2p.io/tcp/443/wss/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ',
+          '/dns4/sjc-1.bootstrap.libp2p.io/tcp/443/wss/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN',
+          '/dns4/ams-1.bootstrap.libp2p.io/tcp/443/wss/p2p/QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb',
+        ];
+        
+        // Importer multiaddr pour parser les adresses
+        const { multiaddr } = await import('@multiformats/multiaddr');
+        
+        // Dial tous les bootstrap nodes en parallèle (ne pas attendre qu'ils réussissent tous)
+        const dialPromises = bootstrapAddrs.map(async (addr) => {
+          try {
+            const ma = multiaddr(addr);
+            console.log(`📞 Dialing ${addr.split('/')[2]}...`);
+            await this.helia.libp2p.dial(ma);
+            console.log(`✅ Connected to ${addr.split('/')[2]}`);
+          } catch (error) {
+            console.log(`⚠️ Failed to dial ${addr.split('/')[2]}: ${error.message}`);
+          }
+        });
+        
+        // Attendre que certaines connexions s'établissent (mais pas toutes, timeout après 10s)
+        const waitForDials = Promise.allSettled(dialPromises);
+        const timeout = new Promise(resolve => setTimeout(resolve, 10000));
+        await Promise.race([waitForDials, timeout]);
+        
+        console.log('⏳ Waiting for additional peer discovery...');
+        await new Promise(resolve => setTimeout(resolve, 3000)); // 3 secondes de plus pour la découverte
         
         // Log des peers connectés
         const peers = this.helia.libp2p.getPeers();
         console.log(`✅ Helia ready with ${peers.length} peer(s) connected`);
         
-        if (peers.length === 0) {
-          console.warn('⚠️ No peers connected yet, but Helia is initialized');
+        // Log détaillé des connexions
+        if (peers.length > 0) {
+          console.log('📊 Connected peers:', peers.map(p => p.toString()));
+          const connections = this.helia.libp2p.getConnections();
+          console.log(`📡 Total connections: ${connections.length}`);
+        } else {
+          console.warn('⚠️ No peers connected yet. This is normal in browser without Kubo.');
+          console.warn('💡 Helia will connect to peers when downloading CIDs from the network.');
+          console.warn('💡 Bootstrap nodes will be contacted on-demand during content retrieval.');
         }
+        
+        // Maintenir activement les connexions - re-dial périodiquement si trop peu de peers
+        this._startPeerMaintenance();
         
         this.isReady = true;
         return true;
@@ -149,6 +219,68 @@ export class IpfsClient {
       this.isReady = false;
       return false;
     }
+  }
+
+  /**
+   * Maintenir activement un nombre minimum de connexions peers
+   * Re-dial les bootstrap nodes si trop peu de peers connectés
+   */
+  _startPeerMaintenance() {
+    if (!this.helia?.libp2p) return;
+    
+    console.log('🔄 Starting peer maintenance (will check every 15 seconds)');
+    
+    const maintenanceInterval = setInterval(async () => {
+      try {
+        if (!this.helia?.libp2p) {
+          clearInterval(maintenanceInterval);
+          return;
+        }
+        
+        const peers = this.helia.libp2p.getPeers();
+        const minPeers = 8; // Minimum souhaité (augmenté pour meilleure connectivité)
+        
+        if (peers.length < minPeers) {
+          console.log(`🔄 Only ${peers.length} peer(s) connected (min: ${minPeers}), re-dialing bootstrap nodes...`);
+          
+          const bootstrapAddrs = [
+            '/dns4/node0.preload.ipfs.io/tcp/443/wss/p2p/QmZMxNdpMkewiVZLMRxaNxUeZpDUb34pWjZ1kZvsd16Zic',
+            '/dns4/node1.preload.ipfs.io/tcp/443/wss/p2p/Qmbut9Ywz9YEDrz8ySBSgWyJk41Uvm2QJPhwDJzJyGFsD6',
+            '/dns4/node2.preload.ipfs.io/tcp/443/wss/p2p/QmV7gnbW5VTcJ3oyM2Xk1rdFBJ3kTkvxc87UFGsun29STS',
+            '/dns4/relay.libp2p.io/tcp/443/wss/p2p/QmWDn2LY8nannvSWJzruUYoLZ4vV83vfCBwd8DipvdbbN1',
+            '/dns4/sjc-1.bootstrap.libp2p.io/tcp/443/wss/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN',
+          ];
+          
+          const { multiaddr } = await import('@multiformats/multiaddr');
+          
+          // Essayer de se connecter à plusieurs bootstrap nodes (plus agressif)
+          let connected = 0;
+          const targetConnections = 3; // Essayer de faire 3 connexions
+          
+          for (const addr of bootstrapAddrs) {
+            if (connected >= targetConnections) break;
+            
+            try {
+              const ma = multiaddr(addr);
+              await this.helia.libp2p.dial(ma);
+              console.log(`✅ Re-connected to ${addr.split('/')[2]}`);
+              connected++;
+            } catch (error) {
+              // Ignore les erreurs, essayer le suivant
+            }
+          }
+          
+          if (connected > 0) {
+            console.log(`🔗 Re-established ${connected} connection(s) to bootstrap nodes`);
+          }
+        }
+      } catch (error) {
+        console.warn('⚠️ Peer maintenance error:', error.message);
+      }
+    }, 15000); // Check toutes les 15 secondes (plus agressif)
+    
+    // Stocker l'interval pour cleanup
+    this._maintenanceInterval = maintenanceInterval;
   }
 
   /**
@@ -493,6 +625,11 @@ export class IpfsClient {
    * Arrête Helia proprement
    */
   async stop() {
+    if (this._maintenanceInterval) {
+      clearInterval(this._maintenanceInterval);
+      this._maintenanceInterval = null;
+    }
+    
     if (this.helia) {
       console.log('🛑 Stopping Helia...');
       await this.helia.stop();

@@ -21,6 +21,7 @@ export const Header = () => {
     kudoNodeAvailable,
     currentBlock,
     heliaPeerCount,
+    kuboPeerCount,
     config,
     toggleWalletMenu,
     selectAccount,
@@ -133,7 +134,7 @@ export const Header = () => {
                     {kudoNodeAvailable && (
                       <div className="flex items-center space-x-2">
                         <span className="text-green-400">✓</span>
-                        <span>Kubo Local (localhost:5001)</span>
+                        <span>Kubo Local ({kuboPeerCount} peer{kuboPeerCount !== 1 ? 's' : ''})</span>
                       </div>
                     )}
                     <div className="flex items-center space-x-2">
@@ -381,7 +382,7 @@ export const Header = () => {
                     {kudoNodeAvailable && (
                       <div className="flex items-center space-x-2">
                         <span className="text-green-400">✓</span>
-                        <span>Kubo Local (localhost:5001)</span>
+                        <span>Kubo Local ({kuboPeerCount} peer{kuboPeerCount !== 1 ? 's' : ''})</span>
                       </div>
                     )}
                     <div className="flex items-center space-x-2">

@@ -342,19 +342,28 @@ export async function submitRagWorkflowStep({
     
     console.log('PKI profile found:', pkiProfile);
     
+    // Convert exchange key from hex to bytes
+    const recipientExchangeKey = hexToBytes(pkiProfile.exchangeKey);
+    console.log('Recipient exchange key length:', recipientExchangeKey.length, 'bytes (expected: 32)');
+    
     // Encrypt RAG data
     const {
       encryptedContent,
       ephemeralPublicKey,
       contentNonce: encContentNonce
-    } = await encryptRagData(ragData, pkiProfile.exchangeKey);
+    } = encryptRagData(ragData, recipientExchangeKey);
     
     console.log('RAG data encrypted');
     
     // Upload encrypted content to IPFS
     console.log('Uploading encrypted content to IPFS...');
-    const uploadResult = await ipfsClient.uploadFile(encryptedContent);
-    ipfsCid = uploadResult.Hash;
+    ipfsCid = await ipfsClient.uploadFile(encryptedContent);
+    
+    if (!ipfsCid || typeof ipfsCid !== 'string') {
+      console.error('Invalid CID returned:', ipfsCid);
+      throw new Error('Failed to get valid CID from IPFS upload');
+    }
+    
     console.log('Uploaded to IPFS:', ipfsCid);
     
     // Generate ephemeral keypair for CID encryption
@@ -367,7 +376,9 @@ export async function submitRagWorkflowStep({
     );
     
     // Convert CID to chain format (36 bytes)
+    console.log('Converting CID to chain format:', ipfsCid);
     const cidBytes = CidConverter.toChainFormat(ipfsCid);
+    console.log('CID converted to', cidBytes.length, 'bytes');
     
     // Encrypt the CID
     const cidNonceBytes = generateNonce();

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { MultiWalletConnector } from '../lib/core/multi-wallet-connector.js';
 import { SubstrateClient } from '../lib/core/substrate-client.js';
 import { IpfsClient } from '../lib/core/ipfs-client.js';
@@ -35,6 +35,11 @@ export const AppProvider = ({ children }) => {
   const [kudoNodeAvailable, setKudoNodeAvailable] = useState(false);
   const [currentBlock, setCurrentBlock] = useState(null);
   const [heliaPeerCount, setHeliaPeerCount] = useState(0);
+  const [kuboPeerCount, setKuboPeerCount] = useState(0);
+
+  // Use refs to avoid closure issues with intervals
+  const kuboPeerIntervalRef = useRef(null);
+  const kudoNodeAvailableRef = useRef(false);
 
   // Initialize services on mount
   useEffect(() => {
@@ -54,6 +59,11 @@ export const AppProvider = ({ children }) => {
         clearInterval(blockUpdateInterval);
         console.log('🧹 Block update interval cleaned up');
       }
+      if (kuboPeerIntervalRef.current) {
+        clearInterval(kuboPeerIntervalRef.current);
+        kuboPeerIntervalRef.current = null;
+        console.log('🧹 Kubo peer interval cleaned up');
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -65,17 +75,20 @@ export const AppProvider = ({ children }) => {
   };
 
   const checkKudoNodeAvailability = async () => {
+    console.log('🎯 checkKudoNodeAvailability called');
+    
     if (!config.IPFS_UPLOAD_URL || 
         (!config.IPFS_UPLOAD_URL.includes('localhost') && 
          !config.IPFS_UPLOAD_URL.includes('127.0.0.1') && 
          !config.IPFS_UPLOAD_URL.includes('::1'))) {
       // Not configured for local node
+      console.log('⚠️ No local Kubo configured in IPFS_UPLOAD_URL:', config.IPFS_UPLOAD_URL);
       setKudoNodeAvailable(false);
       return;
     }
 
     try {
-      console.log('🔍 Checking Kubo node availability...');
+      console.log('🔍 Checking Kubo node availability at', config.IPFS_UPLOAD_URL);
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
       
@@ -90,13 +103,35 @@ export const AppProvider = ({ children }) => {
         const data = await response.json();
         console.log('✅ Kubo node available:', data.Version);
         setKudoNodeAvailable(true);
+        kudoNodeAvailableRef.current = true; // Update ref immediately
+        
+        // Update peer count immediately when Kubo becomes available
+        await updateKuboPeerCount(true);
+        
+        // Start monitoring Kubo peer count if not already started
+        if (!kuboPeerIntervalRef.current) {
+          kuboPeerIntervalRef.current = setInterval(() => updateKuboPeerCount(), 10000);
+          console.log('🔄 Started Kubo peer count monitoring (every 10s)');
+        }
       } else {
         console.log('⚠️ Kubo node returned error:', response.status);
         setKudoNodeAvailable(false);
+        kudoNodeAvailableRef.current = false;
+        // Stop monitoring if it was running
+        if (kuboPeerIntervalRef.current) {
+          clearInterval(kuboPeerIntervalRef.current);
+          kuboPeerIntervalRef.current = null;
+        }
       }
     } catch (error) {
       console.log('⚠️ Kubo node not available:', error.message);
       setKudoNodeAvailable(false);
+      kudoNodeAvailableRef.current = false;
+      // Stop monitoring if it was running
+      if (kuboPeerIntervalRef.current) {
+        clearInterval(kuboPeerIntervalRef.current);
+        kuboPeerIntervalRef.current = null;
+      }
     }
 
     // Recheck every 30 seconds
@@ -112,6 +147,42 @@ export const AppProvider = ({ children }) => {
     } catch (error) {
       // Silent fail - not critical
       setHeliaPeerCount(0);
+    }
+  };
+
+  const updateKuboPeerCount = async (force = false) => {
+    // Use ref instead of state to avoid closure issues
+    if (!force && !kudoNodeAvailableRef.current) {
+      console.log('⏭️ Skipping Kubo peer count (node not available)');
+      setKuboPeerCount(0);
+      return;
+    }
+
+    try {
+      console.log('🔍 Fetching Kubo peer count...');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+      
+      const response = await fetch('http://127.0.0.1:5001/api/v0/swarm/peers', {
+        method: 'POST',
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        const peerCount = data.Peers ? data.Peers.length : 0;
+        console.log(`📊 Kubo has ${peerCount} peers connected`);
+        setKuboPeerCount(peerCount);
+      } else {
+        const text = await response.text();
+        console.warn(`⚠️ Kubo swarm/peers returned status ${response.status}:`, text);
+        setKuboPeerCount(0);
+      }
+    } catch (error) {
+      console.error('❌ Failed to get Kubo peer count:', error);
+      setKuboPeerCount(0);
     }
   };
 
@@ -207,7 +278,7 @@ export const AppProvider = ({ children }) => {
       setIpfsReady(false);
     });
 
-    // Check if Kubo node is available
+    // Check if Kubo node is available (will start peer monitoring if available)
     checkKudoNodeAvailability();
 
     // Auto-connect wallet on mobile or restore saved state on desktop
@@ -348,6 +419,7 @@ export const AppProvider = ({ children }) => {
     kudoNodeAvailable,
     currentBlock,
     heliaPeerCount,
+    kuboPeerCount,
     
     // Actions
     connectWallet,
