@@ -1,11 +1,23 @@
 /**
  * Encryption Utilities
  * Functions for encrypting/decrypting RAG data for secure delivery
+ * 
+ * Uses @noble libraries for compatibility with crypto.ts (TypeScript implementation)
  */
 
-import { sharedKey, scalarMultBase } from '@stablelib/x25519';
-import { ChaCha20Poly1305 } from '@stablelib/chacha20poly1305';
-import { randomBytes } from '@stablelib/random';
+import { chacha20poly1305 } from '@noble/ciphers/chacha.js';
+import { x25519 } from '@noble/curves/ed25519.js';
+
+/**
+ * Generate random bytes using native crypto
+ * @param {number} length - Number of bytes
+ * @returns {Uint8Array}
+ */
+function randomBytes(length) {
+  const bytes = new Uint8Array(length);
+  crypto.getRandomValues(bytes);
+  return bytes;
+}
 
 /**
  * Generate ephemeral keypair for ECDH
@@ -13,46 +25,70 @@ import { randomBytes } from '@stablelib/random';
  */
 export function generateEphemeralKeypair() {
   const secretKey = randomBytes(32);
-  const publicKey = scalarMultBase(secretKey);
+  const publicKey = x25519.getPublicKey(secretKey);
   return { secretKey, publicKey };
 }
 
 /**
  * Perform ECDH key agreement to derive shared secret
- * @param {Uint8Array} secretKey - Our secret key
- * @param {Uint8Array} publicKey - Their public key
+ * @param {Uint8Array} secretKey - Our secret key (32 bytes)
+ * @param {Uint8Array} publicKey - Their public key (32 bytes)
  * @returns {Uint8Array} Shared secret (32 bytes)
  */
 export function deriveSharedSecret(secretKey, publicKey) {
-  return sharedKey(secretKey, publicKey);
+  // Validation stricte (bonnes pratiques)
+  if (secretKey.length !== 32) {
+    throw new Error('Secret key must be 32 bytes');
+  }
+  if (publicKey.length !== 32) {
+    throw new Error('Public key must be 32 bytes');
+  }
+  
+  return x25519.getSharedSecret(secretKey, publicKey);
 }
 
 /**
- * Encrypt data using ChaCha20-Poly1305
+ * Encrypt data using ChaCha20-Poly1305 IETF
  * @param {Uint8Array} data - Data to encrypt
  * @param {Uint8Array} key - 32-byte encryption key
  * @param {Uint8Array} nonce - 12-byte nonce
  * @returns {Uint8Array} Encrypted data with auth tag
  */
 export function encrypt(data, key, nonce) {
-  const cipher = new ChaCha20Poly1305(key);
-  return cipher.seal(nonce, data);
+  // Validation stricte (bonnes pratiques)
+  if (key.length !== 32) {
+    throw new Error('Encryption key must be 32 bytes');
+  }
+  if (nonce.length !== 12) {
+    throw new Error('Nonce must be 12 bytes for ChaCha20Poly1305 IETF');
+  }
+  
+  const cipher = chacha20poly1305(key, nonce);
+  return cipher.encrypt(data);
 }
 
 /**
- * Decrypt data using ChaCha20-Poly1305
+ * Decrypt data using ChaCha20-Poly1305 IETF
  * @param {Uint8Array} encryptedData - Data to decrypt (includes auth tag)
  * @param {Uint8Array} key - 32-byte encryption key
  * @param {Uint8Array} nonce - 12-byte nonce
  * @returns {Uint8Array} Decrypted data
  */
 export function decrypt(encryptedData, key, nonce) {
-  const cipher = new ChaCha20Poly1305(key);
-  const decrypted = cipher.open(nonce, encryptedData);
-  if (!decrypted) {
+  // Validation stricte (bonnes pratiques)
+  if (key.length !== 32) {
+    throw new Error('Decryption key must be 32 bytes');
+  }
+  if (nonce.length !== 12) {
+    throw new Error('Nonce must be 12 bytes for ChaCha20Poly1305 IETF');
+  }
+  
+  const cipher = chacha20poly1305(key, nonce);
+  try {
+    return cipher.decrypt(encryptedData);
+  } catch (error) {
     throw new Error('Decryption failed - invalid key or corrupted data');
   }
-  return decrypted;
 }
 
 /**

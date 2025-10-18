@@ -43,6 +43,7 @@
     "@libp2p/circuit-relay-v2": "^4.0.5",
     "@libp2p/webrtc": "^6.0.6",
     "@libp2p/websockets": "^10.0.6",
+    "@noble/ciphers": "^2.0.1",
     "@noble/curves": "^2.0.1",
     "@polkadot/api": "^16.4.8",
     "@polkadot/extension-dapp": "^0.62.2",
