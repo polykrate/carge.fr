@@ -357,11 +357,11 @@ export async function submitRagWorkflowStep({
     );
     
     // Encrypt RAG data with the shared secret
-    const contentNonce = generateNonce();
+    const contentNonceBytes = generateNonce();
     const ragJson = JSON.stringify(ragData);
     const encoder = new TextEncoder();
     const ragBytes = encoder.encode(ragJson);
-    const encryptedContent = encrypt(ragBytes, sharedSecret, contentNonce);
+    const encryptedContent = encrypt(ragBytes, sharedSecret, contentNonceBytes);
     
     console.log('RAG data encrypted');
     
@@ -382,14 +382,14 @@ export async function submitRagWorkflowStep({
     console.log('CID converted to', cidBytes.length, 'bytes');
     
     // Encrypt the CID with the SAME shared secret (critical!)
-    const cidNonce = generateNonce();
-    const encryptedCidBytes = encrypt(cidBytes, sharedSecret, cidNonce);
+    const cidNonceBytes = generateNonce();
+    const encryptedCidBytes = encrypt(cidBytes, sharedSecret, cidNonceBytes);
     
     // Convert to hex for blockchain
     encryptedCid = bytesToHex(encryptedCidBytes);
     ephemeralPubkey = bytesToHex(ephemeralKeypair.publicKey);
-    cidNonce = bytesToHex(cidNonce);
-    contentNonce = bytesToHex(contentNonce);
+    cidNonce = bytesToHex(cidNonceBytes);
+    contentNonce = bytesToHex(contentNonceBytes);
     
     // Clean up sensitive data from memory
     ephemeralKeypair.secretKey.fill(0);
