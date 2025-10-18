@@ -145,15 +145,6 @@ export class IpfsClient {
         this.helia = await createHelia(heliaConfig);
         this.fs = unixfs(this.helia);
         
-        // Écouter les événements de connexion pour debug
-        this.helia.libp2p.addEventListener('peer:connect', (evt) => {
-          console.log(`🔗 Peer connected: ${evt.detail.toString()}`);
-        });
-        
-        this.helia.libp2p.addEventListener('peer:disconnect', (evt) => {
-          console.log(`🔌 Peer disconnected: ${evt.detail.toString()}`);
-        });
-        
         // CONNECTER ACTIVEMENT aux bootstrap nodes dès le départ
         console.log('🚀 Actively dialing bootstrap nodes...');
         const bootstrapAddrs = [
