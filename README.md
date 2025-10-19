@@ -8,14 +8,22 @@
 
 ## Technical Overview
 
-Client-side application for cryptographically verifiable workflows anchored on Substrate blockchain. Data remains under user control through client-side encryption and IPFS content addressing.
+Client-side application for cryptographically verifiable AI/LLM workflows anchored on **Ragchain**, a Substrate parachain. Combines Retrieval-Augmented Generation (RAG) metadata with on-chain proofs and IPFS content addressing.
+
+**What is RAG here?**
+RAG (Retrieval-Augmented Generation) workflows are composed of three IPFS-stored components:
+- **Instruction CID**: AI prompt/instructions (what to do)
+- **Resource CID**: Context documents/data (knowledge base)
+- **Schema CID**: JSON Schema for validation (expected output structure)
+
+Optional: **Workflow steps** for multi-step processes (e.g., KYC → Verification → Approval)
 
 **Core Properties:**
 - **Zero server trust**: All cryptographic operations in browser
-- **On-chain verification**: Hashes anchored on Substrate blockchain
-- **Client-side encryption**: X25519 key exchange, ChaCha20-Poly1305 AEAD
-- **Decentralized storage**: IPFS for content, blockchain for integrity proofs
-- **Self-sovereign data**: Users control encryption keys and data access
+- **On-chain RAG registry**: Metadata indexed by hash(instruction + resource + schema)
+- **Client-side encryption**: X25519 ECDH, ChaCha20-Poly1305 AEAD for private workflows
+- **Decentralized storage**: IPFS for content, Ragchain for integrity proofs
+- **Self-sovereign data**: Users control encryption keys and workflow access
 
 ## Security Architecture
 
@@ -67,7 +75,7 @@ Random: crypto.getRandomValues (CSPRNG)
 
 ```
 Frontend:     React 18, Vite, TailwindCSS
-Blockchain:   Substrate/Polkadot, @polkadot/api
+Blockchain:   Ragchain (Substrate parachain), @polkadot/api
 Storage:      IPFS/Helia (browser), Kubo (local node)
 Crypto:       @noble/curves, @noble/ciphers
 Testing:      Vitest, React Testing Library
@@ -197,7 +205,10 @@ public/                         # Static assets
 **`substrate-client.js`**
 - WebSocket RPC connection with auto-reconnect
 - Block polling for proof verification
-- Query interface: `pki.profiles`, `cryptoTrail.proofs`, `rag.metadata`
+- Query interface for 3 custom pallets:
+  - `pki`: Public key infrastructure (X25519 keys + libp2p peer IDs)
+  - `cryptoTrail`: Encrypted CID trails with ephemeral keys
+  - `rag`: RAG metadata (instruction/resource/schema CIDs + workflow steps)
 - Transaction signing via Polkadot.js extension
 
 **`ipfs-client.js`**
@@ -221,51 +232,129 @@ public/                         # Static assets
 - Content hash calculation (SHA-256)
 - CID validation and format conversion
 
-### Data Models
+### Data Models (Ragchain Pallets)
 
-**On-chain Proof (CryptoTrail pallet):**
+**PKI Pallet** - Decentralized key/peer registry for IPFS network:
 ```rust
-struct Proof {
-    content_hash: [u8; 32],        // BLAKE2b-256
-    timestamp: BlockNumber,
-    signer: AccountId,
-    metadata: BoundedVec<u8>,      // Application-specific
+struct PkiProfile {
+    exchange_key: [u8; 32],        // X25519 public key for ECDH
+    peer_id: [u8; 38],             // libp2p multihash peer ID
+    profile_cid: Option<[u8; 36]>, // Optional CIDv1 for extended profile
+    staked_amount: Balance,        // Anti-spam stake
+    created_at: BlockNumber,
+    expires_at: BlockNumber,       // TTL for automatic cleanup
 }
 ```
 
-**RAG Metadata (RAG pallet):**
+**CryptoTrail Pallet** - Encrypted CID transmission with proof:
+```rust
+struct CryptoTrail {
+    creator: AccountId,            // Who created this trail
+    encrypted_cid: [u8; 52],       // ChaCha20-Poly1305 encrypted CIDv1 (36 + 16 auth tag)
+    ephemeral_pubkey: [u8; 32],    // Ephemeral X25519 public key
+    cid_nonce: [u8; 12],           // Nonce for CID encryption
+    content_nonce: [u8; 12],       // Nonce for content encryption
+    content_hash: [u8; 32],        // BLAKE2b-256 hash of original content
+    substrate_signature: [u8; 64], // Sr25519 signature of content_hash
+    created_at: BlockNumber,
+    expires_at: BlockNumber,       // TTL (default: 1 month, extendable)
+}
+```
+
+**RAG Pallet** - Workflow metadata registry:
 ```rust
 struct RagMetadata {
-    schema_cid: BoundedVec<u8>,    // IPFS CID (JSON Schema)
-    encrypted_content: Vec<u8>,    // ChaCha20-Poly1305 ciphertext
-    encrypted_cid: Vec<u8>,        // Encrypted IPFS CID
-    ephemeral_public_key: [u8; 32],// X25519 public key
-    content_nonce: [u8; 24],       // ChaCha20 nonce
-    cid_nonce: [u8; 24],           // Separate nonce for CID
+    instruction_cid: [u8; 36],     // CIDv1: AI prompt/instructions
+    resource_cid: [u8; 36],        // CIDv1: Context documents/data
+    schema_cid: [u8; 36],          // CIDv1: JSON Schema for validation
+    steps: BoundedVec<[u8; 32], 64>, // Workflow steps (hashes of RAG metadata)
+    created_at: BlockNumber,
+    expires_at: BlockNumber,       // TTL for automatic cleanup
+    staked_amount: Balance,        // Anti-spam stake
+    publisher: AccountId,
+    name: BoundedVec<u8, 50>,      // RAG name (max 50 chars)
+    description: BoundedVec<u8, 300>, // Description (max 300 chars)
+    tags: BoundedVec<BoundedVec<u8, 15>, 10>, // Up to 10 tags (15 chars each)
 }
 ```
 
-**Workflow Proof (on-chain):**
-```rust
-struct WorkflowProof {
-    rag_hash: [u8; 32],            // Hash of RAG metadata
-    workflow_id: BoundedVec<u8>,   // Unique workflow identifier
-    step_number: u32,              // Current step in workflow
-    total_steps: u32,              // Total steps in workflow
-    previous_proof: Option<[u8; 32]>, // Link to previous step
-}
+**Storage Keys:**
+- PKI: Indexed by `AccountId`
+- CryptoTrail: Indexed by `content_hash` (BLAKE2-256)
+- RAG: Indexed by `hash(instruction_cid || resource_cid || schema_cid || steps)`
+
+### Ragchain Pallet Interactions
+
+**Workflow execution pattern:**
+
+1. **PKI Setup** (once per user):
+   ```rust
+   pki.set_profile(
+     exchange_key,  // X25519 public key
+     peer_id,       // libp2p peer ID for IPFS
+     profile_cid,   // Optional: extended profile on IPFS
+     ttl            // Time-to-live for auto-cleanup
+   )
+   ```
+
+2. **RAG Publication** (workflow creator):
+   ```rust
+   rag.store_metadata(
+     instruction_cid,  // AI prompt (IPFS)
+     resource_cid,     // Context data (IPFS)
+     schema_cid,       // JSON Schema (IPFS)
+     steps,            // Optional: [hash1, hash2, ...] for multi-step
+     name, description, tags  // Metadata for discovery
+   )
+   ```
+
+3. **CryptoTrail Submission** (workflow execution):
+   ```rust
+   cryptoTrail.store_trail(
+     encrypted_cid,        // ChaCha20 encrypted CIDv1 of result
+     ephemeral_pubkey,     // X25519 ephemeral key
+     cid_nonce,            // Nonce for CID encryption
+     content_nonce,        // Nonce for content encryption
+     content_hash,         // BLAKE2-256 of original content
+     substrate_signature   // Sr25519 signature
+   )
+   ```
+
+**Data flow:**
+```
+Alice → PKI (register exchange_key + peer_id)
+     ↓
+Alice → RAG (publish workflow: instruction + resource + schema)
+     ↓
+Bob   → Fetch RAG metadata, execute workflow, encrypt result
+     ↓
+Bob   → CryptoTrail (submit encrypted CID + proof)
+     ↓
+Alice → Decrypt CID using Bob's ephemeral_pubkey + her exchange_key
+     ↓
+Alice → Retrieve content from IPFS using decrypted CID
 ```
 
 ### Configuration (`src/lib/config.js`)
 
 ```javascript
-export const RPC_ENDPOINT = 'wss://rpc.example.com';
-export const IPFS_UPLOAD_URL = 'http://127.0.0.1:5001';
-export const IPFS_GATEWAYS = [
-  'https://ipfs.io',
-  'https://dweb.link',
-  // Fallback chain for content retrieval
-];
+export const config = {
+  // Ragchain (Substrate parachain on Tanssi)
+  SUBSTRATE_WS_URL: 'wss://fraa-flashbox-4667-rpc.a.stagenet.tanssi.network',
+  CHAIN_NAME: 'Ragchain',
+  
+  // IPFS
+  IPFS_UPLOAD_URL: 'http://127.0.0.1:5001/api/v0/add',
+  IPFS_PUBLIC_GATEWAYS: [
+    'https://ipfs.io/ipfs/',
+    'https://cloudflare-ipfs.com/ipfs/',
+    'https://dweb.link/ipfs/',
+  ],
+  
+  // App
+  APP_NAME: 'Carge',
+  APP_VERSION: '1.0.0',
+};
 ```
 
 ### Security Considerations
