@@ -296,5 +296,152 @@ export class ProofVerifier {
       trail
     };
   }
+
+  /**
+   * Reconstruit l'historique du workflow à partir d'une preuve finale
+   * Retourne les étapes intermédiaires avec leurs hash et livrables reconstitués
+   * @param {Object} proof - Proof object with ragData
+   * @param {Object} ragClient - RagClient instance
+   * @param {Object} ipfsClient - IpfsClient instance
+   * @returns {Promise<Object>} Workflow history with verification status for each step
+   */
+  async reconstructWorkflowHistory(proof, ragClient, ipfsClient) {
+    try {
+      console.log('🔄 Reconstructing workflow history...');
+      
+      if (!proof.ragData) {
+        throw new Error('Invalid proof format: missing ragData');
+      }
+
+      const { ragHash, stepHash, livrable } = proof.ragData;
+      
+      console.log(`RAG: ${ragHash}, Current step: ${stepHash}`);
+
+      // Get all RAGs to find the master workflow and steps
+      const allRags = await ragClient.getAllRags();
+      const masterRag = allRags.find(r => r.hash === ragHash);
+      
+      if (!masterRag) {
+        throw new Error(`Master workflow not found: ${ragHash}`);
+      }
+
+      const steps = masterRag.metadata.steps;
+      const currentStepIndex = steps.findIndex(step => step === stepHash);
+      
+      if (currentStepIndex === -1) {
+        throw new Error(`Current step hash not found in workflow: ${stepHash}`);
+      }
+
+      console.log(`Current step is ${currentStepIndex + 1}/${steps.length}`);
+
+      // Reconstruct history by going through steps
+      const history = [];
+      
+      // Get metadata for each step to identify delivrable keys
+      const stepMetadataList = [];
+      for (let i = 0; i <= currentStepIndex; i++) {
+        const stepHashValue = steps[i];
+        const stepRag = allRags.find(r => r.hash === stepHashValue);
+        
+        if (!stepRag) {
+          console.warn(`Step ${i + 1} metadata not found: ${stepHashValue}`);
+          stepMetadataList.push({ hash: stepHashValue, metadata: null, keys: [] });
+          continue;
+        }
+        
+        // Try to get schema keys
+        let keys = [];
+        try {
+          const schemaCid = stepRag.metadata.schemaCid;
+          const schemaObj = await ipfsClient.downloadJsonFromHex(schemaCid);
+          keys = Object.keys(schemaObj.properties || {});
+          console.log(`Step ${i + 1} keys from schema:`, keys);
+        } catch (error) {
+          console.warn(`Could not retrieve schema for step ${i + 1}:`, error.message);
+        }
+        
+        stepMetadataList.push({
+          hash: stepHashValue,
+          metadata: stepRag.metadata,
+          keys
+        });
+      }
+
+      // Reconstruct each step with partial delivrable data
+      let accumulatedDelivrable = {};
+      
+      for (let i = 0; i <= currentStepIndex; i++) {
+        const stepHashValue = steps[i];
+        const { keys, metadata } = stepMetadataList[i];
+        
+        // Add keys from this step to accumulated delivrable
+        for (const key of keys) {
+          if (livrable[key] !== undefined) {
+            accumulatedDelivrable[key] = livrable[key];
+          }
+        }
+
+        // Calculate hash for this step
+        const stepRagData = {
+          ragHash,
+          stepHash: stepHashValue,
+          livrable: { ...accumulatedDelivrable }
+        };
+        
+        const ragDataString = JSON.stringify(stepRagData);
+        const encoder = new TextEncoder();
+        const data = encoder.encode(ragDataString);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const contentHash = '0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+        // Verify on blockchain that this hash exists
+        let blockchainVerified = false;
+        let blockchainData = null;
+        
+        try {
+          const trail = await this.queryBlockchain(contentHash);
+          if (trail) {
+            blockchainVerified = true;
+            blockchainData = {
+              creator: trail.creatorAddress,
+              createdAt: trail.createdAt,
+              expiresAt: trail.expiresAt,
+              signatureValid: trail.signatureValid
+            };
+            console.log(`✅ Step ${i + 1}: Verified on blockchain at block ${trail.createdAt}`);
+          } else {
+            console.log(`❌ Step ${i + 1}: Hash not found on blockchain: ${contentHash}`);
+          }
+        } catch (error) {
+          console.warn(`⚠️ Step ${i + 1}: Blockchain verification error:`, error.message);
+        }
+
+        history.push({
+          stepIndex: i,
+          stepHash: stepHashValue,
+          stepName: metadata?.name || `Step ${i + 1}`,
+          delivrable: { ...accumulatedDelivrable },
+          contentHash,
+          blockchainVerified,
+          blockchainData
+        });
+
+        console.log(`Step ${i + 1}: hash=${contentHash}, keys=[${Object.keys(accumulatedDelivrable).join(', ')}], verified=${blockchainVerified}`);
+      }
+
+      return {
+        masterWorkflowHash: ragHash,
+        masterWorkflowName: masterRag.metadata?.name || 'Unknown Workflow',
+        currentStepIndex,
+        totalSteps: steps.length,
+        history,
+        allStepsVerified: history.every(h => h.blockchainVerified)
+      };
+    } catch (error) {
+      console.error('Failed to reconstruct workflow history:', error);
+      throw error;
+    }
+  }
 }
 

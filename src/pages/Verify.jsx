@@ -22,6 +22,7 @@ export const Verify = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [proofData, setProofData] = useState(null); // Store the proof data for workflow continuation
+  const [workflowHistory, setWorkflowHistory] = useState(null); // Store reconstructed workflow history
   
   // Workflow continuation states
   const [allRags, setAllRags] = useState([]);
@@ -205,6 +206,7 @@ export const Verify = () => {
       setVerifying(true);
       setError(null);
       setResult(null);
+      setWorkflowHistory(null);
 
       console.log('Processing file:', file.name);
       const text = await file.text();
@@ -246,6 +248,7 @@ export const Verify = () => {
       setVerifying(true);
       setError(null);
       setResult(null);
+      setWorkflowHistory(null);
 
       const proof = JSON.parse(jsonInput);
       await verifyProof(proof, toastId);
@@ -311,13 +314,19 @@ export const Verify = () => {
         setProofData(proof.ragData);
       }
       
-      // If proof is valid and contains workflow data, try to load next step
+      // If proof is valid and contains workflow data, reconstruct and verify workflow history
       if (result.isValid && proof.ragData && proof.ragData.ragHash && proof.ragData.stepHash && proof.ragData.livrable) {
-        console.log('Valid workflow proof detected, attempting to load next step...');
+        console.log('Valid workflow proof detected, reconstructing history...');
         try {
+          const ragClient = new RagClient(substrateClient);
+          const history = await verifier.reconstructWorkflowHistory(proof, ragClient, ipfsClient);
+          setWorkflowHistory(history);
+          console.log('📜 Workflow history reconstructed:', history);
+          
+          // Also try to load next step
           await loadNextWorkflowStep(proof.ragData);
         } catch (err) {
-          console.error('Failed to load next workflow step:', err);
+          console.error('Failed to reconstruct workflow history:', err);
           // Don't fail the whole verification, just log it
         }
       }
@@ -845,6 +854,150 @@ export const Verify = () => {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Workflow History Section */}
+      {workflowHistory && (
+        <div className="bg-white border border-gray-200 rounded-lg p-6 mt-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-semibold">Workflow History</h2>
+              {workflowHistory.allStepsVerified ? (
+                <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  All Steps Verified
+                </span>
+              ) : (
+                <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  Some Steps Unverified
+                </span>
+              )}
+            </div>
+            <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+              {workflowHistory.currentStepIndex + 1} / {workflowHistory.totalSteps} Steps
+            </span>
+          </div>
+
+          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <p className="text-sm text-gray-600">
+              <strong>Workflow:</strong> {workflowHistory.masterWorkflowName}
+            </p>
+            <p className="text-xs text-gray-500 mt-1 font-mono">
+              Hash: {workflowHistory.masterWorkflowHash}
+            </p>
+          </div>
+
+          {/* Timeline of steps */}
+          <div className="space-y-4">
+            {workflowHistory.history.map((step, index) => (
+              <div
+                key={step.stepIndex}
+                className={`border rounded-lg p-4 ${
+                  step.blockchainVerified
+                    ? 'border-green-200 bg-green-50'
+                    : 'border-red-200 bg-red-50'
+                }`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    {step.blockchainVerified ? (
+                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    )}
+                    <h3 className="font-semibold text-gray-900">
+                      Step {step.stepIndex + 1}: {step.stepName}
+                    </h3>
+                  </div>
+                  <span
+                    className={`text-xs px-2 py-1 rounded ${
+                      step.blockchainVerified
+                        ? 'bg-green-200 text-green-800'
+                        : 'bg-red-200 text-red-800'
+                    }`}
+                  >
+                    {step.blockchainVerified ? 'Verified' : 'Not Found'}
+                  </span>
+                </div>
+
+                {/* Step Details */}
+                <div className="bg-white rounded p-3 space-y-2 text-xs">
+                  <div>
+                    <span className="text-gray-500 font-medium">Content Hash:</span>
+                    <p className="font-mono text-gray-700 break-all">{step.contentHash}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 font-medium">Step Hash:</span>
+                    <p className="font-mono text-gray-700 break-all">{step.stepHash}</p>
+                  </div>
+                  
+                  {step.blockchainData && (
+                    <>
+                      <div>
+                        <span className="text-gray-500 font-medium">Creator:</span>
+                        <p className="font-mono text-gray-700 break-all">{step.blockchainData.creator}</p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <span className="text-gray-500 font-medium">Created:</span>
+                          <a 
+                            href={getBlockExplorerLink(step.blockchainData.createdAt)} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="font-mono text-blue-600 hover:underline ml-1"
+                          >
+                            Block #{step.blockchainData.createdAt} →
+                          </a>
+                        </div>
+                        <div>
+                          <span className="text-gray-500 font-medium">Signature:</span>
+                          <span
+                            className={`ml-1 px-2 py-0.5 rounded text-xs ${
+                              step.blockchainData.signatureValid
+                                ? 'bg-green-200 text-green-800'
+                                : 'bg-red-200 text-red-800'
+                            }`}
+                          >
+                            {step.blockchainData.signatureValid ? 'Valid' : 'Invalid'}
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  
+                  {/* Show delivrable keys for this step */}
+                  <div>
+                    <span className="text-gray-500 font-medium">Delivrable Keys:</span>
+                    <p className="text-gray-700 mt-1">
+                      {Object.keys(step.delivrable).length > 0
+                        ? Object.keys(step.delivrable).join(', ')
+                        : 'None'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Collapsible delivrable data */}
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-xs text-gray-600 hover:text-gray-900">
+                    Show delivrable data
+                  </summary>
+                  <pre className="mt-2 bg-gray-100 rounded p-2 text-xs text-gray-700 overflow-x-auto">
+                    {JSON.stringify(step.delivrable, null, 2)}
+                  </pre>
+                </details>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
