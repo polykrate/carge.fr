@@ -23,6 +23,8 @@ export const Verify = () => {
   const [error, setError] = useState(null);
   const [proofData, setProofData] = useState(null); // Store the proof data for workflow continuation
   const [workflowHistory, setWorkflowHistory] = useState(null); // Store reconstructed workflow history
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState(false); // Accordion state for history details
+  const [expandedSteps, setExpandedSteps] = useState({}); // Track which steps are expanded
   
   // Workflow continuation states
   const [allRags, setAllRags] = useState([]);
@@ -207,6 +209,8 @@ export const Verify = () => {
       setError(null);
       setResult(null);
       setWorkflowHistory(null);
+      setIsHistoryExpanded(false);
+      setExpandedSteps({});
 
       console.log('Processing file:', file.name);
       const text = await file.text();
@@ -249,6 +253,8 @@ export const Verify = () => {
       setError(null);
       setResult(null);
       setWorkflowHistory(null);
+      setIsHistoryExpanded(false);
+      setExpandedSteps({});
 
       const proof = JSON.parse(jsonInput);
       await verifyProof(proof, toastId);
@@ -857,10 +863,11 @@ export const Verify = () => {
         </div>
       )}
 
-      {/* Workflow History Section */}
+      {/* Workflow History Section - Compact View */}
       {workflowHistory && (
         <div className="bg-white border border-gray-200 rounded-lg p-6 mt-8">
-          <div className="flex items-center justify-between mb-6">
+          {/* Header with Summary */}
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-semibold">Workflow History</h2>
               {workflowHistory.allStepsVerified ? (
@@ -884,120 +891,166 @@ export const Verify = () => {
             </span>
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <p className="text-sm text-gray-600">
-              <strong>Workflow:</strong> {workflowHistory.masterWorkflowName}
-            </p>
-            <p className="text-xs text-gray-500 mt-1 font-mono">
-              Hash: {workflowHistory.masterWorkflowHash}
-            </p>
+          {/* Compact workflow info */}
+          <div className="bg-gray-50 rounded-lg p-4 mb-4">
+            <p className="text-sm text-gray-900 font-medium mb-1">{workflowHistory.masterWorkflowName}</p>
+            <div className="flex items-center gap-4 text-xs text-gray-600">
+              <span>
+                {workflowHistory.history.filter(h => h.blockchainVerified).length} / {workflowHistory.history.length} steps verified
+              </span>
+              <span className="font-mono">{workflowHistory.masterWorkflowHash.slice(0, 10)}...{workflowHistory.masterWorkflowHash.slice(-8)}</span>
+            </div>
           </div>
 
-          {/* Timeline of steps */}
-          <div className="space-y-4">
-            {workflowHistory.history.map((step, index) => (
-              <div
-                key={step.stepIndex}
-                className={`border rounded-lg p-4 ${
-                  step.blockchainVerified
-                    ? 'border-green-200 bg-green-50'
-                    : 'border-red-200 bg-red-50'
-                }`}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    {step.blockchainVerified ? (
-                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    )}
-                    <h3 className="font-semibold text-gray-900">
-                      Step {step.stepIndex + 1}: {step.stepName}
-                    </h3>
-                  </div>
-                  <span
-                    className={`text-xs px-2 py-1 rounded ${
-                      step.blockchainVerified
-                        ? 'bg-green-200 text-green-800'
-                        : 'bg-red-200 text-red-800'
+          {/* Toggle Details Button */}
+          <button
+            onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
+            className="w-full flex items-center justify-between px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-left"
+          >
+            <span className="font-medium text-gray-900">History Details</span>
+            <svg 
+              className={`w-5 h-5 text-gray-600 transition-transform ${isHistoryExpanded ? 'rotate-180' : ''}`}
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {/* Collapsible Details Section */}
+          {isHistoryExpanded && (
+            <div className="mt-4 space-y-3">
+              {/* Timeline of steps */}
+              {workflowHistory.history.map((step) => (
+                <div key={step.stepIndex} className="border border-gray-200 rounded-lg overflow-hidden">
+                  {/* Step Header - Always Visible */}
+                  <button
+                    onClick={() => setExpandedSteps(prev => ({
+                      ...prev,
+                      [step.stepIndex]: !prev[step.stepIndex]
+                    }))}
+                    className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition text-left ${
+                      step.blockchainVerified ? 'bg-green-50' : 'bg-red-50'
                     }`}
                   >
-                    {step.blockchainVerified ? 'Verified' : 'Not Found'}
-                  </span>
-                </div>
+                    <div className="flex items-center gap-3 flex-1">
+                      {step.blockchainVerified ? (
+                        <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 text-sm">
+                          Step {step.stepIndex + 1}: {step.stepName}
+                        </h3>
+                        {step.blockchainData && (
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Block #{step.blockchainData.createdAt} • {Object.keys(step.delivrable).length} keys
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-xs px-2 py-1 rounded font-medium ${
+                            step.blockchainVerified
+                              ? 'bg-green-200 text-green-800'
+                              : 'bg-red-200 text-red-800'
+                          }`}
+                        >
+                          {step.blockchainVerified ? '✓ Verified' : '✗ Not Found'}
+                        </span>
+                        <svg 
+                          className={`w-4 h-4 text-gray-600 transition-transform ${expandedSteps[step.stepIndex] ? 'rotate-180' : ''}`}
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </button>
 
-                {/* Step Details */}
-                <div className="bg-white rounded p-3 space-y-2 text-xs">
-                  <div>
-                    <span className="text-gray-500 font-medium">Content Hash:</span>
-                    <p className="font-mono text-gray-700 break-all">{step.contentHash}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500 font-medium">Step Hash:</span>
-                    <p className="font-mono text-gray-700 break-all">{step.stepHash}</p>
-                  </div>
-                  
-                  {step.blockchainData && (
-                    <>
-                      <div>
-                        <span className="text-gray-500 font-medium">Creator:</span>
-                        <p className="font-mono text-gray-700 break-all">{step.blockchainData.creator}</p>
-                      </div>
-                      <div className="flex items-center gap-4">
+                  {/* Step Details - Collapsible */}
+                  {expandedSteps[step.stepIndex] && (
+                    <div className="px-4 py-3 bg-white border-t space-y-3">
+                      {/* Hashes */}
+                      <div className="grid grid-cols-1 gap-2 text-xs">
                         <div>
-                          <span className="text-gray-500 font-medium">Created:</span>
-                          <a 
-                            href={getBlockExplorerLink(step.blockchainData.createdAt)} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="font-mono text-blue-600 hover:underline ml-1"
-                          >
-                            Block #{step.blockchainData.createdAt} →
-                          </a>
+                          <span className="text-gray-500 font-medium">Content Hash:</span>
+                          <p className="font-mono text-gray-700 break-all mt-0.5">{step.contentHash}</p>
                         </div>
                         <div>
-                          <span className="text-gray-500 font-medium">Signature:</span>
-                          <span
-                            className={`ml-1 px-2 py-0.5 rounded text-xs ${
-                              step.blockchainData.signatureValid
-                                ? 'bg-green-200 text-green-800'
-                                : 'bg-red-200 text-red-800'
-                            }`}
-                          >
-                            {step.blockchainData.signatureValid ? 'Valid' : 'Invalid'}
-                          </span>
+                          <span className="text-gray-500 font-medium">Step Hash:</span>
+                          <p className="font-mono text-gray-700 break-all mt-0.5">{step.stepHash}</p>
                         </div>
                       </div>
-                    </>
+                      
+                      {/* Blockchain Data */}
+                      {step.blockchainData && (
+                        <div className="pt-2 border-t space-y-2 text-xs">
+                          <div>
+                            <span className="text-gray-500 font-medium">Creator:</span>
+                            <p className="font-mono text-gray-700 break-all mt-0.5">{step.blockchainData.creator}</p>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-4">
+                            <div>
+                              <span className="text-gray-500 font-medium">Block:</span>
+                              <a 
+                                href={getBlockExplorerLink(step.blockchainData.createdAt)} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="font-mono text-blue-600 hover:underline ml-1"
+                              >
+                                #{step.blockchainData.createdAt} →
+                              </a>
+                            </div>
+                            <div>
+                              <span className="text-gray-500 font-medium">Signature:</span>
+                              <span
+                                className={`ml-1 px-2 py-0.5 rounded ${
+                                  step.blockchainData.signatureValid
+                                    ? 'bg-green-200 text-green-800'
+                                    : 'bg-red-200 text-red-800'
+                                }`}
+                              >
+                                {step.blockchainData.signatureValid ? 'Valid' : 'Invalid'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Delivrable Keys */}
+                      <div className="pt-2 border-t">
+                        <span className="text-xs text-gray-500 font-medium">Delivrable Keys:</span>
+                        <p className="text-xs text-gray-700 mt-1">
+                          {Object.keys(step.delivrable).length > 0
+                            ? Object.keys(step.delivrable).join(', ')
+                            : 'None'}
+                        </p>
+                      </div>
+
+                      {/* Collapsible delivrable data */}
+                      <details className="pt-2 border-t">
+                        <summary className="cursor-pointer text-xs text-gray-600 hover:text-gray-900 font-medium">
+                          Show full delivrable data
+                        </summary>
+                        <pre className="mt-2 bg-gray-100 rounded p-2 text-xs text-gray-700 overflow-x-auto max-h-64">
+                          {JSON.stringify(step.delivrable, null, 2)}
+                        </pre>
+                      </details>
+                    </div>
                   )}
-                  
-                  {/* Show delivrable keys for this step */}
-                  <div>
-                    <span className="text-gray-500 font-medium">Delivrable Keys:</span>
-                    <p className="text-gray-700 mt-1">
-                      {Object.keys(step.delivrable).length > 0
-                        ? Object.keys(step.delivrable).join(', ')
-                        : 'None'}
-                    </p>
-                  </div>
                 </div>
-
-                {/* Collapsible delivrable data */}
-                <details className="mt-2">
-                  <summary className="cursor-pointer text-xs text-gray-600 hover:text-gray-900">
-                    Show delivrable data
-                  </summary>
-                  <pre className="mt-2 bg-gray-100 rounded p-2 text-xs text-gray-700 overflow-x-auto">
-                    {JSON.stringify(step.delivrable, null, 2)}
-                  </pre>
-                </details>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
