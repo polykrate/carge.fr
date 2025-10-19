@@ -1,10 +1,17 @@
 /**
- * Form Generator - Generate HTML forms from JSON Schema
+ * Form Generator - Generate forms from JSON Schema using React (XSS-safe)
+ * Migration from innerHTML to React components for security
  */
 
+import { createElement } from 'react';
+import { createRoot } from 'react-dom/client';
+import { DynamicForm } from '../../components/DynamicForm.jsx';
+
 export class FormGenerator {
+  static roots = new Map(); // Store React roots for cleanup
+
   /**
-   * Generate HTML form from JSON Schema
+   * Generate form from JSON Schema using React
    * @param {Object} schema - JSON Schema object
    * @param {string} containerId - ID of the container element
    */
@@ -15,276 +22,36 @@ export class FormGenerator {
       return;
     }
 
-    container.innerHTML = '';
-    
-    if (!schema || !schema.properties) {
-      container.innerHTML = '<div class="text-red-500">Invalid schema</div>';
-      return;
+    // Clean up existing root if any
+    if (this.roots.has(containerId)) {
+      this.roots.get(containerId).unmount();
     }
 
-    const formHtml = this.generateFields(schema, schema.properties, '');
-    container.innerHTML = formHtml;
+    // Create new React root and render
+    const root = createRoot(container);
+    root.render(
+      createElement(DynamicForm, {
+        schema,
+        onFileSelect: this.handleFileForCid.bind(this)
+      })
+    );
+
+    this.roots.set(containerId, root);
   }
 
   /**
-   * Generate form fields recursively
-   * @param {Object} schema - Root schema
-   * @param {Object} properties - Properties object
-   * @param {string} prefix - Field name prefix for nested objects
+   * Handle file selection for CID calculation
+   * @param {string} inputId - ID of the input field
+   * @param {File} file - Selected file
    */
-  static generateFields(schema, properties, prefix = '') {
-    let html = '';
+  static async handleFileForCid(inputId, file) {
+    // TODO: Implement CID calculation from file
+    // For now, just log the file selection
+    console.log(`File selected for field ${inputId}:`, file.name);
     
-    for (const [key, prop] of Object.entries(properties)) {
-      const fieldName = prefix ? `${prefix}.${key}` : key;
-      const isRequired = schema.required?.includes(key) || false;
-      
-      if (prop.type === 'object' && prop.properties) {
-        // Nested object - create a section
-        html += `
-          <div class="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
-            <div class="font-medium text-[#003399] mb-2">${this.formatLabel(key)}${isRequired ? ' *' : ''}</div>
-            ${this.generateFields(prop, prop.properties, fieldName)}
-          </div>
-        `;
-      } else {
-        html += this.generateField(fieldName, key, prop, isRequired);
-      }
-    }
-    
-    return html;
-  }
-
-  /**
-   * Generate a single form field
-   */
-  static generateField(fieldName, key, prop, isRequired) {
-    const label = this.formatLabel(key);
-    const id = `field-${fieldName.replace(/\./g, '-')}`;
-    const requiredAttr = isRequired ? 'required' : '';
-    const requiredMark = isRequired ? '<span class="text-red-500">*</span>' : '';
-    
-    let fieldHtml = '';
-
-    // Description/help text
-    const helpText = prop.description ? 
-      `<div class="text-xs text-gray-500 mt-1">${prop.description}</div>` : '';
-
-    switch (prop.type) {
-      case 'string':
-        if (prop.enum) {
-          // Select dropdown for enums
-          fieldHtml = `
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                ${label} ${requiredMark}
-              </label>
-              <select 
-                id="${id}" 
-                name="${fieldName}"
-                ${requiredAttr}
-                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003399]"
-              >
-                <option value="">-- Select ${label} --</option>
-                ${prop.enum.map(opt => `<option value="${opt}">${this.formatLabel(opt)}</option>`).join('')}
-              </select>
-              ${helpText}
-            </div>
-          `;
-        } else if (prop.format === 'date') {
-          // Date input
-          fieldHtml = `
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                ${label} ${requiredMark}
-              </label>
-              <input 
-                type="date" 
-                id="${id}" 
-                name="${fieldName}"
-                ${requiredAttr}
-                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003399]"
-              />
-              ${helpText}
-            </div>
-          `;
-        } else if (prop.format === 'email') {
-          // Email input
-          fieldHtml = `
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                ${label} ${requiredMark}
-              </label>
-              <input 
-                type="email" 
-                id="${id}" 
-                name="${fieldName}"
-                ${requiredAttr}
-                ${prop.minLength ? `minlength="${prop.minLength}"` : ''}
-                ${prop.maxLength ? `maxlength="${prop.maxLength}"` : ''}
-                placeholder="${prop.placeholder || ''}"
-                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003399]"
-              />
-              ${helpText}
-            </div>
-          `;
-        } else if (prop.maxLength && prop.maxLength > 200) {
-          // Textarea for long strings
-          fieldHtml = `
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                ${label} ${requiredMark}
-              </label>
-              <textarea 
-                id="${id}" 
-                name="${fieldName}"
-                rows="4"
-                ${requiredAttr}
-                ${prop.minLength ? `minlength="${prop.minLength}"` : ''}
-                ${prop.maxLength ? `maxlength="${prop.maxLength}"` : ''}
-                placeholder="${prop.placeholder || ''}"
-                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003399]"
-              ></textarea>
-              ${helpText}
-              ${prop.maxLength ? `<div class="text-xs text-gray-400 mt-1">Max ${prop.maxLength} characters</div>` : ''}
-            </div>
-          `;
-        } else if (this.isHashField(key, prop)) {
-          // Hash/CID field with file picker
-          fieldHtml = `
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                ${label} ${requiredMark}
-              </label>
-              <input 
-                type="text" 
-                id="${id}" 
-                name="${fieldName}"
-                ${requiredAttr}
-                ${prop.minLength ? `minlength="${prop.minLength}"` : ''}
-                ${prop.maxLength ? `maxlength="${prop.maxLength}"` : ''}
-                ${prop.pattern ? `pattern="${prop.pattern}"` : ''}
-                placeholder="${prop.placeholder || 'CID or hash'}"
-                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#003399]"
-              />
-              ${helpText}
-              <div class="mt-2 flex gap-2">
-                <input 
-                  type="file" 
-                  id="${id}-file" 
-                  class="hidden"
-                  onchange="handleFileForCid('${id}', this)"
-                />
-                <label 
-                  for="${id}-file"
-                  class="cursor-pointer px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg transition inline-flex items-center gap-1"
-                >
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                  Choose File & Calculate CID
-                </label>
-                <span id="${id}-filename" class="text-xs text-gray-500 flex items-center"></span>
-              </div>
-            </div>
-          `;
-        } else {
-          // Regular text input
-          fieldHtml = `
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                ${label} ${requiredMark}
-              </label>
-              <input 
-                type="text" 
-                id="${id}" 
-                name="${fieldName}"
-                ${requiredAttr}
-                ${prop.minLength ? `minlength="${prop.minLength}"` : ''}
-                ${prop.maxLength ? `maxlength="${prop.maxLength}"` : ''}
-                ${prop.pattern ? `pattern="${prop.pattern}"` : ''}
-                placeholder="${prop.placeholder || ''}"
-                class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#003399]"
-              />
-              ${helpText}
-            </div>
-          `;
-        }
-        break;
-
-      case 'number':
-      case 'integer':
-        fieldHtml = `
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">
-              ${label} ${requiredMark}
-            </label>
-            <input 
-              type="number" 
-              id="${id}" 
-              name="${fieldName}"
-              ${requiredAttr}
-              ${prop.minimum !== undefined ? `min="${prop.minimum}"` : ''}
-              ${prop.maximum !== undefined ? `max="${prop.maximum}"` : ''}
-              ${prop.type === 'integer' ? 'step="1"' : ''}
-              class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003399]"
-            />
-            ${helpText}
-          </div>
-        `;
-        break;
-
-      case 'boolean':
-        fieldHtml = `
-          <div class="mb-4 flex items-center">
-            <input 
-              type="checkbox" 
-              id="${id}" 
-              name="${fieldName}"
-              class="w-4 h-4 text-[#003399] border-gray-300 rounded focus:ring-[#003399]"
-            />
-            <label class="ml-2 text-sm text-gray-700">
-              ${label} ${requiredMark}
-            </label>
-            ${helpText}
-          </div>
-        `;
-        break;
-
-      default:
-        fieldHtml = `
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">
-              ${label} ${requiredMark}
-            </label>
-            <input 
-              type="text" 
-              id="${id}" 
-              name="${fieldName}"
-              ${requiredAttr}
-              class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003399]"
-            />
-            ${helpText}
-          </div>
-        `;
-    }
-
-    return fieldHtml;
-  }
-
-  /**
-   * Check if field is a hash/CID field
-   */
-  static isHashField(key, prop) {
-    const lowerKey = key.toLowerCase();
-    const description = (prop.description || '').toLowerCase();
-    
-    return lowerKey.includes('hash') || 
-           lowerKey.includes('cid') || 
-           description.includes('hash') || 
-           description.includes('cid') ||
-           prop.format === 'hash' ||
-           prop.format === 'cid';
+    // Future: Calculate IPFS CID from file and populate input
+    // const cid = await calculateCID(file);
+    // document.getElementById(inputId).value = cid;
   }
 
   /**
@@ -292,8 +59,8 @@ export class FormGenerator {
    */
   static formatLabel(name) {
     return name
-      .replace(/([A-Z])/g, ' $1') // Add space before capital letters
-      .replace(/^./, str => str.toUpperCase()) // Capitalize first letter
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase())
       .trim();
   }
 
@@ -357,5 +124,14 @@ export class FormGenerator {
       errors
     };
   }
-}
 
+  /**
+   * Cleanup React roots (call when unmounting)
+   */
+  static cleanup(containerId) {
+    if (this.roots.has(containerId)) {
+      this.roots.get(containerId).unmount();
+      this.roots.delete(containerId);
+    }
+  }
+}
