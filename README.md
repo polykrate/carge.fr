@@ -38,28 +38,17 @@ Web application at **carge.fr** for direct user interaction:
 
 ### 2. AI Agent Interface (MCP)
 **Human Context Protocol** - Model Context Protocol server for AI agents:
-- MCP tools for Claude Desktop, Cursor, etc.
+- MCP tools for Claude Desktop, Mistral, Cursor, and compatible AI clients
 - Programmatic workflow execution
-- Autonomous proof verification
-- Multi-agent coordination (Alice/Bob scenarios)
+- Autonomous multi-agent coordination
 
-### 3. Backend Integration (MCP Server Mode)
-**Same MCP server** can be integrated with enterprise systems:
+### 3. Backend Integration (Server Mode)
+Enterprise integration for automated compliance:
 - ERP/CRM workflow automation
-- Legacy system bridging (SAP, Salesforce, etc.)
-- Business process orchestration
-- Headless compliance operations
+- Legacy system bridging
+- Headless business process execution
 
-**Repository**: `github.com/polykrate/human-context-protocol` *(unreleased)*
-
-**Architecture**:
-```
-Humans    → carge.fr (React)        ┐
-                                     │
-AI Agents → MCP Client (Claude)     ├─→ MCP Server ──→ Ragchain (3 pallets)
-                                     │      +                  +
-ERP/SI    → HTTP/gRPC Bridge        ┘   IPFS Node          IPFS Network
-```
+**Repository**: `github.com/polykrate/human-context-protocol` *(unreleased, contact: jf.meneust@gmail.com)*
 
 All three interfaces share identical cryptographic primitives and blockchain logic.
 
@@ -242,158 +231,57 @@ public/                         # Static assets
 
 **`substrate-client.js`**
 - WebSocket RPC connection with auto-reconnect
-- Block polling for proof verification
-- Query interface for 3 custom pallets:
-  - `pki`: Public key infrastructure (X25519 keys + libp2p peer IDs)
-  - `cryptoTrail`: Encrypted CID trails with ephemeral keys
-  - `rag`: RAG metadata (instruction/resource/schema CIDs + workflow steps)
+- Query interface for Ragchain pallets
 - Transaction signing via Polkadot.js extension
 
 **`ipfs-client.js`**
-- Helia node lifecycle (start/stop)
-- Dual upload: Kubo API (if available) or gateway fallback
-- Content retrieval with multi-gateway failover
-- WebRTC/WebSocket transports for P2P
-- Bootstrap nodes: Protocol Labs + custom
+- Helia node lifecycle management
+- Dual upload: Kubo (if available) or gateway fallback
+- Multi-gateway content retrieval
 
 **`encryption-utils.js`**
-- `generateEphemeralKeypair()`: X25519 keypair via @noble/curves
-- `deriveSharedSecret()`: ECDH key exchange
-- `encrypt()`: ChaCha20-Poly1305 with 24-byte nonce
-- `decrypt()`: Verify authentication tag, return plaintext
-- All operations use `Uint8Array` (no string encoding)
+- Ephemeral keypair generation
+- ECDH key exchange
+- AEAD encryption/decryption
 
 **`blockchain-utils.js`**
-- `encryptRagData()`: Orchestrates encryption for RAG workflows
-- `submitRagWorkflowStep()`: Dual encryption (content + CID)
-- `fetchPkiProfile()`: Retrieve recipient's exchange key
-- Content hash calculation (SHA-256)
-- CID validation and format conversion
+- Workflow submission orchestration
+- PKI profile management
+- Content hashing and CID conversion
 
-### Data Models (Ragchain Pallets)
+### Blockchain Integration
 
-**PKI Pallet** - Decentralized key/peer registry for IPFS network:
-```rust
-struct PkiProfile {
-    exchange_key: [u8; 32],        // X25519 public key for ECDH
-    peer_id: [u8; 38],             // libp2p multihash peer ID
-    profile_cid: Option<[u8; 36]>, // Optional CIDv1 for extended profile
-    staked_amount: Balance,        // Anti-spam stake
-    created_at: BlockNumber,
-    expires_at: BlockNumber,       // TTL for automatic cleanup
-}
+**Ragchain Pallets:**
+
+Carge interacts with a custom Substrate parachain featuring specialized pallets for:
+- **PKI**: Decentralized public key registry (exchange keys + peer IDs)
+- **CryptoTrail**: Encrypted proof submissions with ephemeral keys
+- **RAG**: Workflow metadata registry (instruction/resource/schema CIDs)
+
+All pallets feature:
+- Anti-spam staking mechanisms
+- TTL-based automatic cleanup
+- Content-addressed storage keys
+
+**Workflow Pattern:**
+```
+1. Register PKI profile (exchange keys + peer ID)
+2. Publish RAG workflow metadata on-chain
+3. Execute workflow → encrypt result
+4. Submit encrypted proof via CryptoTrail pallet
+5. Recipient decrypts CID → retrieves content from IPFS
 ```
 
-**CryptoTrail Pallet** - Encrypted CID transmission with proof:
-```rust
-struct CryptoTrail {
-    creator: AccountId,            // Who created this trail
-    encrypted_cid: [u8; 52],       // ChaCha20-Poly1305 encrypted CIDv1 (36 + 16 auth tag)
-    ephemeral_pubkey: [u8; 32],    // Ephemeral X25519 public key
-    cid_nonce: [u8; 12],           // Nonce for CID encryption
-    content_nonce: [u8; 12],       // Nonce for content encryption
-    content_hash: [u8; 32],        // BLAKE2b-256 hash of original content
-    substrate_signature: [u8; 64], // Sr25519 signature of content_hash
-    created_at: BlockNumber,
-    expires_at: BlockNumber,       // TTL (default: 1 month, extendable)
-}
-```
-
-**RAG Pallet** - Workflow metadata registry:
-```rust
-struct RagMetadata {
-    instruction_cid: [u8; 36],     // CIDv1: AI prompt/instructions
-    resource_cid: [u8; 36],        // CIDv1: Context documents/data
-    schema_cid: [u8; 36],          // CIDv1: JSON Schema for validation
-    steps: BoundedVec<[u8; 32], 64>, // Workflow steps (hashes of RAG metadata)
-    created_at: BlockNumber,
-    expires_at: BlockNumber,       // TTL for automatic cleanup
-    staked_amount: Balance,        // Anti-spam stake
-    publisher: AccountId,
-    name: BoundedVec<u8, 50>,      // RAG name (max 50 chars)
-    description: BoundedVec<u8, 300>, // Description (max 300 chars)
-    tags: BoundedVec<BoundedVec<u8, 15>, 10>, // Up to 10 tags (15 chars each)
-}
-```
-
-**Storage Keys:**
-- PKI: Indexed by `AccountId`
-- CryptoTrail: Indexed by `content_hash` (BLAKE2-256)
-- RAG: Indexed by `hash(instruction_cid || resource_cid || schema_cid || steps)`
-
-### Ragchain Pallet Interactions
-
-**Workflow execution pattern:**
-
-1. **PKI Setup** (once per user):
-   ```rust
-   pki.set_profile(
-     exchange_key,  // X25519 public key
-     peer_id,       // libp2p peer ID for IPFS
-     profile_cid,   // Optional: extended profile on IPFS
-     ttl            // Time-to-live for auto-cleanup
-   )
-   ```
-
-2. **RAG Publication** (workflow creator):
-   ```rust
-   rag.store_metadata(
-     instruction_cid,  // AI prompt (IPFS)
-     resource_cid,     // Context data (IPFS)
-     schema_cid,       // JSON Schema (IPFS)
-     steps,            // Optional: [hash1, hash2, ...] for multi-step
-     name, description, tags  // Metadata for discovery
-   )
-   ```
-
-3. **CryptoTrail Submission** (workflow execution):
-   ```rust
-   cryptoTrail.store_trail(
-     encrypted_cid,        // ChaCha20 encrypted CIDv1 of result
-     ephemeral_pubkey,     // X25519 ephemeral key
-     cid_nonce,            // Nonce for CID encryption
-     content_nonce,        // Nonce for content encryption
-     content_hash,         // BLAKE2-256 of original content
-     substrate_signature   // Sr25519 signature
-   )
-   ```
-
-**Data flow:**
-```
-Alice → PKI (register exchange_key + peer_id)
-     ↓
-Alice → RAG (publish workflow: instruction + resource + schema)
-     ↓
-Bob   → Fetch RAG metadata, execute workflow, encrypt result
-     ↓
-Bob   → CryptoTrail (submit encrypted CID + proof)
-     ↓
-Alice → Decrypt CID using Bob's ephemeral_pubkey + her exchange_key
-     ↓
-Alice → Retrieve content from IPFS using decrypted CID
-```
+For detailed pallet specifications, see Ragchain repository (contact: jf.meneust@gmail.com).
 
 ### Configuration (`src/lib/config.js`)
 
-```javascript
-export const config = {
-  // Ragchain (Substrate parachain on Tanssi)
-  SUBSTRATE_WS_URL: 'wss://fraa-flashbox-4667-rpc.a.stagenet.tanssi.network',
-  CHAIN_NAME: 'Ragchain',
-  
-  // IPFS
-  IPFS_UPLOAD_URL: 'http://127.0.0.1:5001/api/v0/add',
-  IPFS_PUBLIC_GATEWAYS: [
-    'https://ipfs.io/ipfs/',
-    'https://cloudflare-ipfs.com/ipfs/',
-    'https://dweb.link/ipfs/',
-  ],
-  
-  // App
-  APP_NAME: 'Carge',
-  APP_VERSION: '1.0.0',
-};
-```
+Configuration includes:
+- Ragchain RPC endpoints (WebSocket + HTTP)
+- IPFS gateway URLs (public + optional local Kubo)
+- Application metadata (name, version)
+
+See `src/lib/config.js` for current network endpoints.
 
 ### Security Considerations
 
