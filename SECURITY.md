@@ -1,52 +1,117 @@
 # Security Policy
 
-## Reporting a Vulnerability
+## ⚠️ NO WARRANTY - USE AT YOUR OWN RISK
 
-If you discover a security vulnerability in Carge, please report it responsibly:
+**This software is provided "AS IS" without warranty of any kind, express or implied.**
 
-### 🔒 **Private Disclosure**
-- **DO NOT** open a public issue
-- Contact via GitHub Security Advisories (recommended)
-- Or email: security@carge.io (if available)
+As stated in the GNU General Public License v3.0 (sections 15-16):
 
-### 📧 **What to Include**
-- Description of the vulnerability
+> **15. Disclaimer of Warranty.**
+> 
+> THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.
+
+> **16. Limitation of Liability.**
+> 
+> IN NO EVENT WILL ANY COPYRIGHT HOLDER BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE PROGRAM.
+
+**You use this software entirely at your own risk. The authors and contributors accept NO responsibility for:**
+- Loss of funds or assets
+- Data corruption or loss
+- Security breaches
+- System failures
+- Any direct or indirect damages
+
+---
+
+## Your Responsibilities
+
+By using Carge, you acknowledge that:
+
+1. **You are solely responsible for**:
+   - Securing your wallet and private keys
+   - Verifying all transactions before signing
+   - Understanding the risks of blockchain technology
+   - Backing up your data and seed phrases
+
+2. **You understand that**:
+   - This is experimental software (testnet deployment)
+   - No external security audit has been conducted
+   - Bugs may exist despite testing efforts
+   - Blockchain transactions are irreversible
+
+3. **You accept that**:
+   - The authors provide no guarantees of availability, correctness, or security
+   - Support is provided on a best-effort basis
+   - No SLA or uptime guarantees exist
+   - The software may change or be discontinued at any time
+
+---
+
+## Known Risks & Limitations
+
+### Critical Dependencies
+- **Polkadot.js Extension**: Security is user responsibility
+- **Browser Security**: Client-side execution environment
+- **IPFS Network**: Content availability not guaranteed
+- **Ragchain Testnet**: Experimental blockchain (not production-ready)
+
+### Attack Vectors
+- Phishing attacks (fake websites, malicious wallets)
+- Browser extension compromise
+- Social engineering
+- Supply chain attacks (NPM packages)
+- Man-in-the-middle attacks (use HTTPS only)
+
+### Technical Limitations
+- IPFS retrieval timeouts (30s limit)
+- Single RPC endpoint (no fallback yet)
+- Browser memory constraints (~50MB for IPFS)
+- Testnet may be reset without notice
+
+---
+
+## Responsible Disclosure
+
+If you discover a security vulnerability, we appreciate responsible disclosure:
+
+### Reporting
+- **Email**: jf.meneust@gmail.com
+- **Subject**: "Security: [Brief description]"
+- **DO NOT** open public GitHub issues for vulnerabilities
+
+### Include
+- Vulnerability description
 - Steps to reproduce
-- Potential impact
-- Suggested fix (if any)
+- Potential impact assessment
 
-### ⏱️ **Response Time**
-- We aim to acknowledge reports within **48 hours**
-- Security patches will be prioritized
+### Response
+- Best-effort response (no guaranteed timeline)
+- Security patches prioritized when feasible
+- No bug bounty program currently
 
-### 🛡️ **Supported Versions**
-Currently, we provide security updates for:
+---
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.x.x   | ✅ Yes             |
-| < 1.0   | ❌ No              |
+## Best Practices (Your Responsibility)
 
-## Security Considerations
+1. ✅ **Verify everything**: URLs, wallet addresses, transaction details
+2. ✅ **Use hardware wallets**: For any significant operations
+3. ✅ **Keep software updated**: Browser, extensions, OS
+4. ✅ **Backup seed phrases**: Store securely offline
+5. ✅ **Test with small amounts**: Before large transactions
+6. ✅ **Understand the code**: It's open source for a reason
+7. ✅ **Assume the worst**: Always have a recovery plan
 
-### Client-Side Security
-- All private keys remain in your browser wallet
-- No server-side storage of credentials
-- Local-first architecture
+---
 
-### Blockchain Security
-- All transactions are cryptographically signed
-- Immutable audit trail on Substrate
-- IPFS for decentralized storage
+## Legal Notice
 
-### Known Limitations
-- Relies on Polkadot.js Extension security
-- Browser security is user responsibility
-- Testnet deployment - not production ready
+**NO FINANCIAL ADVICE. NO GUARANTEES. NO LIABILITY.**
 
-## Best Practices
-1. Always verify transaction details before signing
-2. Use hardware wallets for high-value operations
-3. Keep your wallet extension updated
-4. Never share your seed phrase or private keys
+This software is a tool. Like any tool, it can be misused or fail. You are responsible for how you use it and any consequences that arise.
+
+**By using Carge, you agree to hold harmless the authors, contributors, and maintainers from any claims, damages, or losses.**
+
+---
+
+*GPL-3.0 License - See LICENSE file for full legal terms*
 
