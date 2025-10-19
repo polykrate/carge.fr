@@ -25,6 +25,44 @@ Optional: **Workflow steps** for multi-step processes (e.g., KYC → Verificatio
 - **Decentralized storage**: IPFS for content, Ragchain for integrity proofs
 - **Self-sovereign data**: Users control encryption keys and workflow access
 
+## Interfaces
+
+**Three ways to interact with Ragchain:**
+
+### 1. Human Interface (this repo)
+Web application at **carge.fr** for direct user interaction:
+- Visual workflow builder and executor
+- Wallet integration (Polkadot.js extension)
+- Proof verification and history browsing
+- Multi-language support (EN/FR)
+
+### 2. AI Agent Interface (MCP)
+**Human Context Protocol** - Model Context Protocol server for AI agents:
+- MCP tools for Claude Desktop, Cursor, etc.
+- Programmatic workflow execution
+- Autonomous proof verification
+- Multi-agent coordination (Alice/Bob scenarios)
+
+### 3. Backend Integration (MCP Server Mode)
+**Same MCP server** can be integrated with enterprise systems:
+- ERP/CRM workflow automation
+- Legacy system bridging (SAP, Salesforce, etc.)
+- Business process orchestration
+- Headless compliance operations
+
+**Repository**: `github.com/polykrate/human-context-protocol` *(unreleased)*
+
+**Architecture**:
+```
+Humans    → carge.fr (React)        ┐
+                                     │
+AI Agents → MCP Client (Claude)     ├─→ MCP Server ──→ Ragchain (3 pallets)
+                                     │      +                  +
+ERP/SI    → HTTP/gRPC Bridge        ┘   IPFS Node          IPFS Network
+```
+
+All three interfaces share identical cryptographic primitives and blockchain logic.
+
 ## Security Architecture
 
 ### Cryptographic Stack
