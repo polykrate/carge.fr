@@ -787,7 +787,11 @@ export const Verify = () => {
             {result.details && (
               <button
                 onClick={() => setIsProofDetailsExpanded(!isProofDetailsExpanded)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-white hover:bg-gray-50 rounded-lg transition text-left border border-gray-200"
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition text-left border ${
+                  result.isValid
+                    ? 'bg-green-50 hover:bg-green-100 border-green-200'
+                    : 'bg-red-50 hover:bg-red-100 border-red-200'
+                }`}
               >
                 <span className="font-medium text-gray-900">Proof Details</span>
                 <svg 
@@ -804,7 +808,9 @@ export const Verify = () => {
 
           {/* Collapsible Details Section */}
           {result.details && isProofDetailsExpanded && (
-            <div className="px-6 pb-6 bg-white border-t">
+            <div className={`px-6 pb-6 border-t ${
+              result.isValid ? 'border-green-200' : 'border-red-200'
+            }`}>
               <div className="pt-4 space-y-2 text-sm">
                 {Object.entries(result.details).map(([key, value]) => (
                   <div key={key} className="flex flex-col">
