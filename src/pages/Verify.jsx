@@ -1061,7 +1061,7 @@ export const Verify = () => {
       {/* Workflow Continuation Section */}
       {workflowInfo && (
         <div className="bg-white border border-gray-200 rounded-lg p-6 mt-8">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Workflow Continuation</h2>
             <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
               Step {workflowInfo.currentStep} / {workflowInfo.totalSteps}
