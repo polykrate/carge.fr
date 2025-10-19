@@ -11,6 +11,32 @@ export class SubstrateClient {
     this.isConnected = false;
     this.currentBlock = 0;
     this.pollInterval = null;
+    this.reconnectInterval = null;
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 10;
+    this.reconnectDelay = 5000; // 5 seconds
+    this.connectionListeners = new Set();
+  }
+
+  /**
+   * Add a connection status listener
+   */
+  onConnectionChange(listener) {
+    this.connectionListeners.add(listener);
+    return () => this.connectionListeners.delete(listener);
+  }
+
+  /**
+   * Notify all listeners of connection status change
+   */
+  notifyConnectionChange(isConnected) {
+    this.connectionListeners.forEach(listener => {
+      try {
+        listener(isConnected);
+      } catch (err) {
+        console.error('Error in connection listener:', err);
+      }
+    });
   }
 
   /**
@@ -41,9 +67,18 @@ export class SubstrateClient {
       const data = await response.json();
       
       if (data.result && data.result.number) {
+        const wasDisconnected = !this.isConnected;
         this.isConnected = true;
         this.currentBlock = parseInt(data.result.number, 16);
-        console.log(`✅ Connected to Substrate. Current block: ${this.currentBlock}`);
+        this.reconnectAttempts = 0; // Reset reconnect counter on successful connection
+        
+        if (wasDisconnected) {
+          console.log(`✅ ${this.reconnectAttempts > 0 ? 'Reconnected' : 'Connected'} to Substrate. Current block: ${this.currentBlock}`);
+          this.notifyConnectionChange(true);
+        }
+        
+        // Stop any reconnect attempts
+        this.stopReconnecting();
         
         // Start polling for new blocks
         this.startPolling();
@@ -55,8 +90,58 @@ export class SubstrateClient {
       
     } catch (error) {
       console.error('Failed to connect to Substrate:', error);
+      const wasConnected = this.isConnected;
       this.isConnected = false;
+      
+      if (wasConnected) {
+        this.notifyConnectionChange(false);
+      }
+      
       throw error;
+    }
+  }
+
+  /**
+   * Start automatic reconnection attempts
+   */
+  startReconnecting() {
+    if (this.reconnectInterval) {
+      return; // Already reconnecting
+    }
+
+    console.log(`🔄 Starting reconnection attempts (max: ${this.maxReconnectAttempts})...`);
+    
+    this.reconnectInterval = setInterval(async () => {
+      if (this.isConnected) {
+        this.stopReconnecting();
+        return;
+      }
+
+      this.reconnectAttempts++;
+      
+      if (this.reconnectAttempts > this.maxReconnectAttempts) {
+        console.error(`❌ Max reconnection attempts (${this.maxReconnectAttempts}) reached. Giving up.`);
+        this.stopReconnecting();
+        return;
+      }
+
+      console.log(`🔄 Reconnection attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts}...`);
+      
+      try {
+        await this.connect();
+      } catch (err) {
+        // connect() already logs the error
+      }
+    }, this.reconnectDelay);
+  }
+
+  /**
+   * Stop reconnection attempts
+   */
+  stopReconnecting() {
+    if (this.reconnectInterval) {
+      clearInterval(this.reconnectInterval);
+      this.reconnectInterval = null;
     }
   }
 
@@ -65,7 +150,14 @@ export class SubstrateClient {
    */
   async disconnect() {
     this.stopPolling();
+    this.stopReconnecting();
+    const wasConnected = this.isConnected;
     this.isConnected = false;
+    
+    if (wasConnected) {
+      this.notifyConnectionChange(false);
+    }
+    
     console.log('Disconnected from Substrate');
   }
 
@@ -73,6 +165,9 @@ export class SubstrateClient {
    * Start polling for new blocks
    */
   startPolling() {
+    // Stop any existing polling
+    this.stopPolling();
+    
     // Poll every 6 seconds (typical Substrate block time)
     this.pollInterval = setInterval(async () => {
       if (!this.isConnected) return;
@@ -101,9 +196,16 @@ export class SubstrateClient {
           this.currentBlock = parseInt(data.result.number, 16);
         }
       } catch (err) {
-        console.error('Error polling block:', err);
+        console.error('⚠️ Error polling block, connection lost:', err.message);
+        const wasConnected = this.isConnected;
         this.isConnected = false;
         this.stopPolling();
+        
+        if (wasConnected) {
+          this.notifyConnectionChange(false);
+          // Start automatic reconnection
+          this.startReconnecting();
+        }
       }
     }, 6000);
   }
@@ -119,13 +221,28 @@ export class SubstrateClient {
   }
 
   /**
+   * Ensure connection is established (auto-reconnect if needed)
+   */
+  async ensureConnected() {
+    if (this.isConnected) {
+      return true;
+    }
+
+    console.log('⚠️ Not connected, attempting to reconnect...');
+    try {
+      await this.connect();
+      return true;
+    } catch (err) {
+      console.error('❌ Failed to establish connection:', err.message);
+      throw new Error('Not connected to Substrate blockchain');
+    }
+  }
+
+  /**
    * Get current block number
    */
   async getCurrentBlock() {
-    if (!this.isConnected) {
-      throw new Error('Not connected to Substrate');
-    }
-    
+    await this.ensureConnected();
     return this.currentBlock;
   }
 
@@ -133,9 +250,7 @@ export class SubstrateClient {
    * Query blockchain storage with raw RPC
    */
   async queryStorage(storageKey) {
-    if (!this.isConnected) {
-      throw new Error('Not connected to Substrate');
-    }
+    await this.ensureConnected();
     
     try {
       const response = await fetch(this.rpcUrl, {

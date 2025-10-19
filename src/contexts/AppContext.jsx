@@ -44,9 +44,12 @@ export const AppProvider = ({ children }) => {
   // Initialize services on mount
   useEffect(() => {
     let blockUpdateInterval = null;
+    let unsubscribeConnection = null;
     
     const initialize = async () => {
-      blockUpdateInterval = await initializeApp();
+      const result = await initializeApp();
+      blockUpdateInterval = result.blockUpdateInterval;
+      unsubscribeConnection = result.unsubscribeConnection;
     };
     
     initialize();
@@ -58,6 +61,10 @@ export const AppProvider = ({ children }) => {
       if (blockUpdateInterval) {
         clearInterval(blockUpdateInterval);
         console.log('🧹 Block update interval cleaned up');
+      }
+      if (unsubscribeConnection) {
+        unsubscribeConnection();
+        console.log('🧹 Substrate connection listener cleaned up');
       }
       if (kuboPeerIntervalRef.current) {
         clearInterval(kuboPeerIntervalRef.current);
@@ -235,6 +242,39 @@ export const AppProvider = ({ children }) => {
   const initializeApp = async () => {
     let blockUpdateInterval = null;
     
+    // Setup connection status listener
+    const unsubscribe = substrateClient.onConnectionChange((isConnected) => {
+      console.log(`🔗 Substrate connection status changed: ${isConnected ? 'CONNECTED' : 'DISCONNECTED'}`);
+      setSubstrateConnected(isConnected);
+      
+      if (isConnected) {
+        // Reconnected - restart block updates
+        if (!blockUpdateInterval) {
+          substrateClient.getCurrentBlock().then(block => {
+            setCurrentBlock(block);
+            
+            blockUpdateInterval = setInterval(async () => {
+              try {
+                const newBlock = await substrateClient.getCurrentBlock();
+                setCurrentBlock(newBlock);
+              } catch (error) {
+                console.error('Error updating block:', error);
+              }
+            }, 6000);
+            
+            console.log('✅ Block update interval (re)started');
+          });
+        }
+      } else {
+        // Disconnected - stop block updates
+        if (blockUpdateInterval) {
+          clearInterval(blockUpdateInterval);
+          blockUpdateInterval = null;
+          console.log('⏹️ Block update interval stopped');
+        }
+      }
+    });
+    
     // Connect to Substrate
     try {
       const connected = await substrateClient.connect();
@@ -349,7 +389,7 @@ export const AppProvider = ({ children }) => {
       console.error('❌ Failed to auto-connect wallet:', error);
     }
     
-    return blockUpdateInterval;
+    return { blockUpdateInterval, unsubscribeConnection: unsubscribe };
   };
 
   const connectWallet = async (walletId = 'polkadot-js') => {
