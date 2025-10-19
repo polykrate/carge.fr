@@ -25,6 +25,7 @@ export const Verify = () => {
   const [workflowHistory, setWorkflowHistory] = useState(null); // Store reconstructed workflow history
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false); // Accordion state for history details
   const [expandedSteps, setExpandedSteps] = useState({}); // Track which steps are expanded
+  const [isProofDetailsExpanded, setIsProofDetailsExpanded] = useState(false); // Accordion state for proof details
   
   // Workflow continuation states
   const [allRags, setAllRags] = useState([]);
@@ -46,7 +47,7 @@ export const Verify = () => {
   const exampleProof = {
     "ragData": {
       "ragHash": "0x3bda44d8460eb05bee5487c433f3d8a9a2bbdc056f3622dac36810012a7972b8",
-      "stepHash": "0xc9ab2efad8f54abaf263987bc217ca4169a690ea8db7613099e27e2fe1b82afe",
+      "stepHash": "0x038b7cbc0dd28fbce26d50fc405ceaa06bda8c47b27f24e16d165e4d67d2784c",
       "livrable": {
         "entity": {
           "entityType": "company",
@@ -124,32 +125,6 @@ export const Verify = () => {
           "alertThreshold": 50000,
           "monitoringConsent": true,
           "monitoringFrequency": "daily"
-        },
-        "compliance": {
-          "fullName": "CryptoTrading France SAS",
-          "aliases": [
-            "CTF"
-          ],
-          "sanctionsScreeningConsent": true,
-          "sanctionsScreeningResult": "clear",
-          "adverseMediaFound": false,
-          "criminalRecord": false,
-          "beneficialOwnerScreening": "all_clear",
-          "monitoringFrequency": "monthly",
-          "sarAcknowledgment": true,
-          "complianceOfficer": {
-            "name": "Sophie Bernard",
-            "email": "compliance@cryptotrading-fr.example",
-            "certification": "CAMS"
-          },
-          "attestations": {
-            "informationAccurate": true,
-            "noMaterialChanges": true,
-            "consentToMonitoring": true,
-            "consentToRegulatorSharing": true,
-            "amlProgramInPlace": true,
-            "understandSARObligations": true
-          }
         }
       }
     }
@@ -211,6 +186,7 @@ export const Verify = () => {
       setWorkflowHistory(null);
       setIsHistoryExpanded(false);
       setExpandedSteps({});
+      setIsProofDetailsExpanded(false);
 
       console.log('Processing file:', file.name);
       const text = await file.text();
@@ -255,6 +231,7 @@ export const Verify = () => {
       setWorkflowHistory(null);
       setIsHistoryExpanded(false);
       setExpandedSteps({});
+      setIsProofDetailsExpanded(false);
 
       const proof = JSON.parse(jsonInput);
       await verifyProof(proof, toastId);
@@ -779,35 +756,56 @@ export const Verify = () => {
         </div>
       )}
 
-      {/* Result */}
+      {/* Result - Compact View */}
       {result && (
-        <div role="region" aria-label="Verification results" className={`border rounded-lg p-6 ${
+        <div role="region" aria-label="Verification results" className={`border rounded-lg overflow-hidden ${
           result.isValid
             ? 'bg-green-50 border-green-200'
             : 'bg-red-50 border-red-200'
         }`}>
-          <div className="flex items-center space-x-3 mb-4">
-            {result.isValid ? (
-              <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            ) : (
-              <svg className="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            )}
-            <div>
-              <div className="font-medium text-lg">
-                {result.isValid ? 'Proof Valid' : 'Proof Invalid'}
+          {/* Header - Always visible */}
+          <div className="p-6">
+            <div className="flex items-center space-x-3 mb-4">
+              {result.isValid ? (
+                <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              ) : (
+                <svg className="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )}
+              <div>
+                <div className="font-medium text-lg">
+                  {result.isValid ? 'Proof Valid' : 'Proof Invalid'}
+                </div>
+                <div className="text-sm text-gray-700">{result.message}</div>
               </div>
-              <div className="text-sm text-gray-700">{result.message}</div>
             </div>
+
+            {/* Toggle Details Button */}
+            {result.details && (
+              <button
+                onClick={() => setIsProofDetailsExpanded(!isProofDetailsExpanded)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-white hover:bg-gray-50 rounded-lg transition text-left border border-gray-200"
+              >
+                <span className="font-medium text-gray-900">Proof Details</span>
+                <svg 
+                  className={`w-5 h-5 text-gray-600 transition-transform ${isProofDetailsExpanded ? 'rotate-180' : ''}`}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            )}
           </div>
 
-          {result.details && (
-            <div className="mt-4 bg-white rounded-lg p-4">
-              <h3 className="font-medium mb-3">Proof Details</h3>
-              <div className="space-y-2 text-sm">
+          {/* Collapsible Details Section */}
+          {result.details && isProofDetailsExpanded && (
+            <div className="px-6 pb-6 bg-white border-t">
+              <div className="pt-4 space-y-2 text-sm">
                 {Object.entries(result.details).map(([key, value]) => (
                   <div key={key} className="flex flex-col">
                     <span className="text-gray-500 font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span>
@@ -831,7 +829,7 @@ export const Verify = () => {
 
           {/* Continue Workflow Button for valid RAG proofs */}
           {result.isValid && proofData && proofData.ragHash && proofData.stepHash && (
-            <div className="mt-6 pt-6 border-t border-green-200">
+            <div className={`px-6 pb-6 ${result.details && isProofDetailsExpanded ? 'pt-4 border-t' : ''}`}>
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
                   <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
