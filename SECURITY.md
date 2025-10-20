@@ -75,7 +75,7 @@ By using Carge, you acknowledge that:
 If you discover a security vulnerability, we appreciate responsible disclosure:
 
 ### Reporting
-- **Email**: jf.meneust@gmail.com
+- **Email**: contact@carge.fr
 - **Subject**: "Security: [Brief description]"
 - **DO NOT** open public GitHub issues for vulnerabilities
 
