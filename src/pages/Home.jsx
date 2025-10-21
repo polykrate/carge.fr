@@ -275,6 +275,10 @@ export const Home = () => {
                   <span className="text-[#003399]">✓</span>
                   <span>{t('home.ebsiFeature2')}</span>
                 </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#003399]">✓</span>
+                  <span>{t('home.ebsiFeature3')}</span>
+                </li>
               </ul>
             </div>
 
