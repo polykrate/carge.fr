@@ -263,10 +263,10 @@ export const Home = () => {
                   {t('home.ebsiTitle')}
                 </a>
               </div>
-              <p className="text-gray-600 mb-4 text-justify">
+              <p className="text-gray-600 mb-4 text-justify flex-1">
                 {t('home.ebsiDesc')}
               </p>
-              <ul className="space-y-2 text-sm text-gray-700">
+              <ul className="space-y-2 text-sm text-gray-700 mt-auto">
                 <li className="flex items-start gap-2">
                   <span className="text-[#003399]">✓</span>
                   <span>{t('home.ebsiFeature1')}</span>
@@ -290,10 +290,10 @@ export const Home = () => {
                   {t('home.polkadotTitle')}
                 </a>
               </div>
-              <p className="text-gray-600 mb-4 text-justify">
+              <p className="text-gray-600 mb-4 text-justify flex-1">
                 {t('home.polkadotDesc')}
               </p>
-              <ul className="space-y-2 text-sm text-gray-700">
+              <ul className="space-y-2 text-sm text-gray-700 mt-auto">
                 <li className="flex items-start gap-2">
                   <span className="text-[#003399]">✓</span>
                   <span>{t('home.polkadotFeature1')}</span>
@@ -321,10 +321,10 @@ export const Home = () => {
                   {t('home.solanaTitle')}
                 </a>
               </div>
-              <p className="text-gray-600 mb-4 text-justify">
+              <p className="text-gray-600 mb-4 text-justify flex-1">
                 {t('home.solanaDesc')}
               </p>
-              <ul className="space-y-2 text-sm text-gray-700">
+              <ul className="space-y-2 text-sm text-gray-700 mt-auto">
                 <li className="flex items-start gap-2">
                   <span className="text-[#003399]">✓</span>
                   <span>{t('home.solanaFeature1')}</span>
