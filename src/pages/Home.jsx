@@ -282,7 +282,7 @@ export const Home = () => {
               </ul>
             </div>
 
-            {/* Tanssi Appchain */}
+            {/* Tanssi / Security */}
             <div className="bg-white p-8 rounded-xl border-2 border-[#003399]/20 hover:border-[#003399] transition flex flex-col">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-[#003399]/10 rounded-lg flex items-center justify-center">
