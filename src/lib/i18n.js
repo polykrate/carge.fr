@@ -105,7 +105,7 @@ const resources = {
         polkadotTitle: 'Tanssi Appchain',
         polkadotDesc: 'Deployed on Tanssi with security backed by $250M+ in restaked assets ensuring honest operator behavior',
         polkadotFeature1: 'Dedicated appchain with full customization and sovereignty',
-        polkadotFeature2: 'Secured by Symbiotic restaking protocol with $250M+ stake',
+        polkadotFeature2: 'State-of-the-art Substrate blockchain with Rust for defensive coding',
         polkadotFeature3: 'Native interoperability with Polkadot ecosystem',
         
         // Roadmap
@@ -405,7 +405,7 @@ const resources = {
         polkadotTitle: 'Appchain Tanssi',
         polkadotDesc: 'Déployée sur Tanssi avec une sécurité garantie par +250M$ d\'actifs restakés assurant l\'honnêteté des opérateurs',
         polkadotFeature1: 'Appchain dédiée avec personnalisation totale et souveraineté',
-        polkadotFeature2: 'Sécurisée par le protocole de restaking Symbiotic avec +250M$ de stake',
+        polkadotFeature2: 'Blockchain Substrate de pointe avec Rust pour la programmation défensive',
         polkadotFeature3: 'Interopérabilité native avec l\'écosystème Polkadot',
         
         // Roadmap
