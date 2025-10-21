@@ -90,8 +90,8 @@ const resources = {
         interopFeature3Desc: 'Every exchange is encrypted and cryptographically signed on-chain. Full data sovereignty - you control who accesses your information.',
         
         // Deployment
-        deploymentTitle: 'From Process to Proof',
-        deploymentSubtitle: 'Complete audit trails transmitted to authorities for credentialing and archiving',
+        deploymentTitle: 'Blockchain Infrastructure',
+        deploymentSubtitle: 'Three-tier blockchain architecture: Credentials on EBSI, Archives on Solana, Runtime on Tanssi',
         ebsiTitle: 'EBSI / W3C Credentials',
         ebsiDesc: 'Process deliverables transmitted to authorities who issue W3C Verifiable Credentials on the European Blockchain Services Infrastructure (EBSI)',
         ebsiFeature1: 'eIDAS 2.0 compliant - Legally recognized electronic signatures and identification (EU) 2024/1183',
@@ -390,8 +390,8 @@ const resources = {
         interopFeature3Desc: 'Chaque échange est crypté et signé cryptographiquement on-chain. Souveraineté totale des données - vous contrôlez qui accède à vos informations.',
         
         // Déploiement
-        deploymentTitle: 'Du Processus à la Preuve',
-        deploymentSubtitle: 'Pistes d\'audit complètes transmises aux autorités pour certification et archivage',
+        deploymentTitle: 'Infrastructure Blockchain',
+        deploymentSubtitle: 'Architecture blockchain triple-couche : Credentials sur EBSI, Archives sur Solana, Runtime sur Tanssi',
         ebsiTitle: 'EBSI / Credentials W3C',
         ebsiDesc: 'Livrables de processus transmis aux autorités qui émettent des Verifiable Credentials W3C sur l\'Infrastructure Européenne de Services Blockchain (EBSI)',
         ebsiFeature1: 'Conforme eIDAS 2.0 - Signatures électroniques et identification légalement reconnues (UE) 2024/1183',
