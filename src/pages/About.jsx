@@ -40,6 +40,18 @@ export const About = () => {
               <strong>Blockchain:</strong> Substrate Parachain on Polkadot (Tanssi parachain)
             </li>
             <li>
+              <strong>Security:</strong>{' '}
+              <a 
+                href="https://app.symbiotic.fi/network/0x8c1a46D032B7b30D9AB4F30e51D8139CC3E85Ce3" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[#003399] hover:underline"
+              >
+                Symbiotic restaking protocol
+              </a>
+              {' '}($250M+ stake)
+            </li>
+            <li>
               <strong>Storage:</strong> IPFS (Helia browser client)
             </li>
             <li>

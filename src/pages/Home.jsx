@@ -259,7 +259,9 @@ export const Home = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-[#003399]">{t('home.ebsiTitle')}</h3>
+                <a href="https://ec.europa.eu/digital-building-blocks/sites/spaces/EBSI/pages/447687044/Home" target="_blank" rel="noopener noreferrer" className="text-xl font-semibold text-[#003399] hover:underline">
+                  {t('home.ebsiTitle')}
+                </a>
               </div>
               <p className="text-gray-600 mb-4 text-justify">
                 {t('home.ebsiDesc')}
@@ -276,7 +278,7 @@ export const Home = () => {
               </ul>
             </div>
 
-            {/* Polkadot / XCM */}
+            {/* Tanssi Appchain */}
             <div className="bg-white p-8 rounded-xl border-2 border-[#003399]/20 hover:border-[#003399] transition flex flex-col">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-[#003399]/10 rounded-lg flex items-center justify-center">
@@ -284,7 +286,9 @@ export const Home = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-[#003399]">{t('home.polkadotTitle')}</h3>
+                <a href="https://www.tanssi.network/" target="_blank" rel="noopener noreferrer" className="text-xl font-semibold text-[#003399] hover:underline">
+                  {t('home.polkadotTitle')}
+                </a>
               </div>
               <p className="text-gray-600 mb-4 text-justify">
                 {t('home.polkadotDesc')}
@@ -313,7 +317,9 @@ export const Home = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-[#003399]">{t('home.solanaTitle')}</h3>
+                <a href="https://solana.com/solutions/real-world-assets" target="_blank" rel="noopener noreferrer" className="text-xl font-semibold text-[#003399] hover:underline">
+                  {t('home.solanaTitle')}
+                </a>
               </div>
               <p className="text-gray-600 mb-4 text-justify">
                 {t('home.solanaDesc')}

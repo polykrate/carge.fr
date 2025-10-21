@@ -102,11 +102,15 @@ Random: crypto.getRandomValues (CSPRNG)
 
 ```
 Frontend:     React 18, Vite, TailwindCSS
-Blockchain:   Ragchain (Substrate parachain), @polkadot/api
+Blockchain:   Ragchain (Substrate/Tanssi), @polkadot/api
+Security:     Symbiotic restaking protocol ($250M+ stake)
 Storage:      IPFS/Helia (browser), Kubo (local node)
 Crypto:       @noble/curves, @noble/ciphers
 Testing:      Vitest, React Testing Library
 ```
+
+**Security Infrastructure:**
+- [Symbiotic Network](https://app.symbiotic.fi/network/0x8c1a46D032B7b30D9AB4F30e51D8139CC3E85Ce3) - Restaking protocol securing the network with $250M+ in staked assets
 
 ## Quick Start
 
@@ -360,4 +364,5 @@ Pull requests accepted. See [CONTRIBUTING.md](CONTRIBUTING.md) for code style an
 GPL-3.0 © 2025 Jean-François Meneust
 
 **Support Development:**
-Polkadot: `5C4kKzKyDuZTu3Qa89soZWdRfFRJzvTjVVDTNqAKPuzXcaRa`
+- Polkadot: `5C4kKzKyDuZTu3Qa89soZWdRfFRJzvTjVVDTNqAKPuzXcaRa`
+- Ethereum: `0x99dAE932C2252A6f7d65A2C0f176F754F69a1e0e`
