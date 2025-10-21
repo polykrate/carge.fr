@@ -91,7 +91,7 @@ const resources = {
         
         // Deployment
         deploymentTitle: 'Blockchain Infrastructure',
-        deploymentSubtitle: 'Three-tier blockchain architecture: Credentials on EBSI, Archives on Solana, Runtime on Tanssi',
+        deploymentSubtitle: 'Legal recognition, permanent archives, and full sovereignty over your data',
         ebsiTitle: 'EBSI / W3C Credentials',
         ebsiDesc: 'Process deliverables transmitted to authorities who issue W3C Verifiable Credentials on the European Blockchain Services Infrastructure (EBSI)',
         ebsiFeature1: 'eIDAS 2.0 compliant - Legally recognized electronic signatures and identification (EU) 2024/1183',
@@ -391,7 +391,7 @@ const resources = {
         
         // Déploiement
         deploymentTitle: 'Infrastructure Blockchain',
-        deploymentSubtitle: 'Architecture blockchain triple-couche : Credentials sur EBSI, Archives sur Solana, Runtime sur Tanssi',
+        deploymentSubtitle: 'Reconnaissance légale, archives permanentes, et souveraineté totale sur vos données',
         ebsiTitle: 'EBSI / Credentials W3C',
         ebsiDesc: 'Livrables de processus transmis aux autorités qui émettent des Verifiable Credentials W3C sur l\'Infrastructure Européenne de Services Blockchain (EBSI)',
         ebsiFeature1: 'Conforme eIDAS 2.0 - Signatures électroniques et identification légalement reconnues (UE) 2024/1183',
