@@ -421,8 +421,20 @@ export class ProofVerifier {
         let chainOfTrustValid = null; // null = not verifiable, true = valid, false = broken
         if (i > 0 && blockchainData) {
           const previousStep = history[i - 1];
-          if (previousStep && previousStep.delivrable._targetAddress) {
-            const expectedCreator = previousStep.delivrable._targetAddress;
+          
+          // Extract _targetAddress from any section of the delivrable
+          let expectedCreator = null;
+          if (previousStep && previousStep.delivrable) {
+            // Look for _targetAddress in any section of the delivrable
+            for (const key of Object.keys(previousStep.delivrable)) {
+              if (previousStep.delivrable[key] && typeof previousStep.delivrable[key] === 'object' && previousStep.delivrable[key]._targetAddress) {
+                expectedCreator = previousStep.delivrable[key]._targetAddress;
+                // Keep the last one found (most recent section)
+              }
+            }
+          }
+          
+          if (expectedCreator) {
             const actualCreator = blockchainData.creator;
             
             if (expectedCreator !== actualCreator) {
