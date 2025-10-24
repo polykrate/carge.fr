@@ -13,6 +13,52 @@ import {
   downloadProofFile
 } from '../lib/core/blockchain-utils.js';
 
+// Helper function to format delivrable data in a human-readable way
+const formatDelivrableData = (data, indent = 0) => {
+  const indentStr = '  '.repeat(indent);
+  
+  if (data === null || data === undefined) {
+    return `${indentStr}—`;
+  }
+  
+  if (typeof data === 'boolean') {
+    return data ? '✓ Yes' : '✗ No';
+  }
+  
+  if (typeof data === 'string' || typeof data === 'number') {
+    return String(data);
+  }
+  
+  if (Array.isArray(data)) {
+    if (data.length === 0) return '(empty)';
+    return data.map((item, i) => `${indentStr}${i + 1}. ${formatDelivrableData(item, 0)}`).join('\n');
+  }
+  
+  if (typeof data === 'object') {
+    const entries = Object.entries(data);
+    if (entries.length === 0) return '(empty)';
+    
+    return entries.map(([key, value]) => {
+      // Format the key to be more readable (convert snake_case to Title Case)
+      const formattedKey = key
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        // Nested object
+        return `${indentStr}${formattedKey}:\n${formatDelivrableData(value, indent + 1)}`;
+      } else if (Array.isArray(value)) {
+        return `${indentStr}${formattedKey}:\n${formatDelivrableData(value, indent + 1)}`;
+      } else {
+        return `${indentStr}${formattedKey}: ${formatDelivrableData(value, 0)}`;
+      }
+    }).join('\n');
+  }
+  
+  return String(data);
+};
+
 export const Verify = () => {
   const { t } = useTranslation();
   const { substrateClient, ipfsClient, selectedAccount } = useApp();
@@ -1081,11 +1127,13 @@ export const Verify = () => {
                       {/* Collapsible delivrable data */}
                       <details className="pt-2 border-t">
                         <summary className="cursor-pointer text-xs text-gray-600 hover:text-gray-900 font-medium">
-                          Show full delivrable data
+                          View Step Data
                         </summary>
-                        <pre className="mt-2 bg-gray-100 rounded p-2 text-xs text-gray-700 overflow-x-auto max-h-64">
-                          {JSON.stringify(step.delivrable, null, 2)}
-                        </pre>
+                        <div className="mt-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
+                          <div className="text-xs text-gray-800 leading-relaxed whitespace-pre-line font-sans">
+                            {formatDelivrableData(step.delivrable)}
+                          </div>
+                        </div>
                       </details>
                     </div>
                   )}
@@ -1119,12 +1167,15 @@ export const Verify = () => {
 
           {/* Previous Deliverables */}
           <div className="mb-6">
-            <h3 className="font-semibold text-gray-900 mb-3">Previous Deliverables:</h3>
-            <div className="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
-              <pre className="text-xs text-gray-700 whitespace-pre-wrap font-mono">
-                {JSON.stringify(workflowInfo.livrable, null, 2)}
-              </pre>
+            <h3 className="font-semibold text-gray-900 mb-3">Previous Steps Summary:</h3>
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-5 max-h-96 overflow-y-auto border border-blue-200">
+              <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
+                {formatDelivrableData(workflowInfo.livrable)}
+              </div>
             </div>
+            <p className="text-xs text-gray-500 mt-2">
+              These are the accumulated deliverables from all previous workflow steps.
+            </p>
           </div>
 
           {/* Next Step Form or Completion Message */}
