@@ -241,7 +241,8 @@ export const Home = () => {
                 <div className="font-semibold text-[#003399] mb-1">Privacy by Design</div>
                 <p className="text-sm text-gray-700 leading-relaxed mb-3">{t('home.workflowExampleNote')}</p>
                 <Link 
-                  to="/verify" 
+                  to="/verify"
+                  state={{ loadExample: true }}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-[#003399] text-white text-sm font-medium rounded-lg hover:bg-[#002266] transition-all duration-200 shadow-md hover:shadow-lg"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

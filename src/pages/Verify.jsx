@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { ProofVerifier } from '../lib/core/proof-verifier.js';
 import { RagClient } from '../lib/core/rag-client.js';
@@ -16,6 +17,7 @@ import {
 
 export const Verify = () => {
   const { t } = useTranslation();
+  const location = useLocation();
   const { substrateClient, ipfsClient, selectedAccount } = useApp();
   const [mode, setMode] = useState('file'); // 'file' or 'json'
   const [jsonInput, setJsonInput] = useState('');
@@ -179,6 +181,14 @@ export const Verify = () => {
       FormGenerator.generateForm(nextStepSchema, 'next-step-form-fields');
     }
   }, [nextStepSchema]);
+
+  // Load example proof when arriving from Home page
+  useEffect(() => {
+    if (location.state?.loadExample) {
+      console.log('Loading example proof from Home page...');
+      loadExampleProof();
+    }
+  }, [location.state?.loadExample]);
 
   // Generate Polkadot.js Apps explorer link for a block number
   const getBlockExplorerLink = (blockNumber) => {
@@ -378,12 +388,12 @@ export const Verify = () => {
       
       // Don't show success/error toasts if chain of trust is not verifiable (gray state)
       if (!isChainOfTrustNonVerifiable) {
-        if (result.isValid) {
-          dismiss(toastId);
-          showSuccess('Proof verified successfully!');
-        } else {
-          dismiss(toastId);
-          showError(result.message);
+      if (result.isValid) {
+        dismiss(toastId);
+        showSuccess('Proof verified successfully!');
+      } else {
+        dismiss(toastId);
+        showError(result.message);
         }
       } else {
         // Just dismiss the toast for gray state (non-verifiable)
@@ -844,8 +854,8 @@ export const Verify = () => {
           verifyingChainOfTrust
             ? 'bg-gray-50 border-gray-300'
             : result.isValid
-              ? 'bg-green-50 border-green-200'
-              : 'bg-red-50 border-red-200'
+            ? 'bg-green-50 border-green-200'
+            : 'bg-red-50 border-red-200'
         }`}>
           {/* Header - Always visible */}
           <div className="p-6">
@@ -898,8 +908,8 @@ export const Verify = () => {
                   verifyingChainOfTrust
                     ? 'bg-gray-100 hover:bg-gray-200 border-gray-300'
                     : result.isValid
-                      ? 'bg-green-50 hover:bg-green-100 border-green-200'
-                      : 'bg-red-50 hover:bg-red-100 border-red-200'
+                    ? 'bg-green-50 hover:bg-green-100 border-green-200'
+                    : 'bg-red-50 hover:bg-red-100 border-red-200'
                 }`}
               >
                 <span className="font-medium text-gray-900">Proof Details</span>
@@ -975,7 +985,7 @@ export const Verify = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                     Loading workflow...
-                  </div>
+              </div>
                 )}
                 {workflowInfo && workflowInfo.isLastStep && (
                   <div className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg">
