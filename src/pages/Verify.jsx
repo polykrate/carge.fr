@@ -208,9 +208,8 @@ export const Verify = () => {
       setIsProofDetailsExpanded(false);
       setVerifyingChainOfTrust(false);
       
-      // Reset workflow continuation states
+      // Reset workflow continuation states (but keep allRags - needed for workflow detection)
       setProofData(null);
-      setAllRags([]);
       setNextStepSchema(null);
       setWorkflowInfo(null);
       setLoadingNextStep(false);
@@ -262,9 +261,8 @@ export const Verify = () => {
       setIsProofDetailsExpanded(false);
       setVerifyingChainOfTrust(false);
       
-      // Reset workflow continuation states
+      // Reset workflow continuation states (but keep allRags - needed for workflow detection)
       setProofData(null);
-      setAllRags([]);
       setNextStepSchema(null);
       setWorkflowInfo(null);
       setLoadingNextStep(false);
