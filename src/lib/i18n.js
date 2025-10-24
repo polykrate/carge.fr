@@ -103,6 +103,7 @@ const resources = {
         workflowStep7: 'Mr. Wei Chen (Collector)',
         workflowStep7Desc: 'Final destination: Shanghai, China. Rating 5/5. Full provenance traced from Scotland.',
         workflowExampleNote: 'Each transfer validates the chain of trust. Fight counterfeiting with cryptographic proof of origin.',
+        verifyExampleButton: 'Verify This Proof',
         
         // Connection Modes
         connectionTitle: 'Three Ways to Connect',
@@ -429,6 +430,7 @@ const resources = {
         workflowStep7: 'M. Wei Chen (Collectionneur)',
         workflowStep7Desc: 'Destination finale : Shanghai, Chine. Note 5/5. Provenance complète tracée depuis l\'Écosse.',
         workflowExampleNote: 'Chaque transfert valide la chaîne de confiance. Luttez contre la contrefaçon avec preuve cryptographique d\'origine.',
+        verifyExampleButton: 'Vérifier cette preuve',
         
         // Modes de Connexion
         connectionTitle: 'Trois modes de connexion',
