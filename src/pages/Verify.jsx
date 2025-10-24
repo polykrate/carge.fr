@@ -207,6 +207,14 @@ export const Verify = () => {
       setExpandedSteps({});
       setIsProofDetailsExpanded(false);
       setVerifyingChainOfTrust(false);
+      
+      // Reset workflow continuation states
+      setProofData(null);
+      setAllRags([]);
+      setNextStepSchema(null);
+      setWorkflowInfo(null);
+      setLoadingNextStep(false);
+      setSubmittingStep(false);
 
       console.log('Processing file:', file.name);
       const text = await file.text();
@@ -253,6 +261,14 @@ export const Verify = () => {
       setExpandedSteps({});
       setIsProofDetailsExpanded(false);
       setVerifyingChainOfTrust(false);
+      
+      // Reset workflow continuation states
+      setProofData(null);
+      setAllRags([]);
+      setNextStepSchema(null);
+      setWorkflowInfo(null);
+      setLoadingNextStep(false);
+      setSubmittingStep(false);
 
       const proof = JSON.parse(jsonInput);
       await verifyProof(proof, toastId);
