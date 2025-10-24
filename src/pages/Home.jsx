@@ -1,8 +1,10 @@
   import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
 
 export const Home = () => {
   const { t } = useTranslation();
+  const [selectedStep, setSelectedStep] = useState(1);
   
   return (
     <>
@@ -114,53 +116,53 @@ export const Home = () => {
         </div>
       </section>
 
-      {/* How It Works - Simple 3 Steps */}
+      {/* Core CaaS Principles */}
       <section className="py-20 bg-gray-50 border-t border-gray-100">
         <div className="container mx-auto px-6 max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-[#003399]">{t('home.howItWorksTitle')}</h2>
+            <h2 className="text-4xl font-bold mb-4 text-[#003399]">{t('home.principlesTitle')}</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              {t('home.howItWorksDesc')}
+              {t('home.principlesDesc')}
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Step 1 */}
+            {/* Principle 1 */}
+            <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
+                <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.principle1Title')}</h3>
+              <p className="text-gray-600 leading-relaxed">
+                {t('home.principle1Desc')}
+              </p>
+            </div>
+
+            {/* Principle 2 */}
             <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
               <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
                 <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.step1Title')}</h3>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.principle2Title')}</h3>
               <p className="text-gray-600 leading-relaxed">
-                {t('home.step1Desc')}
+                {t('home.principle2Desc')}
               </p>
             </div>
 
-            {/* Step 2 */}
+            {/* Principle 3 */}
             <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
               <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
                 <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.step2Title')}</h3>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.principle3Title')}</h3>
               <p className="text-gray-600 leading-relaxed">
-                {t('home.step2Desc')}
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
-                <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.step3Title')}</h3>
-              <p className="text-gray-600 leading-relaxed">
-                {t('home.step3Desc')}
+                {t('home.principle3Desc')}
               </p>
             </div>
           </div>
@@ -178,11 +180,11 @@ export const Home = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Multi-Agent AI Systems */}
+            {/* Use Case 1 - AI Invoice Digitization */}
             <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
               <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
                 <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
               <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.useCase1Title')}</h3>
@@ -191,11 +193,11 @@ export const Home = () => {
               </p>
             </div>
 
-            {/* Compliance Automation */}
+            {/* Use Case 2 - Logistics Tracking */}
             <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
               <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
                 <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
               </div>
               <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.useCase2Title')}</h3>
@@ -204,11 +206,11 @@ export const Home = () => {
               </p>
             </div>
 
-            {/* Supply Chain Intelligence */}
+            {/* Use Case 3 - Administrative Procedures */}
             <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
               <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
                 <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
               </div>
               <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.useCase3Title')}</h3>
@@ -220,53 +222,197 @@ export const Home = () => {
         </div>
       </section>
 
-      {/* Interoperability */}
+      {/* Workflow Example */}
+      <section className="py-20 bg-white border-t border-gray-100">
+        <div className="container mx-auto px-6 max-w-5xl">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4 text-[#003399]">{t('home.workflowExampleTitle')}</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              {t('home.workflowExampleDesc')}
+            </p>
+          </div>
+
+          {/* Timeline */}
+          <div className="relative mb-12">
+            {/* Connection Line */}
+            <div className="absolute top-8 left-0 right-0 h-1 bg-gray-200 hidden md:block" style={{ left: '4%', right: '4%' }}></div>
+            
+            {/* Steps */}
+            <div className="relative flex justify-between items-start">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((step) => (
+                <button
+                  key={step}
+                  onClick={() => setSelectedStep(step)}
+                  className={`flex flex-col items-center transition-all duration-300 ${
+                    selectedStep === step ? 'scale-110' : 'hover:scale-105'
+                  }`}
+                >
+                  <div
+                    className={`w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl mb-2 shadow-lg transition-all duration-300 ${
+                      selectedStep === step
+                        ? 'bg-[#003399] ring-4 ring-[#003399]/30'
+                        : 'bg-gray-400 hover:bg-gray-500'
+                    }`}
+                  >
+                    {step}
+                  </div>
+                  <div className={`text-xs font-medium transition-all duration-300 ${
+                    selectedStep === step ? 'text-[#003399]' : 'text-gray-400'
+                  }`}>
+                    {step === 1 && 'Alice'}
+                    {step === 2 && 'Bob'}
+                    {step === 3 && 'Alice'}
+                    {step === 4 && 'Charlie'}
+                    {step === 5 && 'David'}
+                    {step === 6 && 'Eve'}
+                    {step === 7 && 'Bob'}
+                    {step === 8 && 'Alice'}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Selected Step Details */}
+          <div className="bg-gradient-to-br from-[#003399]/5 to-blue-50 rounded-2xl p-8 border-2 border-[#003399]/20 shadow-xl transition-all duration-300">
+            <div className="flex items-start gap-6">
+              {/* Icon */}
+              <div className="flex-shrink-0">
+                <div className="w-20 h-20 bg-[#003399] rounded-xl flex items-center justify-center shadow-lg">
+                  {selectedStep === 1 && (
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  )}
+                  {selectedStep === 2 && (
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  )}
+                  {selectedStep === 3 && (
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  )}
+                  {selectedStep === 4 && (
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  )}
+                  {selectedStep === 5 && (
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+                    </svg>
+                  )}
+                  {selectedStep === 6 && (
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                  )}
+                  {selectedStep === 7 && (
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  )}
+                  {selectedStep === 8 && (
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                  )}
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-3xl font-bold text-[#003399]">{selectedStep}.</span>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    {selectedStep === 1 && t('home.workflowStep1')}
+                    {selectedStep === 2 && t('home.workflowStep2')}
+                    {selectedStep === 3 && t('home.workflowStep3')}
+                    {selectedStep === 4 && t('home.workflowStep4')}
+                    {selectedStep === 5 && t('home.workflowStep5')}
+                    {selectedStep === 6 && t('home.workflowStep6')}
+                    {selectedStep === 7 && t('home.workflowStep7')}
+                    {selectedStep === 8 && t('home.workflowStep8')}
+                  </h3>
+                </div>
+                <p className="text-lg text-gray-700">
+                  {selectedStep === 1 && t('home.workflowStep1Desc')}
+                  {selectedStep === 2 && t('home.workflowStep2Desc')}
+                  {selectedStep === 3 && t('home.workflowStep3Desc')}
+                  {selectedStep === 4 && t('home.workflowStep4Desc')}
+                  {selectedStep === 5 && t('home.workflowStep5Desc')}
+                  {selectedStep === 6 && t('home.workflowStep6Desc')}
+                  {selectedStep === 7 && t('home.workflowStep7Desc')}
+                  {selectedStep === 8 && t('home.workflowStep8Desc')}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Note */}
+          <div className="mt-8 bg-gradient-to-r from-[#003399]/10 to-blue-100/50 border-2 border-[#003399]/30 rounded-xl p-6">
+            <div className="flex items-start gap-3">
+              <svg className="w-6 h-6 flex-shrink-0 text-[#003399] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <div>
+                <div className="font-semibold text-[#003399] mb-1">Privacy by Design</div>
+                <p className="text-sm text-gray-700 leading-relaxed">{t('home.workflowExampleNote')}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Connection Modes */}
       <section className="py-20 bg-gray-50 border-t border-gray-100">
         <div className="container mx-auto px-6 max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-[#003399]">{t('home.interopTitle')}</h2>
+            <h2 className="text-4xl font-bold mb-4 text-[#003399]">{t('home.connectionTitle')}</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              {t('home.interopDesc')}
+              {t('home.connectionDesc')}
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Local Server Interface */}
+            {/* Web Interface */}
             <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
               <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
                 <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.interopFeature1Title')}</h3>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.connection1Title')}</h3>
               <p className="text-gray-600 leading-relaxed">
-                {t('home.interopFeature1Desc')}
+                {t('home.connection1Desc')}
               </p>
             </div>
 
-            {/* With or Without AI */}
+            {/* Database Event Script */}
+            <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
+                <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.connection2Title')}</h3>
+              <p className="text-gray-600 leading-relaxed">
+                {t('home.connection2Desc')}
+              </p>
+            </div>
+
+            {/* AI Agent via MCP */}
             <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
               <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
                 <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.interopFeature2Title')}</h3>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.connection3Title')}</h3>
               <p className="text-gray-600 leading-relaxed">
-                {t('home.interopFeature2Desc')}
-              </p>
-            </div>
-
-            {/* Certified Data Exchange */}
-            <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
-                <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.interopFeature3Title')}</h3>
-              <p className="text-gray-600 leading-relaxed">
-                {t('home.interopFeature3Desc')}
+                {t('home.connection3Desc')}
               </p>
             </div>
           </div>
