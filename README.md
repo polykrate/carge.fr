@@ -1,4 +1,4 @@
-# Carge - Decentralized Workflow Verification
+# Carge - Blockchain-Anchored RAG for AI
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Built with React](https://img.shields.io/badge/Built%20with-React-61DAFB?logo=react)](https://reactjs.org/)
@@ -6,51 +6,81 @@
 
 **Source**: [github.com/polykrate/carge](https://github.com/polykrate/carge)
 
+## Inject Certified Context into AI. Work with Everyone.
+
+**Make AI smarter by injecting blockchain-verified knowledge directly into their context.** CARGE deploys RAG contexts (instructions + resources + schemas) on-chain. AI agents pull optimized, certified context directly from the blockchain.
+
+**Universal collaboration protocol.** Human-Human, AI-Human, AI-AI: same cryptographic rules. No centralized server to hack. No prompt poisoning. Just verifiable execution with complete audit trails.
+
 ## Technical Overview
 
 Client-side application for cryptographically verifiable AI/LLM workflows anchored on **Ragchain**, a Substrate parachain. Combines Retrieval-Augmented Generation (RAG) metadata with on-chain proofs and IPFS content addressing.
 
-**What is RAG here?**
-RAG (Retrieval-Augmented Generation) workflows are composed of three IPFS-stored components:
+**RAG Context Components:**
 - **Instruction CID**: AI prompt/instructions (what to do)
 - **Resource CID**: Context documents/data (knowledge base)
 - **Schema CID**: JSON Schema for validation (expected output structure)
-
-Optional: **Workflow steps** for multi-step processes (e.g., KYC → Verification → Approval)
+- **Workflow Steps** (optional): Multi-step processes (e.g., KYC → Verification → Approval)
 
 **Core Properties:**
-- **Zero server trust**: All cryptographic operations in browser
-- **On-chain RAG registry**: Metadata indexed by hash(instruction + resource + schema)
+- **Zero server trust**: All cryptographic operations in browser, no centralized infrastructure
+- **On-chain RAG registry**: Certified contexts indexed by hash(instruction + resource + schema)
 - **Client-side encryption**: X25519 ECDH, ChaCha20-Poly1305 AEAD for private workflows
 - **Decentralized storage**: IPFS for content, Ragchain for integrity proofs
-- **Self-sovereign data**: Users control encryption keys and workflow access
+- **Universal protocol**: Same cryptographic primitives for Human-Human, AI-Human, AI-AI
+
+## Use Cases
+
+**Multi-Agent AI Systems**: AI agents coordinate using certified RAG contexts without centralized orchestration. Each agent verifies context authenticity before execution.
+
+**Compliance Automation**: AI processes regulatory workflows with cryptographic audit trails. Every decision traceable and verifiable by authorities.
+
+**Hybrid Human-AI Workflows**: Humans and AI collaborate with same cryptographic rules. AI analyzes, humans approve, blockchain certifies.
+
+**Document Certification**: Sign contracts, certify documents, prove existence. Human-to-human or AI-assisted - identical guarantees.
+
+## Why This Matters
+
+**The AI Agent Economy Needs Trust Infrastructure**
+
+As AI agents become autonomous economic actors, they need verifiable context sources. Traditional centralized RAG databases create:
+- **Single points of failure**: One compromised server poisons all downstream agents
+- **Trust dependencies**: Agents must trust infrastructure providers
+- **Audit gaps**: No cryptographic proof of what context was actually used
+
+**CARGE eliminates these risks** by making RAG contexts:
+- **Immutable**: Published on blockchain, impossible to retroactively modify
+- **Verifiable**: Any agent can cryptographically verify context authenticity
+- **Traceable**: Complete audit trail of who used what context, when
+- **Trustless**: No central authority or infrastructure provider required
+
+**Market Opportunity**: Every AI agent interaction that requires compliance, audit, or multi-party coordination is a use case.
 
 ## Interfaces
 
 **Three ways to interact with Ragchain:**
 
-### 1. Human Interface (this repo)
+### 1. AI Agent Interface (MCP)
+**Human Context Protocol** - Model Context Protocol server for AI agents:
+- Native integration with Claude Desktop, Cursor, and MCP-compatible AI clients
+- AI agents read/write certified contexts without API keys or SaaS dependencies
+- Autonomous multi-agent coordination with cryptographic verification
+- **Repository**: `github.com/polykrate/human-context-protocol` *(unreleased, contact: jf.meneust@gmail.com)*
+
+### 2. Human Interface (this repo)
 Web application at **carge.fr** for direct user interaction:
 - Visual workflow builder and executor
 - Wallet integration (Polkadot.js extension)
 - Proof verification and history browsing
 - Multi-language support (EN/FR)
 
-### 2. AI Agent Interface (MCP)
-**Human Context Protocol** - Model Context Protocol server for AI agents:
-- MCP tools for Claude Desktop, Mistral, Cursor, and compatible AI clients
-- Programmatic workflow execution
-- Autonomous multi-agent coordination
-
 ### 3. Backend Integration (Server Mode)
 Enterprise integration for automated compliance:
-- ERP/CRM workflow automation
-- Legacy system bridging
+- ERP/CRM workflow automation via local server
+- Legacy system bridging with blockchain anchoring
 - Headless business process execution
 
-**Repository**: `github.com/polykrate/human-context-protocol` *(unreleased, contact: jf.meneust@gmail.com)*
-
-All three interfaces share identical cryptographic primitives and blockchain logic.
+**Universal Protocol**: All three interfaces use identical cryptographic primitives and blockchain logic. Human-Human, AI-Human, AI-AI: same rules.
 
 ## Security Architecture
 
@@ -82,10 +112,12 @@ Random: crypto.getRandomValues (CSPRNG)
 ### Threat Model
 
 **Mitigated:**
-- ✅ Server compromise (no server)
-- ✅ Data tampering (content-addressed storage + on-chain hashes)
-- ✅ XSS attacks (React auto-escaping, no innerHTML)
-- ✅ MITM (HTTPS/WSS only, SRI for CDN resources)
+- ✅ **Prompt poisoning** (contexts stored on immutable blockchain, cryptographically signed)
+- ✅ **Server compromise** (no server - fully client-side and on-chain)
+- ✅ **Context tampering** (content-addressed storage + on-chain hashes verify integrity)
+- ✅ **Unauthorized context modification** (signature verification for all updates)
+- ✅ **XSS attacks** (React auto-escaping, no innerHTML)
+- ✅ **MITM** (HTTPS/WSS only, SRI for CDN resources)
 
 **Not Mitigated (User Responsibility):**
 - ⚠️ Wallet phishing (use official Polkadot.js extension)
@@ -95,7 +127,7 @@ Random: crypto.getRandomValues (CSPRNG)
 
 **Known Limitations:**
 - No forward secrecy (ephemeral keys not rotated)
-- IPFS metadata leakage (CIDs are public)
+- IPFS metadata leakage (CIDs are public, content-addressed)
 - Front-running possible (public mempool)
 
 ## Technology Stack

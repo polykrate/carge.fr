@@ -51,30 +51,30 @@ export const Verify = () => {
       "livrable": {
         "entity": {
           "entityType": "company",
-          "legalName": "CryptoTrading France SAS",
+          "legalName": "Polykrate Technologies SAS",
           "country": "FR",
-          "registrationNumber": "85234567800015",
+          "registrationNumber": "85234567800019",
           "legalStructure": "SAS",
           "beneficialOwners": [
             {
-              "name": "Sophie Bernard",
-              "ownershipPercentage": 55,
+              "name": "César Dubois",
+              "ownershipPercentage": 65,
               "nationality": "FR"
             },
             {
-              "name": "Lucas Moreau",
-              "ownershipPercentage": 45,
+              "name": "Marie Laurent",
+              "ownershipPercentage": 35,
               "nationality": "FR"
             }
           ]
         },
         "identity": {
-          "documentType": "national_id",
-          "documentNumber": "FR298765432",
-          "expiryDate": "2029-05-20",
-          "documentCid": "bafkreiyb3zl56brrvyrl27gkwklolhrxxjr3ez32fdxa2mtt4ddlsocr2q",
+          "documentType": "passport",
+          "documentNumber": "19FR98765",
+          "expiryDate": "2029-12-31",
+          "documentCid": "bafkreid2uhv5rlmkv2eqzr7cnmbz2brbn4n6qgrxq3s75zgkeqiqnwe6ye",
           "proofOfAddressType": "utility_bill",
-          "proofOfAddressCid": "bafkreiho3a6qpuyjouxg6ot5ozdj4wiu24x2ur2oh7vbqlawdytsqn4zsg",
+          "proofOfAddressCid": "bafkreic5a7uykno7wr2zotlbjqp5q3tx3iyptvt26e3s3kgjbud6exqyua",
           "proofOfAddressDate": "2025-09-15",
           "sourceOfFunds": "business_income",
           "pepStatus": false
@@ -83,15 +83,16 @@ export const Verify = () => {
           "operatingJurisdictions": [
             "FR",
             "DE",
-            "BE"
+            "GB"
           ],
           "monthlyVolume": "100k_1m",
           "transactionFrequency": "daily",
           "cryptoActivities": [
             "exchange_trading",
+            "custody",
             "defi_staking"
           ],
-          "customerBase": "retail",
+          "customerBase": "retail_mixed_institutional",
           "highRiskJurisdictions": [],
           "riskLevel": "medium",
           "riskMitigationMeasures": [
@@ -99,7 +100,8 @@ export const Verify = () => {
             "transaction_monitoring",
             "sanctions_screening",
             "compliance_officer",
-            "kyc_verification"
+            "blockchain_analytics_tools",
+            "employee_training"
           ]
         },
         "wallet_monitoring": {
@@ -115,16 +117,24 @@ export const Verify = () => {
               "address": "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
               "walletType": "cold_wallet",
               "primaryUse": "treasury"
+            },
+            {
+              "blockchain": "polygon",
+              "address": "0x8765dcba4321fedcba98765432fedcba87654321",
+              "walletType": "non_custodial",
+              "primaryUse": "defi_staking"
             }
           ],
-          "transactionPatterns": "Daily exchange trading 10-50K EUR, weekly DeFi staking deposits 5-20K EUR, monthly treasury consolidation",
+          "transactionPatterns": "Daily DeFi operations between 5K-50K USD, weekly exchange deposits and withdrawals 50K-200K USD, monthly treasury consolidations",
           "counterpartyTypes": [
             "regulated_exchange",
-            "defi_protocol"
+            "defi_protocol",
+            "business_partners"
           ],
-          "alertThreshold": 50000,
+          "alertThreshold": 100000,
           "monitoringConsent": true,
-          "monitoringFrequency": "daily"
+          "monitoringFrequency": "daily",
+          "blockchainAnalyticsProvider": "chainalysis"
         }
       }
     }
@@ -658,7 +668,13 @@ export const Verify = () => {
 
         <div className="flex gap-2 mb-6">
           <button
-            onClick={() => setMode('file')}
+            onClick={() => {
+              setMode('file');
+              // Trigger file input click after a small delay to ensure mode switch completes
+              setTimeout(() => {
+                document.getElementById('file-upload')?.click();
+              }, 100);
+            }}
             className={`px-4 py-2 rounded-lg transition ${
               mode === 'file'
                 ? 'bg-[#003399] text-white'
@@ -681,7 +697,29 @@ export const Verify = () => {
 
         {/* File Upload Mode */}
         {mode === 'file' && (
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition">
+          <div 
+            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition"
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onDragEnter={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                const fakeEvent = {
+                  target: {
+                    files: e.dataTransfer.files
+                  }
+                };
+                handleFileUpload(fakeEvent);
+              }
+            }}
+          >
             <input
               type="file"
               onChange={handleFileUpload}
