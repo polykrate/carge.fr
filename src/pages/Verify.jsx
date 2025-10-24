@@ -1190,7 +1190,7 @@ export const Verify = () => {
                           View Step Data
                         </summary>
                         <div className="mt-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-5 border border-gray-200">
-                          <DeliverableDisplay data={step.delivrable} />
+                          <DeliverableDisplay data={step.stepOnlyData || step.delivrable} />
                         </div>
                       </details>
                     </div>

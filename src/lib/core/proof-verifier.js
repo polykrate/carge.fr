@@ -374,6 +374,14 @@ export class ProofVerifier {
         const stepHashValue = steps[i];
         const { keys, metadata } = stepMetadataList[i];
         
+        // Extract only this step's data
+        const stepOnlyData = {};
+        for (const key of keys) {
+          if (livrable[key] !== undefined) {
+            stepOnlyData[key] = livrable[key];
+          }
+        }
+        
         // Add keys from this step to accumulated delivrable
         for (const key of keys) {
           if (livrable[key] !== undefined) {
@@ -457,6 +465,7 @@ export class ProofVerifier {
           stepHash: stepHashValue,
           stepName: metadata?.name || `Step ${i + 1}`,
           delivrable: { ...accumulatedDelivrable },
+          stepOnlyData: { ...stepOnlyData },
           contentHash,
           blockchainVerified,
           blockchainData,
