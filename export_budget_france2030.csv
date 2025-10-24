@@ -1,6 +1,0 @@
-SIREN;Raison Sociale;N°Lot;Intitulé Lot;N° Tache;Intitulé Tache;Mois début tâche;Mois fin tâche;Livrable;Personne.mois cat 1;Personne.mois cat 2;Personne.mois cat 3;Sous-traitance;Description Sous-traitance;Contribution aux amortissements;Description Contribution aux amortissements;Autres dépenses;Description Autres dépenses;Investissements;Description Investissements;Classification saisie
-939981247;CARGE;1;Management et cadrage;1;Gestion de projet et coordination;1;6;6 rapports mensuels + dossier final;0.8;;;;;;;5000;Déplacements clients + reporting (TJM 700€);3000;Station de travail + équipement (amortis sur 3 ans);ADM
-939981247;CARGE;2;Identification et conformité;2;Analyse processus et conformité légale;1;2;3 specs workflows + rapport conformité;0.5;;;15000;Conseils juridiques DORA/RGPD/AI Act;;;3000;Ateliers clients + documentation (TJM 700€);;;RI
-939981247;CARGE;3;Déploiement et sécurisation blockchain;3;Implémentation workflows et audit sécurité;2;5;3 workflows opérationnels + rapport audit;0.5;;;55000;Audit blockchain sécurité (40k) + Tanssi infrastructure (15k);3000;Serveur nœud blockchain;3000;Tests + intégration + doc technique (TJM 700€);2000;Équipement réseau;DE
-939981247;CARGE;4;Exécution et validation;4;Validation terrain humains + IA;4;6;Rapport validation 300 preuves + ROI;0.2;;;;;;;3000;Formation + support utilisateurs (TJM 700€);;;DE
-
