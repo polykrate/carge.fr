@@ -117,19 +117,33 @@ export const Home = () => {
       </section>
 
       {/* Workflow Example */}
-      <section className="py-20 bg-white border-t border-gray-100">
-        <div className="container mx-auto px-6 max-w-5xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 text-[#003399]">{t('home.workflowExampleTitle')}</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+      <section className="py-20 bg-gradient-to-b from-white via-blue-50/30 to-white border-t border-gray-100 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#003399]/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-400/5 rounded-full blur-3xl"></div>
+        
+        <div className="container mx-auto px-6 max-w-6xl relative z-10">
+          {/* Header with badge */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#003399]/10 to-blue-500/10 border border-[#003399]/20 rounded-full mb-6">
+              <svg className="w-4 h-4 text-[#003399]" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span className="text-sm font-semibold text-[#003399]">Real-World Use Case</span>
+            </div>
+            <h2 className="text-5xl font-extrabold mb-6 bg-gradient-to-r from-[#003399] via-blue-600 to-[#003399] bg-clip-text text-transparent">
+              {t('home.workflowExampleTitle')}
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               {t('home.workflowExampleDesc')}
             </p>
           </div>
 
           {/* Timeline */}
-          <div className="relative mb-12">
-            {/* Connection Line */}
-            <div className="absolute top-8 left-0 right-0 h-1 bg-gray-200 hidden md:block" style={{ left: '4%', right: '4%' }}></div>
+          <div className="relative mb-16">
+            {/* Connection Line with gradient */}
+            <div className="absolute top-10 left-0 right-0 h-1.5 bg-gradient-to-r from-gray-300 via-[#003399]/30 to-gray-300 hidden md:block rounded-full" style={{ left: '4%', right: '4%' }}></div>
             
             {/* Steps */}
             <div className="relative flex justify-between items-start">
@@ -137,21 +151,24 @@ export const Home = () => {
                 <button
                   key={step}
                   onClick={() => setSelectedStep(step)}
-                  className={`flex flex-col items-center transition-all duration-300 ${
-                    selectedStep === step ? 'scale-110' : 'hover:scale-105'
+                  className={`group flex flex-col items-center transition-all duration-500 ${
+                    selectedStep === step ? 'scale-110 -translate-y-1' : 'hover:scale-105 hover:-translate-y-0.5'
                   }`}
                 >
                   <div
-                    className={`w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl mb-2 shadow-lg transition-all duration-300 ${
+                    className={`relative w-20 h-20 rounded-2xl flex items-center justify-center text-white font-extrabold text-2xl mb-3 transition-all duration-500 ${
                       selectedStep === step
-                        ? 'bg-[#003399] ring-4 ring-[#003399]/30'
-                        : 'bg-gray-400 hover:bg-gray-500'
+                        ? 'bg-gradient-to-br from-[#003399] to-blue-600 shadow-2xl shadow-[#003399]/40 ring-4 ring-[#003399]/20'
+                        : 'bg-gradient-to-br from-gray-400 to-gray-500 shadow-lg hover:shadow-xl hover:from-gray-500 hover:to-gray-600'
                     }`}
                   >
-                    {step}
+                    {selectedStep === step && (
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent"></div>
+                    )}
+                    <span className="relative z-10">{step}</span>
                   </div>
-                  <div className={`text-xs font-medium transition-all duration-300 ${
-                    selectedStep === step ? 'text-[#003399]' : 'text-gray-400'
+                  <div className={`text-sm font-semibold transition-all duration-300 text-center px-2 ${
+                    selectedStep === step ? 'text-[#003399]' : 'text-gray-500 group-hover:text-gray-700'
                   }`}>
                     {step === 1 && '🏴󠁧󠁢󠁳󠁣󠁴󠁿 Macallan'}
                     {step === 2 && '🇬🇧 Edrington'}
@@ -167,11 +184,17 @@ export const Home = () => {
           </div>
 
           {/* Selected Step Details */}
-          <div className="bg-gradient-to-br from-[#003399]/5 to-blue-50 rounded-2xl p-8 border-2 border-[#003399]/20 shadow-xl transition-all duration-300">
-            <div className="flex items-start gap-6">
+          <div className="relative bg-white rounded-3xl p-10 border border-gray-200 shadow-2xl transition-all duration-500 hover:shadow-3xl overflow-hidden group">
+            {/* Animated background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#003399]/5 via-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#003399]/5 rounded-full blur-3xl"></div>
+            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-400/5 rounded-full blur-3xl"></div>
+            
+            <div className="relative z-10 flex items-start gap-8">
               {/* Icon */}
               <div className="flex-shrink-0">
-                <div className="w-20 h-20 bg-[#003399] rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-24 h-24 bg-gradient-to-br from-[#003399] to-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-[#003399]/30 relative overflow-hidden group-hover:scale-105 transition-transform duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
                   {selectedStep === 1 && (
                     <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -212,9 +235,11 @@ export const Home = () => {
 
               {/* Content */}
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-3xl font-bold text-[#003399]">{selectedStep}.</span>
-                  <h3 className="text-2xl font-bold text-gray-900">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-[#003399]/10 to-blue-500/10 border border-[#003399]/20">
+                    <span className="text-2xl font-extrabold text-[#003399]">{selectedStep}</span>
+                  </div>
+                  <h3 className="text-3xl font-extrabold text-gray-900 tracking-tight">
                     {selectedStep === 1 && t('home.workflowStep1')}
                     {selectedStep === 2 && t('home.workflowStep2')}
                     {selectedStep === 3 && t('home.workflowStep3')}
@@ -224,36 +249,53 @@ export const Home = () => {
                     {selectedStep === 7 && t('home.workflowStep7')}
                   </h3>
                 </div>
-                <p className="text-lg text-gray-700">
-                  {selectedStep === 1 && t('home.workflowStep1Desc')}
-                  {selectedStep === 2 && t('home.workflowStep2Desc')}
-                  {selectedStep === 3 && t('home.workflowStep3Desc')}
-                  {selectedStep === 4 && t('home.workflowStep4Desc')}
-                  {selectedStep === 5 && t('home.workflowStep5Desc')}
-                  {selectedStep === 6 && t('home.workflowStep6Desc')}
-                  {selectedStep === 7 && t('home.workflowStep7Desc')}
-                </p>
+                <div className="pl-16">
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                    {selectedStep === 1 && t('home.workflowStep1Desc')}
+                    {selectedStep === 2 && t('home.workflowStep2Desc')}
+                    {selectedStep === 3 && t('home.workflowStep3Desc')}
+                    {selectedStep === 4 && t('home.workflowStep4Desc')}
+                    {selectedStep === 5 && t('home.workflowStep5Desc')}
+                    {selectedStep === 6 && t('home.workflowStep6Desc')}
+                    {selectedStep === 7 && t('home.workflowStep7Desc')}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Note */}
-          <div className="mt-8 bg-gradient-to-r from-[#003399]/10 to-blue-100/50 border-2 border-[#003399]/30 rounded-xl p-6">
-            <div className="flex items-start gap-3">
-              <svg className="w-6 h-6 flex-shrink-0 text-[#003399] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
+          {/* Privacy by Design - Call to Action */}
+          <div className="mt-12 relative bg-gradient-to-br from-[#003399]/10 via-blue-100/30 to-transparent rounded-2xl p-8 border border-[#003399]/30 shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
+            {/* Animated background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#003399]/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#003399]/10 rounded-full blur-2xl"></div>
+            
+            <div className="relative z-10 flex items-start gap-6">
+              <div className="flex-shrink-0">
+                <div className="w-14 h-14 bg-gradient-to-br from-[#003399] to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-[#003399]/30 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+              </div>
               <div className="flex-1">
-                <div className="font-semibold text-[#003399] mb-1">Privacy by Design</div>
-                <p className="text-sm text-gray-700 leading-relaxed mb-3">{t('home.workflowExampleNote')}</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <h4 className="text-xl font-bold text-[#003399]">Privacy by Design</h4>
+                  <div className="h-1 w-1 bg-[#003399]/50 rounded-full"></div>
+                  <span className="text-sm font-semibold text-[#003399]/70">Zero-Knowledge Proof</span>
+                </div>
+                <p className="text-base text-gray-700 leading-relaxed mb-5">{t('home.workflowExampleNote')}</p>
                 <Link 
                   to="/verify" 
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#003399] text-white text-sm font-medium rounded-lg hover:bg-[#002266] transition-all duration-200 shadow-md hover:shadow-lg"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#003399] to-blue-600 text-white font-semibold rounded-xl hover:from-[#002266] hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 group/btn"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 group-hover/btn:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  {t('home.verifyExampleButton')}
+                  <span>{t('home.verifyExampleButton')}</span>
+                  <svg className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
                 </Link>
               </div>
             </div>
