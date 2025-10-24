@@ -4,6 +4,7 @@ import { useApp } from '../contexts/AppContext';
 import { ProofVerifier } from '../lib/core/proof-verifier.js';
 import { RagClient } from '../lib/core/rag-client.js';
 import { FormGenerator } from '../lib/core/form-generator.js';
+import { DeliverableDisplay } from '../components/DeliverableDisplay';
 import { showError, showSuccess, showLoading, dismiss, toastTx } from '../lib/toast';
 import {
   waitForPolkadot,
@@ -12,52 +13,6 @@ import {
   handleTransactionResult,
   downloadProofFile
 } from '../lib/core/blockchain-utils.js';
-
-// Helper function to format delivrable data in a human-readable way
-const formatDelivrableData = (data, indent = 0) => {
-  const indentStr = '  '.repeat(indent);
-  
-  if (data === null || data === undefined) {
-    return `${indentStr}—`;
-  }
-  
-  if (typeof data === 'boolean') {
-    return data ? '✓ Yes' : '✗ No';
-  }
-  
-  if (typeof data === 'string' || typeof data === 'number') {
-    return String(data);
-  }
-  
-  if (Array.isArray(data)) {
-    if (data.length === 0) return '(empty)';
-    return data.map((item, i) => `${indentStr}${i + 1}. ${formatDelivrableData(item, 0)}`).join('\n');
-  }
-  
-  if (typeof data === 'object') {
-    const entries = Object.entries(data);
-    if (entries.length === 0) return '(empty)';
-    
-    return entries.map(([key, value]) => {
-      // Format the key to be more readable (convert snake_case to Title Case)
-      const formattedKey = key
-        .split('_')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-      
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        // Nested object
-        return `${indentStr}${formattedKey}:\n${formatDelivrableData(value, indent + 1)}`;
-      } else if (Array.isArray(value)) {
-        return `${indentStr}${formattedKey}:\n${formatDelivrableData(value, indent + 1)}`;
-      } else {
-        return `${indentStr}${formattedKey}: ${formatDelivrableData(value, 0)}`;
-      }
-    }).join('\n');
-  }
-  
-  return String(data);
-};
 
 export const Verify = () => {
   const { t } = useTranslation();
@@ -1129,10 +1084,8 @@ export const Verify = () => {
                         <summary className="cursor-pointer text-xs text-gray-600 hover:text-gray-900 font-medium">
                           View Step Data
                         </summary>
-                        <div className="mt-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
-                          <div className="text-xs text-gray-800 leading-relaxed whitespace-pre-line font-sans">
-                            {formatDelivrableData(step.delivrable)}
-                          </div>
+                        <div className="mt-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-5 border border-gray-200">
+                          <DeliverableDisplay data={step.delivrable} />
                         </div>
                       </details>
                     </div>
@@ -1168,12 +1121,13 @@ export const Verify = () => {
           {/* Previous Deliverables */}
           <div className="mb-6">
             <h3 className="font-semibold text-gray-900 mb-3">Previous Steps Summary:</h3>
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-5 max-h-96 overflow-y-auto border border-blue-200">
-              <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
-                {formatDelivrableData(workflowInfo.livrable)}
-              </div>
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 max-h-[600px] overflow-y-auto border border-blue-200">
+              <DeliverableDisplay data={workflowInfo.livrable} />
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
               These are the accumulated deliverables from all previous workflow steps.
             </p>
           </div>
