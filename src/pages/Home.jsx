@@ -166,9 +166,22 @@ export const Home = () => {
             </div>
           </div>
 
-          {/* Selected Step Details */}
-          <div className="bg-gradient-to-br from-[#003399]/5 to-blue-50 rounded-2xl p-8 border-2 border-[#003399]/20 shadow-xl transition-all duration-300">
-            <div className="flex items-start gap-6">
+          {/* Selected Step Details with Navigation */}
+          <div className="flex items-center gap-4">
+            {/* Previous Button */}
+            <button
+              onClick={() => setSelectedStep(selectedStep === 1 ? 7 : selectedStep - 1)}
+              className="flex-shrink-0 w-12 h-12 rounded-full bg-white border-2 border-gray-300 hover:border-[#003399] hover:bg-[#003399] text-gray-400 hover:text-white transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg group"
+              aria-label="Previous step"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            {/* Step Details Card */}
+            <div className="flex-1 bg-gradient-to-br from-[#003399]/5 to-blue-50 rounded-2xl p-8 border-2 border-[#003399]/20 shadow-xl transition-all duration-300">
+              <div className="flex items-start gap-6">
               {/* Icon */}
               <div className="flex-shrink-0">
                 <div className="w-20 h-20 bg-[#003399] rounded-xl flex items-center justify-center shadow-lg">
@@ -234,7 +247,19 @@ export const Home = () => {
                   {selectedStep === 7 && t('home.workflowStep7Desc')}
                 </p>
               </div>
+              </div>
             </div>
+
+            {/* Next Button */}
+            <button
+              onClick={() => setSelectedStep(selectedStep === 7 ? 1 : selectedStep + 1)}
+              className="flex-shrink-0 w-12 h-12 rounded-full bg-white border-2 border-gray-300 hover:border-[#003399] hover:bg-[#003399] text-gray-400 hover:text-white transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg group"
+              aria-label="Next step"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
 
           {/* Note */}
