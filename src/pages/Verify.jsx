@@ -45,98 +45,105 @@ export const Verify = () => {
     }
   }, [selectedAccount]);
   
-  // Example proof JSON
+  // Example proof JSON - Macallan 25 Years Scotland → China
   const exampleProof = {
     "ragData": {
-      "ragHash": "0x3bda44d8460eb05bee5487c433f3d8a9a2bbdc056f3622dac36810012a7972b8",
-      "stepHash": "0x038b7cbc0dd28fbce26d50fc405ceaa06bda8c47b27f24e16d165e4d67d2784c",
+      "ragHash": "0x505346475f911b5349f111b97ed57014c8da358f4bbf72a4738a6f7ef84881cd",
+      "stepHash": "0x677219e1ad53c5abf937aa694b9a7b84f8770b4fe08e45805f1c1978975a8bd3",
       "livrable": {
-        "entity": {
-          "entityType": "company",
-          "legalName": "Polykrate Technologies SAS",
-          "country": "FR",
-          "registrationNumber": "85234567800019",
-          "legalStructure": "SAS",
-          "beneficialOwners": [
-            {
-              "name": "César Dubois",
-              "ownershipPercentage": 65,
-              "nationality": "FR"
-            },
-            {
-              "name": "Marie Laurent",
-              "ownershipPercentage": 35,
-              "nationality": "FR"
-            }
-          ]
+        "production": {
+          "distilleryName": "Macallan Distillery",
+          "spiritType": "Whisky",
+          "appellation": "Scotch Single Malt Speyside",
+          "distillationYear": 1999,
+          "age": 25,
+          "batchNumber": "MAC-2024-B47-0892",
+          "bottleNumber": "892/2400",
+          "bottlesProduced": 2400,
+          "caskType": "Sherry Oak Casks (European Oak)",
+          "alcoholDegree": 43,
+          "qrCodeApplied": true,
+          "productionNotes": "Matured exclusively in hand-picked sherry seasoned European oak casks from Jerez, Spain. Deep mahogany color. Production date: 1999, Bottled: 2024. This is bottle 892 of 2400 from batch B47. Unique QR code applied on label for blockchain traceability.",
+          "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
         },
-        "identity": {
-          "documentType": "passport",
-          "documentNumber": "19FR98765",
-          "expiryDate": "2029-12-31",
-          "documentCid": "bafkreid2uhv5rlmkv2eqzr7cnmbz2brbn4n6qgrxq3s75zgkeqiqnwe6ye",
-          "proofOfAddressType": "utility_bill",
-          "proofOfAddressCid": "bafkreic5a7uykno7wr2zotlbjqp5q3tx3iyptvt26e3s3kgjbud6exqyua",
-          "proofOfAddressDate": "2025-09-15",
-          "sourceOfFunds": "business_income",
-          "pepStatus": false
+        "nationalDistribution": {
+          "distributorName": "Edrington UK",
+          "receptionDate": "2024-02-15",
+          "storageConditions": "Temperature-controlled warehouse 16°C, high security vault, monitored 24/7",
+          "certifiedDistributor": true,
+          "licenseNumber": "UK-DIST-SPIRITS-2024-8847",
+          "quantityReceived": 2400,
+          "distributionNotes": "Official distributor for Macallan. Received complete batch B47. All bottles inspected for quality control. Stored in bonded warehouse awaiting customs clearance for international distribution.",
+          "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
         },
-        "risk_profile": {
-          "operatingJurisdictions": [
-            "FR",
-            "DE",
-            "GB"
-          ],
-          "monthlyVolume": "100k_1m",
-          "transactionFrequency": "daily",
-          "cryptoActivities": [
-            "exchange_trading",
-            "custody",
-            "defi_staking"
-          ],
-          "customerBase": "retail_mixed_institutional",
-          "highRiskJurisdictions": [],
-          "riskLevel": "medium",
-          "riskMitigationMeasures": [
-            "aml_program",
-            "transaction_monitoring",
-            "sanctions_screening",
-            "compliance_officer",
-            "blockchain_analytics_tools",
-            "employee_training"
-          ]
+        "import1": {
+          "importerName": "La Maison du Whisky Paris",
+          "originCountry": "United Kingdom",
+          "destinationCountry": "France",
+          "importLicenseNumber": "FR-IMP-SPIRITS-2024-3392",
+          "customsClearanceDate": "2024-03-01",
+          "originCertificate": "UK-ORIGIN-SCOTCH-2024-7712",
+          "healthCertificate": "EU-HEALTH-SPIRITS-2024-5529",
+          "exciseCertificate": "FR-EXCISE-2024-8841",
+          "transportConditions": "Road transport from UK, temperature-controlled truck 18°C, GPS tracked",
+          "quantityImported": 500,
+          "import1Notes": "Imported 500 bottles from batch B47 for French market and re-export to Asia. Full customs clearance completed. Certificate of authenticity verified. Stored in Paris warehouse pending retail distribution and export.",
+          "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
         },
-        "wallet_monitoring": {
-          "wallets": [
-            {
-              "blockchain": "ethereum",
-              "address": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1",
-              "walletType": "hot_wallet",
-              "primaryUse": "business_operations"
-            },
-            {
-              "blockchain": "bitcoin",
-              "address": "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
-              "walletType": "cold_wallet",
-              "primaryUse": "treasury"
-            },
-            {
-              "blockchain": "polygon",
-              "address": "0x8765dcba4321fedcba98765432fedcba87654321",
-              "walletType": "non_custodial",
-              "primaryUse": "defi_staking"
-            }
-          ],
-          "transactionPatterns": "Daily DeFi operations between 5K-50K USD, weekly exchange deposits and withdrawals 50K-200K USD, monthly treasury consolidations",
-          "counterpartyTypes": [
-            "regulated_exchange",
-            "defi_protocol",
-            "business_partners"
-          ],
-          "alertThreshold": 100000,
-          "monitoringConsent": true,
-          "monitoringFrequency": "daily",
-          "blockchainAnalyticsProvider": "chainalysis"
+        "export": {
+          "exporterName": "Golden Dragon Spirits Hong Kong",
+          "originCountry": "France",
+          "finalDestinationCountry": "China",
+          "exportLicenseNumber": "HK-EXP-SPIRITS-2024-9987",
+          "shipmentDate": "2024-04-10",
+          "exportDocuments": "DAU FR-HK-2024-9987, AWB (Air Waybill) CX8847-HKG",
+          "transportMethod": "Aérien",
+          "securedTransport": true,
+          "insuranceValue": 180000,
+          "quantityExported": 150,
+          "exportNotes": "Air cargo secured container from Paris CDG to Hong Kong. 150 bottles selected for Chinese premium market. GPS tracking active. Temperature controlled 18°C. Insurance €180,000. ETA Hong Kong: 2024-04-11.",
+          "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
+        },
+        "import2": {
+          "importerName": "Shanghai Premium Imports Co. Ltd",
+          "destinationCountry": "China",
+          "importLicenseNumber": "CN-IMP-SPIRITS-2024-5571",
+          "customsClearanceDate": "2024-04-15",
+          "gaccCertificate": "GACC-SPIRITS-2024-CN-8834",
+          "healthCertificate": "CN-HEALTH-IMPORT-2024-7729",
+          "originCertificate": "UK-SCOTCH-ORIGIN-2024-7712",
+          "chineseLabelingCompliant": true,
+          "bondedWarehouse": "Shanghai Free Trade Zone - Bonded Warehouse B7",
+          "quantityImported": 150,
+          "import2Notes": "Customs clearance completed. Chinese labeling applied (bilingual EN/CN). GACC health certificate obtained. All 150 bottles inspected and verified authentic via QR code blockchain. Stored in bonded warehouse pending retail distribution. Taxes: Duty 10% + Consumption 10% + VAT 13% = 33% total.",
+          "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
+        },
+        "retail": {
+          "retailerName": "Emperor's Cellar Shanghai",
+          "receptionDate": "2024-05-01",
+          "authenticityVerified": true,
+          "qualityInspection": "QR code blockchain verified. Bottle 892/2400 confirmed authentic. Capsule intact. Label perfect condition.",
+          "storageConditions": "Climate-controlled cellar 18°C, 65% humidity. High-security display case. 24/7 surveillance.",
+          "retailPrice": 28800,
+          "priceCurrency": "CNY",
+          "stockAvailable": 1,
+          "premiumServices": "VIP tasting room available. Certificate of authenticity provided. Delivery available. Expert consultation included.",
+          "retailNotes": "Ultra-premium whisky specialist. Macallan 25 Years batch B47 bottle 892. Retail price: ¥28,800 CNY (~€3,600). Full provenance blockchain-verified from Scotland to Shanghai. Ready for premium sale to collector.",
+          "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
+        },
+        "consumer": {
+          "consumerName": "Mr. Wei Chen",
+          "purchaseDate": "2024-05-15",
+          "purchaseLocation": "Emperor's Cellar Shanghai",
+          "purchasePrice": 28800,
+          "priceCurrency": "CNY",
+          "usage": "Collection",
+          "tastingDate": "2024-06-01",
+          "tastingNotes": "Exceptional whisky. Nose: Rich sherry, dried fruits (raisins, figs), dark chocolate, Christmas cake, subtle oak. Palate: Full-bodied, velvety smooth. Sherry sweetness balanced with spice (ginger, cinnamon). Dark fruits, orange zest, hints of coffee and leather. Finish: Very long, warm, lingering sherry and oak. Absolutely magnificent. Worth every yuan.",
+          "rating": 5,
+          "wouldRecommend": true,
+          "consumerNotes": "Purchased for my premium collection. Full blockchain traceability from Macallan Distillery Scotland to Shanghai verified via QR code. Complete provenance: 7 actors, all signatures validated. This is what I call authentic luxury. Certificate of authenticity received. Bottle 892/2400 from batch B47 distilled 1999. A masterpiece.",
+          "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
         }
       }
     }
