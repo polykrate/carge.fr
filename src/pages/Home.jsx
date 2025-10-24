@@ -316,11 +316,11 @@ export const Home = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Use Case 1 - AI Invoice Digitization */}
+            {/* Use Case 1 - Wine Traceability */}
             <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
               <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
                 <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
               <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.useCase1Title')}</h3>
@@ -329,11 +329,11 @@ export const Home = () => {
               </p>
             </div>
 
-            {/* Use Case 2 - Logistics Tracking */}
+            {/* Use Case 2 - Automotive Parts */}
             <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
               <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
                 <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
                 </svg>
               </div>
               <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.useCase2Title')}</h3>
@@ -342,16 +342,55 @@ export const Home = () => {
               </p>
             </div>
 
-            {/* Use Case 3 - Administrative Procedures */}
+            {/* Use Case 3 - Agriculture */}
+            <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
+                <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.useCase3Title')}</h3>
+              <p className="text-gray-600 leading-relaxed">
+                {t('home.useCase3Desc')}
+              </p>
+            </div>
+
+            {/* Use Case 4 - AI Invoice */}
+            <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
+                <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.useCase4Title')}</h3>
+              <p className="text-gray-600 leading-relaxed">
+                {t('home.useCase4Desc')}
+              </p>
+            </div>
+
+            {/* Use Case 5 - Logistics */}
+            <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
+                <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.useCase5Title')}</h3>
+              <p className="text-gray-600 leading-relaxed">
+                {t('home.useCase5Desc')}
+              </p>
+            </div>
+
+            {/* Use Case 6 - Administrative */}
             <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
               <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
                 <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.useCase3Title')}</h3>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.useCase6Title')}</h3>
               <p className="text-gray-600 leading-relaxed">
-                {t('home.useCase3Desc')}
+                {t('home.useCase6Desc')}
               </p>
             </div>
           </div>
