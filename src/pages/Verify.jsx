@@ -27,6 +27,7 @@ export const Verify = () => {
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false); // Accordion state for history details
   const [expandedSteps, setExpandedSteps] = useState({}); // Track which steps are expanded
   const [isProofDetailsExpanded, setIsProofDetailsExpanded] = useState(false); // Accordion state for proof details
+  const [verifyingChainOfTrust, setVerifyingChainOfTrust] = useState(false); // Track chain of trust verification
   
   // Workflow continuation states
   const [allRags, setAllRags] = useState([]);
@@ -198,6 +199,7 @@ export const Verify = () => {
       setIsHistoryExpanded(false);
       setExpandedSteps({});
       setIsProofDetailsExpanded(false);
+      setVerifyingChainOfTrust(false);
 
       console.log('Processing file:', file.name);
       const text = await file.text();
@@ -243,6 +245,7 @@ export const Verify = () => {
       setIsHistoryExpanded(false);
       setExpandedSteps({});
       setIsProofDetailsExpanded(false);
+      setVerifyingChainOfTrust(false);
 
       const proof = JSON.parse(jsonInput);
       await verifyProof(proof, toastId);
@@ -257,6 +260,8 @@ export const Verify = () => {
   };
 
   const verifyProof = async (proof, toastId) => {
+    let isChainOfTrustNonVerifiable = false;
+    
     try {
       console.log('Starting proof verification...');
       const verifier = new ProofVerifier(substrateClient);
@@ -311,26 +316,57 @@ export const Verify = () => {
       // If proof is valid and contains workflow data, reconstruct and verify workflow history
       if (result.isValid && proof.ragData && proof.ragData.ragHash && proof.ragData.stepHash && proof.ragData.livrable) {
         console.log('Valid workflow proof detected, reconstructing history...');
+        
+        // Set intermediate state - proof found but chain of trust not verified yet
+        setVerifyingChainOfTrust(true);
+        
         try {
           const ragClient = new RagClient(substrateClient);
           const history = await verifier.reconstructWorkflowHistory(proof, ragClient, ipfsClient);
           setWorkflowHistory(history);
           console.log('📜 Workflow history reconstructed:', history);
           
+          // Update result color based on chain of trust
+          // If chainOfTrustValid is null (not verifiable), keep verifying state (gray)
+          // If chainOfTrustValid is false (broken), mark as invalid
+          // If chainOfTrustValid is true (valid), keep current isValid state
+          setResult(prev => ({
+            ...prev,
+            chainOfTrustValid: history.chainOfTrustValid,
+            chainOfTrustVerifiable: history.chainOfTrustVerifiable,
+            isValid: history.chainOfTrustValid === false ? false : prev.isValid
+          }));
+          
+          // Track if chain of trust is not verifiable
+          isChainOfTrustNonVerifiable = (history.chainOfTrustValid === null);
+          
+          // Only exit verifying state if chain of trust is actually verified (true or false)
+          // Keep gray state if not verifiable (null)
+          if (history.chainOfTrustValid !== null) {
+            setVerifyingChainOfTrust(false);
+          }
+          
           // Also try to load next step
           await loadNextWorkflowStep(proof.ragData);
         } catch (err) {
           console.error('Failed to reconstruct workflow history:', err);
           // Don't fail the whole verification, just log it
+          setVerifyingChainOfTrust(false);
         }
       }
       
-      if (result.isValid) {
-        dismiss(toastId);
-        showSuccess('Proof verified successfully!');
+      // Don't show success/error toasts if chain of trust is not verifiable (gray state)
+      if (!isChainOfTrustNonVerifiable) {
+        if (result.isValid) {
+          dismiss(toastId);
+          showSuccess('Proof verified successfully!');
+        } else {
+          dismiss(toastId);
+          showError(result.message);
+        }
       } else {
+        // Just dismiss the toast for gray state (non-verifiable)
         dismiss(toastId);
-        showError(result.message);
       }
     } catch (err) {
       console.error('Verification error:', err);
@@ -764,21 +800,7 @@ export const Verify = () => {
         )}
       </div>
 
-      {/* Verifying Status */}
-      {verifying && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-          <div className="flex items-center space-x-3">
-            <svg className="animate-spin h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <div>
-              <div className="font-medium text-blue-900">{t('verify.verifying')}</div>
-              <div className="text-sm text-blue-700">{t('common.loading')}</div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Verifying Status - Removed: Toast indicator is sufficient */}
 
       {/* Error */}
       {error && (
@@ -798,14 +820,27 @@ export const Verify = () => {
       {/* Result - Compact View */}
       {result && (
         <div role="region" aria-label="Verification results" className={`border rounded-lg overflow-hidden ${
-          result.isValid
-            ? 'bg-green-50 border-green-200'
-            : 'bg-red-50 border-red-200'
+          verifyingChainOfTrust
+            ? 'bg-gray-50 border-gray-300'
+            : result.isValid
+              ? 'bg-green-50 border-green-200'
+              : 'bg-red-50 border-red-200'
         }`}>
           {/* Header - Always visible */}
           <div className="p-6">
             <div className="flex items-center space-x-3 mb-4">
-              {result.isValid ? (
+              {verifyingChainOfTrust ? (
+                result.chainOfTrustVerifiable === false ? (
+                  <svg className="h-8 w-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                ) : (
+                  <svg className="h-8 w-8 text-gray-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                )
+              ) : result.isValid ? (
                 <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -816,9 +851,21 @@ export const Verify = () => {
               )}
               <div>
                 <div className="font-medium text-lg">
-                  {result.isValid ? 'Proof Valid' : 'Proof Invalid'}
+                  {verifyingChainOfTrust 
+                    ? (result.chainOfTrustVerifiable === false 
+                        ? 'Proof Valid - Chain of Trust Not Verifiable'
+                        : 'Verifying Chain of Trust...')
+                    : result.isValid 
+                      ? 'Proof Valid' 
+                      : 'Proof Invalid'}
                 </div>
-                <div className="text-sm text-gray-700">{result.message}</div>
+                <div className="text-sm text-gray-700">
+                  {verifyingChainOfTrust 
+                    ? (result.chainOfTrustVerifiable === false
+                        ? 'Workflow steps verified on blockchain, but participant identities cannot be traced (no _targetAddress metadata)'
+                        : 'Proof found on blockchain, checking workflow chain of trust...')
+                    : result.message}
+                </div>
               </div>
             </div>
 
@@ -827,9 +874,11 @@ export const Verify = () => {
               <button
                 onClick={() => setIsProofDetailsExpanded(!isProofDetailsExpanded)}
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition text-left border ${
-                  result.isValid
-                    ? 'bg-green-50 hover:bg-green-100 border-green-200'
-                    : 'bg-red-50 hover:bg-red-100 border-red-200'
+                  verifyingChainOfTrust
+                    ? 'bg-gray-100 hover:bg-gray-200 border-gray-300'
+                    : result.isValid
+                      ? 'bg-green-50 hover:bg-green-100 border-green-200'
+                      : 'bg-red-50 hover:bg-red-100 border-red-200'
                 }`}
               >
                 <span className="font-medium text-gray-900">Proof Details</span>
@@ -848,7 +897,11 @@ export const Verify = () => {
           {/* Collapsible Details Section */}
           {result.details && isProofDetailsExpanded && (
             <div className={`px-6 pb-6 border-t ${
-              result.isValid ? 'border-green-200' : 'border-red-200'
+              verifyingChainOfTrust
+                ? 'border-gray-300'
+                : result.isValid 
+                  ? 'border-green-200' 
+                  : 'border-red-200'
             }`}>
               <div className="pt-4 space-y-2 text-sm">
                 {Object.entries(result.details).map(([key, value]) => (
@@ -910,8 +963,8 @@ export const Verify = () => {
       {workflowHistory && (
         <div className="bg-white border border-gray-200 rounded-lg p-6 mt-8">
           {/* Header with Summary */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-xl font-semibold">Workflow History</h2>
               {workflowHistory.allStepsVerified ? (
                 <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full flex items-center gap-1">
@@ -926,6 +979,31 @@ export const Verify = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                   Some Steps Unverified
+                </span>
+              )}
+              {workflowHistory.chainOfTrustValid !== undefined && workflowHistory.chainOfTrustValid !== null && (
+                workflowHistory.chainOfTrustValid === true ? (
+                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.586-2A2 2 0 0119 9H5a2 2 0 01-1.414-3.414l2-2a2 2 0 012.828 0l2 2a2 2 0 010 2.828l-2 2z" />
+                    </svg>
+                    Chain of Trust Valid
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 bg-orange-100 text-orange-800 text-sm font-medium rounded-full flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    Chain of Trust Broken
+                  </span>
+                )
+              )}
+              {workflowHistory.chainOfTrustValid === null && (
+                <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Chain of Trust Not Verifiable
                 </span>
               )}
             </div>
@@ -1065,6 +1143,26 @@ export const Verify = () => {
                                 {step.blockchainData.signatureValid ? 'Valid' : 'Invalid'}
                               </span>
                             </div>
+                            {step.stepIndex > 0 && step.chainOfTrustValid !== undefined && (
+                              <div>
+                                <span className="text-gray-500 font-medium">Chain of Trust:</span>
+                                <span
+                                  className={`ml-1 px-2 py-0.5 rounded ${
+                                    step.chainOfTrustValid === true
+                                      ? 'bg-blue-200 text-blue-800'
+                                      : step.chainOfTrustValid === false
+                                        ? 'bg-orange-200 text-orange-800'
+                                        : 'bg-gray-200 text-gray-700'
+                                  }`}
+                                >
+                                  {step.chainOfTrustValid === true 
+                                    ? '✓ Valid' 
+                                    : step.chainOfTrustValid === false 
+                                      ? '✗ Broken' 
+                                      : 'ℹ Not Verifiable'}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}

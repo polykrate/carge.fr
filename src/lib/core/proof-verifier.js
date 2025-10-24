@@ -417,6 +417,29 @@ export class ProofVerifier {
           console.warn(`⚠️ Step ${i + 1}: Blockchain verification error:`, error.message);
         }
 
+        // Verify chain of trust: target address from previous step should match creator of current step
+        let chainOfTrustValid = null; // null = not verifiable, true = valid, false = broken
+        if (i > 0 && blockchainData) {
+          const previousStep = history[i - 1];
+          if (previousStep && previousStep.delivrable._targetAddress) {
+            const expectedCreator = previousStep.delivrable._targetAddress;
+            const actualCreator = blockchainData.creator;
+            
+            if (expectedCreator !== actualCreator) {
+              chainOfTrustValid = false;
+              console.warn(`⚠️ Chain of trust broken at step ${i + 1}: Expected creator ${expectedCreator} but got ${actualCreator}`);
+            } else {
+              chainOfTrustValid = true;
+              console.log(`✅ Step ${i + 1}: Chain of trust validated (${actualCreator})`);
+            }
+          } else {
+            console.log(`ℹ️ Step ${i + 1}: Chain of trust not verifiable (no _targetAddress in previous step)`);
+          }
+        } else if (i === 0) {
+          // First step - chain of trust is valid by definition
+          chainOfTrustValid = true;
+        }
+
         history.push({
           stepIndex: i,
           stepHash: stepHashValue,
@@ -424,19 +447,28 @@ export class ProofVerifier {
           delivrable: { ...accumulatedDelivrable },
           contentHash,
           blockchainVerified,
-          blockchainData
+          blockchainData,
+          chainOfTrustValid
         });
 
         console.log(`Step ${i + 1}: hash=${contentHash}, keys=[${Object.keys(accumulatedDelivrable).join(', ')}], verified=${blockchainVerified}`);
       }
 
+      // Calculate chain of trust status
+      const chainOfTrustStatuses = history.map(h => h.chainOfTrustValid);
+      const hasAnyBroken = chainOfTrustStatuses.includes(false);
+      const hasAnyNonVerifiable = chainOfTrustStatuses.includes(null);
+      const allValid = chainOfTrustStatuses.every(status => status === true);
+      
       return {
         masterWorkflowHash: ragHash,
         masterWorkflowName: masterRag.metadata?.name || 'Unknown Workflow',
         currentStepIndex,
         totalSteps: steps.length,
         history,
-        allStepsVerified: history.every(h => h.blockchainVerified)
+        allStepsVerified: history.every(h => h.blockchainVerified),
+        chainOfTrustValid: hasAnyBroken ? false : (hasAnyNonVerifiable ? null : true),
+        chainOfTrustVerifiable: !hasAnyNonVerifiable
       };
     } catch (error) {
       console.error('Failed to reconstruct workflow history:', error);
