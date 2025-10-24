@@ -118,7 +118,7 @@ export const Home = () => {
 
       {/* Workflow Example */}
       <section className="py-20 bg-white border-t border-gray-100">
-        <div className="container mx-auto px-6 max-w-6xl">
+        <div className="container mx-auto px-6 max-w-4xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 text-[#003399]">{t('home.workflowExampleTitle')}</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -126,140 +126,109 @@ export const Home = () => {
             </p>
           </div>
 
-          {/* Timeline */}
-          <div className="relative mb-12">
-            {/* Connection Line */}
-            <div className="absolute top-8 left-0 right-0 h-1 bg-gray-200 hidden md:block" style={{ left: '4%', right: '4%' }}></div>
-            
-            {/* Steps */}
-            <div className="relative flex justify-between items-start">
-              {[1, 2, 3, 4, 5, 6, 7].map((step) => (
-                <button
-                  key={step}
-                  onClick={() => setSelectedStep(step)}
-                  className={`flex flex-col items-center transition-all duration-300 ${
-                    selectedStep === step ? 'scale-110' : 'hover:scale-105'
-                  }`}
-                >
-                  <div
-                    className={`w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl mb-2 shadow-lg transition-all duration-300 ${
-                      selectedStep === step
-                        ? 'bg-[#003399] ring-4 ring-[#003399]/30'
-                        : 'bg-gray-400 hover:bg-gray-500'
-                    }`}
-                  >
-                    {step}
+          {/* Vertical Timeline */}
+          <div className="relative">
+            {/* Vertical Line */}
+            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#003399] via-blue-400 to-[#003399]"></div>
+
+            {/* Timeline Steps */}
+            <div className="space-y-8">
+              {[1, 2, 3, 4, 5, 6, 7].map((step) => {
+                const stepData = {
+                  1: { emoji: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', title: t('home.workflowStep1'), desc: t('home.workflowStep1Desc'), icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
+                  2: { emoji: '🇬🇧', title: t('home.workflowStep2'), desc: t('home.workflowStep2Desc'), icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+                  3: { emoji: '🇫🇷', title: t('home.workflowStep3'), desc: t('home.workflowStep3Desc'), icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+                  4: { emoji: '🇭🇰', title: t('home.workflowStep4'), desc: t('home.workflowStep4Desc'), icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
+                  5: { emoji: '🇨🇳', title: t('home.workflowStep5'), desc: t('home.workflowStep5Desc'), icon: 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0' },
+                  6: { emoji: '🏛️', title: t('home.workflowStep6'), desc: t('home.workflowStep6Desc'), icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
+                  7: { emoji: '👤', title: t('home.workflowStep7'), desc: t('home.workflowStep7Desc'), icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' }
+                };
+                
+                const data = stepData[step];
+                const isExpanded = selectedStep === step;
+
+                return (
+                  <div key={step} className="relative flex items-start gap-6">
+                    {/* Circle Badge */}
+                    <button
+                      onClick={() => setSelectedStep(step)}
+                      className={`relative z-10 flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl transition-all duration-300 shadow-lg ${
+                        isExpanded
+                          ? 'bg-[#003399] text-white ring-4 ring-[#003399]/20 scale-110'
+                          : 'bg-white text-gray-600 border-2 border-gray-300 hover:border-[#003399] hover:text-[#003399]'
+                      }`}
+                    >
+                      {step}
+                    </button>
+
+                    {/* Card Content */}
+                    <div className="flex-1 pb-4">
+                      <button
+                        onClick={() => setSelectedStep(step)}
+                        className={`w-full text-left bg-white rounded-xl border-2 transition-all duration-300 ${
+                          isExpanded
+                            ? 'border-[#003399] shadow-xl'
+                            : 'border-gray-200 shadow-md hover:border-[#003399]/50 hover:shadow-lg'
+                        }`}
+                      >
+                        {/* Card Header */}
+                        <div className="p-6 flex items-center justify-between">
+                          <div className="flex items-center gap-4 flex-1">
+                            {/* Icon */}
+                            <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors duration-300 ${
+                              isExpanded ? 'bg-[#003399]' : 'bg-gray-100'
+                            }`}>
+                              <svg className={`w-6 h-6 ${isExpanded ? 'text-white' : 'text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={data.icon} />
+                              </svg>
+                            </div>
+
+                            {/* Title */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-2xl">{data.emoji}</span>
+                                <h3 className={`text-xl font-bold transition-colors duration-300 ${
+                                  isExpanded ? 'text-[#003399]' : 'text-gray-900'
+                                }`}>
+                                  {data.title}
+                                </h3>
+                              </div>
+                            </div>
+
+                            {/* Expand Icon */}
+                            <svg
+                              className={`w-6 h-6 text-gray-400 transition-transform duration-300 ${
+                                isExpanded ? 'rotate-180' : ''
+                              }`}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </div>
+                        </div>
+
+                        {/* Expandable Description */}
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ${
+                            isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                          }`}
+                        >
+                          <div className="px-6 pb-6 pt-2">
+                            <div className="bg-gradient-to-br from-[#003399]/5 to-blue-50 rounded-lg p-4">
+                              <p className="text-gray-700 leading-relaxed">
+                                {data.desc}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    </div>
                   </div>
-                  <div className={`text-xs font-medium transition-all duration-300 ${
-                    selectedStep === step ? 'text-[#003399]' : 'text-gray-400'
-                  }`}>
-                    {step === 1 && '🏴󠁧󠁢󠁳󠁣󠁴󠁿 Macallan'}
-                    {step === 2 && '🇬🇧 Edrington'}
-                    {step === 3 && '🇫🇷 Paris'}
-                    {step === 4 && '🇭🇰 HK'}
-                    {step === 5 && '🇨🇳 Shanghai'}
-                    {step === 6 && '🏛️ Cave'}
-                    {step === 7 && '👤 Collector'}
-                  </div>
-                </button>
-              ))}
+                );
+              })}
             </div>
-          </div>
-
-          {/* Selected Step Details with Navigation */}
-          <div className="flex items-center gap-4">
-            {/* Previous Button */}
-            <button
-              onClick={() => setSelectedStep(selectedStep === 1 ? 7 : selectedStep - 1)}
-              className="flex-shrink-0 w-12 h-12 rounded-full bg-white border-2 border-gray-300 hover:border-[#003399] hover:bg-[#003399] text-gray-400 hover:text-white transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg group"
-              aria-label="Previous step"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-
-            {/* Step Details Card */}
-            <div className="flex-1 bg-gradient-to-br from-[#003399]/5 to-blue-50 rounded-2xl p-8 border-2 border-[#003399]/20 shadow-xl transition-all duration-300">
-              <div className="flex items-start gap-6">
-              {/* Icon */}
-              <div className="flex-shrink-0">
-                <div className="w-20 h-20 bg-[#003399] rounded-xl flex items-center justify-center shadow-lg">
-                  {selectedStep === 1 && (
-                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  )}
-                  {selectedStep === 2 && (
-                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  )}
-                  {selectedStep === 3 && (
-                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  )}
-                  {selectedStep === 4 && (
-                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                  )}
-                  {selectedStep === 5 && (
-                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
-                    </svg>
-                  )}
-                  {selectedStep === 6 && (
-                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                  )}
-                  {selectedStep === 7 && (
-                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  )}
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-3xl font-bold text-[#003399]">{selectedStep}.</span>
-                  <h3 className="text-2xl font-bold text-gray-900">
-                    {selectedStep === 1 && t('home.workflowStep1')}
-                    {selectedStep === 2 && t('home.workflowStep2')}
-                    {selectedStep === 3 && t('home.workflowStep3')}
-                    {selectedStep === 4 && t('home.workflowStep4')}
-                    {selectedStep === 5 && t('home.workflowStep5')}
-                    {selectedStep === 6 && t('home.workflowStep6')}
-                    {selectedStep === 7 && t('home.workflowStep7')}
-                  </h3>
-                </div>
-                <p className="text-lg text-gray-700">
-                  {selectedStep === 1 && t('home.workflowStep1Desc')}
-                  {selectedStep === 2 && t('home.workflowStep2Desc')}
-                  {selectedStep === 3 && t('home.workflowStep3Desc')}
-                  {selectedStep === 4 && t('home.workflowStep4Desc')}
-                  {selectedStep === 5 && t('home.workflowStep5Desc')}
-                  {selectedStep === 6 && t('home.workflowStep6Desc')}
-                  {selectedStep === 7 && t('home.workflowStep7Desc')}
-                </p>
-              </div>
-              </div>
-            </div>
-
-            {/* Next Button */}
-            <button
-              onClick={() => setSelectedStep(selectedStep === 7 ? 1 : selectedStep + 1)}
-              className="flex-shrink-0 w-12 h-12 rounded-full bg-white border-2 border-gray-300 hover:border-[#003399] hover:bg-[#003399] text-gray-400 hover:text-white transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg group"
-              aria-label="Next step"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
           </div>
 
           {/* Note */}
