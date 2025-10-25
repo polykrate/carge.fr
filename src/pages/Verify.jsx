@@ -192,6 +192,12 @@ export const Verify = () => {
   const [isProofDetailsExpanded, setIsProofDetailsExpanded] = useState(false); // Accordion state for proof details
   const [verifyingChainOfTrust, setVerifyingChainOfTrust] = useState(false); // Track chain of trust verification
   
+  // Product QR verification states
+  const [showProductQRScanner, setShowProductQRScanner] = useState(false);
+  const [scanningProductQR, setScanningProductQR] = useState(false);
+  const [productQRResult, setProductQRResult] = useState(null);
+  const [firstStepHash, setFirstStepHash] = useState(null); // Store first step hash for product verification
+  
   // Workflow continuation states
   const [allRags, setAllRags] = useState([]);
   const [nextStepSchema, setNextStepSchema] = useState(null);
@@ -385,6 +391,12 @@ export const Verify = () => {
       setWorkflowInfo(null);
       setLoadingNextStep(false);
       setSubmittingStep(false);
+      
+      // Reset product QR verification states
+      setShowProductQRScanner(false);
+      setScanningProductQR(false);
+      setProductQRResult(null);
+      setFirstStepHash(null);
 
       console.log('Processing file:', file.name);
       const text = await file.text();
@@ -438,6 +450,12 @@ export const Verify = () => {
       setWorkflowInfo(null);
       setLoadingNextStep(false);
       setSubmittingStep(false);
+      
+      // Reset product QR verification states
+      setShowProductQRScanner(false);
+      setScanningProductQR(false);
+      setProductQRResult(null);
+      setFirstStepHash(null);
 
       const proof = JSON.parse(jsonInput);
       await verifyProof(proof, toastId);
@@ -517,6 +535,12 @@ export const Verify = () => {
           const history = await verifier.reconstructWorkflowHistory(proof, ragClient, ipfsClient);
           setWorkflowHistory(history);
           console.log('📜 Workflow history reconstructed:', history);
+          
+          // Store first step hash for product QR verification
+          if (history.steps && history.steps.length > 0) {
+            setFirstStepHash(history.steps[0].contentHash);
+            console.log('💾 First step hash stored for product verification:', history.steps[0].contentHash);
+          }
           
           // Update result color based on chain of trust
           // If chainOfTrustValid is null (not verifiable), keep verifying state (gray)
@@ -787,6 +811,12 @@ export const Verify = () => {
       setWorkflowInfo(null);
       setLoadingNextStep(false);
       setSubmittingStep(false);
+      
+      // Reset product QR verification states
+      setShowProductQRScanner(false);
+      setScanningProductQR(false);
+      setProductQRResult(null);
+      setFirstStepHash(null);
 
       console.log('QR Code scanned:', qrContent);
       
@@ -897,6 +927,55 @@ export const Verify = () => {
     } catch (err) {
       console.error('Hash verification error:', err);
       throw err;
+    }
+  };
+
+  const handleProductQRScan = async (qrContent) => {
+    try {
+      console.log('Product QR scanned:', qrContent);
+      
+      // Check if it's a hash (starts with 0x and is 66 chars)
+      let scannedHash = qrContent.trim();
+      
+      if (!scannedHash.startsWith('0x')) {
+        // Try to parse as JSON in case it's a proof
+        try {
+          const parsed = JSON.parse(scannedHash);
+          if (parsed.ragData && parsed.ragData.contentHash) {
+            scannedHash = parsed.ragData.contentHash;
+          }
+        } catch {
+          // Not JSON, might be hash without 0x prefix
+          scannedHash = '0x' + scannedHash.replace(/^0x/, '');
+        }
+      }
+      
+      console.log('Comparing scanned hash:', scannedHash);
+      console.log('With first step hash:', firstStepHash);
+      
+      if (scannedHash === firstStepHash) {
+        setProductQRResult({
+          isValid: true,
+          message: '✅ Product is authentic!',
+          details: 'The scanned QR code matches the first step of the verified workflow. This confirms the product\'s authenticity.'
+        });
+        showSuccess('Product verified! QR code matches the workflow.');
+      } else {
+        setProductQRResult({
+          isValid: false,
+          message: '❌ Product verification failed!',
+          details: 'The scanned QR code does NOT match the first step of the verified workflow. This product may be counterfeit.'
+        });
+        showError('Product QR does not match the workflow!');
+      }
+    } catch (err) {
+      console.error('Product QR verification error:', err);
+      setProductQRResult({
+        isValid: false,
+        message: '⚠️ Verification error',
+        details: err.message || 'Failed to verify product QR code'
+      });
+      showError('Failed to verify product QR code');
     }
   };
 
@@ -1275,7 +1354,7 @@ export const Verify = () => {
           {/* Continue Workflow Button for valid RAG proofs */}
           {result.isValid && proofData && proofData.ragHash && proofData.stepHash && (
             <div className={`px-6 pb-6 ${result.details && isProofDetailsExpanded ? 'pt-4 border-t' : ''}`}>
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div className="flex items-center gap-2">
                   <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1284,17 +1363,34 @@ export const Verify = () => {
                     This is a valid workflow proof
                   </span>
                 </div>
-                {!workflowInfo && !loadingNextStep && (
-                  <button
-                    onClick={() => loadNextWorkflowStep(proofData)}
-                    className="px-6 py-2 bg-[#003399] hover:bg-[#002266] text-white rounded-lg transition font-medium text-sm flex items-center gap-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Continue Workflow
-                  </button>
-                )}
+                <div className="flex items-center gap-2">
+                  {/* Product QR Verification Button */}
+                  {firstStepHash && !showProductQRScanner && (
+                    <button
+                      onClick={() => {
+                        setShowProductQRScanner(true);
+                        setProductQRResult(null);
+                      }}
+                      className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-medium text-sm flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                      </svg>
+                      Verify Product QR
+                    </button>
+                  )}
+                  {!workflowInfo && !loadingNextStep && (
+                    <button
+                      onClick={() => loadNextWorkflowStep(proofData)}
+                      className="px-6 py-2 bg-[#003399] hover:bg-[#002266] text-white rounded-lg transition font-medium text-sm flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Continue Workflow
+                    </button>
+                  )}
+                </div>
                 {loadingNextStep && (
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1317,6 +1413,101 @@ export const Verify = () => {
                   ↓ Workflow continuation loaded below
                 </div>
               )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Product QR Scanner Section */}
+      {showProductQRScanner && firstStepHash && (
+        <div className="bg-white border border-gray-200 rounded-lg p-6 mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Verify Product QR Code</h2>
+            <button
+              onClick={() => {
+                setShowProductQRScanner(false);
+                setScanningProductQR(false);
+                setProductQRResult(null);
+              }}
+              className="text-gray-500 hover:text-gray-700 transition"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-900">
+              <strong>Instructions:</strong> Scan the QR code on the product (e.g., bottle label) to verify if it matches the first step of this workflow.
+            </p>
+            <p className="text-xs text-blue-700 mt-2">
+              Expected hash: <code className="bg-blue-100 px-2 py-1 rounded font-mono">{firstStepHash.substring(0, 20)}...{firstStepHash.substring(firstStepHash.length - 10)}</code>
+            </p>
+          </div>
+
+          {/* QR Scanner */}
+          {!productQRResult && (
+            <QRCodeScanner
+              onScan={handleProductQRScan}
+              scanning={scanningProductQR}
+              setScanning={setScanningProductQR}
+              verifying={false}
+            />
+          )}
+
+          {/* Product Verification Result */}
+          {productQRResult && (
+            <div className={`p-6 rounded-lg border-2 ${
+              productQRResult.isValid 
+                ? 'bg-green-50 border-green-300' 
+                : 'bg-red-50 border-red-300'
+            }`}>
+              <div className="flex items-start gap-3 mb-4">
+                {productQRResult.isValid ? (
+                  <svg className="w-8 h-8 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                ) : (
+                  <svg className="w-8 h-8 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+                <div className="flex-1">
+                  <h3 className={`text-lg font-bold mb-2 ${
+                    productQRResult.isValid ? 'text-green-900' : 'text-red-900'
+                  }`}>
+                    {productQRResult.message}
+                  </h3>
+                  <p className={`text-sm ${
+                    productQRResult.isValid ? 'text-green-800' : 'text-red-800'
+                  }`}>
+                    {productQRResult.details}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setProductQRResult(null);
+                    setScanningProductQR(false);
+                  }}
+                  className="px-4 py-2 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium text-sm"
+                >
+                  Scan Another QR
+                </button>
+                <button
+                  onClick={() => {
+                    setShowProductQRScanner(false);
+                    setScanningProductQR(false);
+                    setProductQRResult(null);
+                  }}
+                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition font-medium text-sm"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           )}
         </div>
