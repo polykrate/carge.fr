@@ -7,20 +7,37 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        // 🚀 Simplified chunking strategy - group only heavy vendors separately
-        manualChunks: {
-          // Core dependencies loaded upfront
-          'react-vendor': ['react', 'react-dom', 'react-router-dom', 'react-hot-toast'],
+        // 🚀 Simplified chunking strategy - keep critical vendors together
+        manualChunks: (id) => {
+          // Core React dependencies
+          if (id.includes('node_modules/react') || 
+              id.includes('node_modules/react-dom') || 
+              id.includes('node_modules/react-router')) {
+            return 'react-vendor';
+          }
           
-          // Heavy vendors loaded on demand
-          'polkadot-vendor': [
-            '@polkadot/api',
-            '@polkadot/extension-dapp',
-            '@polkadot/util',
-            '@polkadot/util-crypto'
-          ],
+          // Polkadot vendor
+          if (id.includes('@polkadot/')) {
+            return 'polkadot-vendor';
+          }
           
-          // Note: IPFS is too complex to chunk manually, let Vite handle it
+          // IPFS/Helia - MUST stay together for dynamic imports to work
+          if (id.includes('helia') || 
+              id.includes('@helia/') ||
+              id.includes('multiformats') ||
+              id.includes('libp2p') ||
+              id.includes('@libp2p/') ||
+              id.includes('blockstore') ||
+              id.includes('datastore') ||
+              id.includes('ipfs') ||
+              id.includes('@chainsafe/libp2p')) {
+            return 'ipfs-vendor';
+          }
+          
+          // All other node_modules
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         }
       }
     },
