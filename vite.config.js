@@ -5,47 +5,18 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
+    // Increase chunk size limit to avoid warnings on vendors
+    chunkSizeWarningLimit: 1000,
+    
     rollupOptions: {
       output: {
-        // 🚀 Simplified chunking strategy - keep critical vendors together
-        manualChunks: (id) => {
-          // Core React dependencies
-          if (id.includes('node_modules/react') || 
-              id.includes('node_modules/react-dom') || 
-              id.includes('node_modules/react-router')) {
-            return 'react-vendor';
-          }
-          
-          // Polkadot vendor
-          if (id.includes('@polkadot/')) {
-            return 'polkadot-vendor';
-          }
-          
-          // IPFS/Helia - MUST stay together for dynamic imports to work
-          if (id.includes('helia') || 
-              id.includes('@helia/') ||
-              id.includes('multiformats') ||
-              id.includes('libp2p') ||
-              id.includes('@libp2p/') ||
-              id.includes('blockstore') ||
-              id.includes('datastore') ||
-              id.includes('ipfs') ||
-              id.includes('@chainsafe/libp2p')) {
-            return 'ipfs-vendor';
-          }
-          
-          // All other node_modules
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
-        }
+        // Let Vite handle chunking automatically with default strategy
+        // This avoids circular dependency issues from manual chunking
       }
     },
-    // Reduce chunk size warning limit (we're optimizing!)
-    chunkSizeWarningLimit: 400,
     
-    // Improve build performance
-    target: 'es2015',
+    // Use ES2020 to support BigInt (required by IPFS/Helia)
+    target: 'es2020',
     minify: 'terser',
     terserOptions: {
       compress: {
