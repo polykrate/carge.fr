@@ -179,6 +179,73 @@ export const dismiss = (toastId) => {
 };
 
 /**
+ * Update an existing toast (useful for progress updates)
+ * @param {string} toastId - ID of the toast to update
+ * @param {Object} options - Toast options (render, type, isLoading, autoClose)
+ */
+export const update = (toastId, options = {}) => {
+  const { render, type = 'info', isLoading = false, autoClose = 4000 } = options;
+  
+  if (!toastId) return;
+  
+  // Determine which toast function to use based on type and loading state
+  if (isLoading) {
+    toast.loading(render, {
+      id: toastId,
+      ...defaultOptions,
+      duration: Infinity,
+      icon: icons.loading,
+      style: {
+        ...defaultOptions.style,
+        borderLeft: '4px solid #003399',
+      },
+    });
+  } else if (type === 'success') {
+    toast.success(render, {
+      id: toastId,
+      ...defaultOptions,
+      duration: autoClose,
+      icon: icons.success,
+      style: {
+        ...defaultOptions.style,
+        borderLeft: '4px solid #10b981',
+      },
+      iconTheme: {
+        primary: '#10b981',
+        secondary: '#ffffff',
+      },
+    });
+  } else if (type === 'error') {
+    toast.error(render, {
+      id: toastId,
+      ...defaultOptions,
+      duration: autoClose,
+      icon: icons.error,
+      style: {
+        ...defaultOptions.style,
+        borderLeft: '4px solid #ef4444',
+      },
+      iconTheme: {
+        primary: '#ef4444',
+        secondary: '#ffffff',
+      },
+    });
+  } else {
+    // type === 'info' or default
+    toast(render, {
+      id: toastId,
+      ...defaultOptions,
+      duration: isLoading ? Infinity : autoClose,
+      icon: isLoading ? icons.loading : icons.info,
+      style: {
+        ...defaultOptions.style,
+        borderLeft: '4px solid #003399',
+      },
+    });
+  }
+};
+
+/**
  * Show promise-based toast (auto updates based on promise state)
  */
 export const showPromise = (promise, messages, options = {}) => {

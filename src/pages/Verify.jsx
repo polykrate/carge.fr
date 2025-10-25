@@ -6,7 +6,7 @@ import { ProofVerifier } from '../lib/core/proof-verifier.js';
 import { RagClient } from '../lib/core/rag-client.js';
 import { FormGenerator } from '../lib/core/form-generator.js';
 import { DeliverableDisplay } from '../components/DeliverableDisplay';
-import { showError, showSuccess, showLoading, dismiss, toastTx } from '../lib/toast';
+import { showError, showSuccess, showLoading, dismiss, update, toastTx } from '../lib/toast';
 import {
   waitForPolkadot,
   connectToApi,
