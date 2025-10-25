@@ -638,11 +638,17 @@ export const Verify = () => {
           // If chainOfTrustValid is null (not verifiable), keep verifying state (gray)
           // If chainOfTrustValid is false (broken), mark as invalid
           // If chainOfTrustValid is true (valid), keep current isValid state
+          const isValidWithChainOfTrust = history.chainOfTrustValid === false ? false : result.isValid;
+          const messageWithChainOfTrust = history.chainOfTrustValid === false 
+            ? 'Proof found on blockchain but Chain of Trust is broken!' 
+            : result.message;
+          
           setResult(prev => ({
             ...prev,
             chainOfTrustValid: history.chainOfTrustValid,
             chainOfTrustVerifiable: history.chainOfTrustVerifiable,
-            isValid: history.chainOfTrustValid === false ? false : prev.isValid
+            isValid: isValidWithChainOfTrust,
+            message: messageWithChainOfTrust
           }));
           
           // Track if chain of trust is not verifiable
@@ -662,12 +668,12 @@ export const Verify = () => {
       
       // Don't show success/error toasts if chain of trust is not verifiable (gray state)
       if (!isChainOfTrustNonVerifiable) {
-      if (result.isValid) {
+      if (isValidWithChainOfTrust) {
         dismiss(toastId);
         showSuccess('Proof verified successfully!');
       } else {
         dismiss(toastId);
-        showError(result.message);
+        showError(messageWithChainOfTrust);
         }
       } else {
         // Just dismiss the toast for gray state (non-verifiable)
@@ -1368,7 +1374,7 @@ export const Verify = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               )}
-              <div>
+              <div className="flex-1">
                 <div className="font-medium text-lg">
                   {verifyingChainOfTrust 
                     ? (result.chainOfTrustVerifiable === false 
@@ -1385,6 +1391,16 @@ export const Verify = () => {
                         : 'Proof found on blockchain, checking workflow chain of trust...')
                     : result.message}
                 </div>
+                {result.chainOfTrustValid === false && !verifyingChainOfTrust && (
+                  <div className="mt-3 flex items-start gap-2 p-3 bg-red-100 border border-red-300 rounded-lg">
+                    <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <div className="text-xs text-red-800">
+                      <strong className="font-bold">Security Alert:</strong> At least one step in the workflow was not created by the intended recipient of the previous step. This indicates a potential security issue or tampering.
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
