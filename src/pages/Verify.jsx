@@ -16,11 +16,12 @@ import {
 } from '../lib/core/blockchain-utils.js';
 
 // QR Code Scanner Component
-const QRCodeScanner = ({ onScan, scanning, setScanning, verifying }) => {
+const QRCodeScanner = ({ onScan, scanning, setScanning, verifying, autoStart = false }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
   const scanIntervalRef = useRef(null);
+  const autoStartedRef = useRef(false);
 
   const startScanning = async () => {
     try {
@@ -99,6 +100,14 @@ const QRCodeScanner = ({ onScan, scanning, setScanning, verifying }) => {
       }
     }
   };
+
+  // Auto-start camera if autoStart is true
+  useEffect(() => {
+    if (autoStart && !scanning && !autoStartedRef.current) {
+      autoStartedRef.current = true;
+      startScanning();
+    }
+  }, [autoStart]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -1222,6 +1231,7 @@ export const Verify = () => {
             scanning={scanning}
             setScanning={setScanning}
             verifying={verifying}
+            autoStart={true}
           />
         )}
       </div>
@@ -1453,6 +1463,7 @@ export const Verify = () => {
               scanning={scanningProductQR}
               setScanning={setScanningProductQR}
               verifying={false}
+              autoStart={true}
             />
           )}
 
