@@ -15,13 +15,174 @@ import {
   downloadProofFile
 } from '../lib/core/blockchain-utils.js';
 
+// QR Code Scanner Component
+const QRCodeScanner = ({ onScan, scanning, setScanning, verifying }) => {
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const streamRef = useRef(null);
+  const scanIntervalRef = useRef(null);
+
+  const startScanning = async () => {
+    try {
+      setScanning(true);
+      
+      // Request camera access
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' } // Prefer back camera on mobile
+      });
+      
+      streamRef.current = stream;
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+        
+        // Wait for video to be ready
+        videoRef.current.onloadedmetadata = () => {
+          // Start scanning loop
+          scanIntervalRef.current = setInterval(scanQRCode, 300);
+        };
+      }
+    } catch (err) {
+      console.error('Error accessing camera:', err);
+      showError('Unable to access camera. Please check permissions.');
+      setScanning(false);
+    }
+  };
+
+  const stopScanning = () => {
+    // Stop scanning loop
+    if (scanIntervalRef.current) {
+      clearInterval(scanIntervalRef.current);
+      scanIntervalRef.current = null;
+    }
+    
+    // Stop video stream
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    
+    setScanning(false);
+  };
+
+  const scanQRCode = async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+    
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      
+      try {
+        // Use jsQR to decode
+        const { default: jsQR } = await import('jsqr');
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        
+        if (code) {
+          console.log('QR Code detected:', code.data);
+          stopScanning();
+          onScan(code.data);
+        }
+      } catch (err) {
+        console.error('QR scan error:', err);
+      }
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Stop scanning loop
+      if (scanIntervalRef.current) {
+        clearInterval(scanIntervalRef.current);
+      }
+      
+      // Stop video stream
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+
+  return (
+    <div className="space-y-4">
+      {!scanning ? (
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+          <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+          </svg>
+          <p className="text-gray-700 font-medium mb-2">Scan a QR Code</p>
+          <p className="text-sm text-gray-500 mb-4">
+            Position the QR code within the camera frame
+          </p>
+          <button
+            onClick={startScanning}
+            disabled={verifying}
+            className="px-6 py-3 bg-[#003399] hover:bg-[#002266] text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Start Camera
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="relative bg-black rounded-lg overflow-hidden">
+            <video
+              ref={videoRef}
+              className="w-full h-auto"
+              playsInline
+              muted
+            />
+            <canvas ref={canvasRef} className="hidden" />
+            
+            {/* Scanning overlay */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="border-4 border-[#003399] rounded-lg w-64 h-64 opacity-75">
+                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white"></div>
+                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white"></div>
+                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white"></div>
+                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            <button
+              onClick={stopScanning}
+              disabled={verifying}
+              className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition font-medium disabled:opacity-50"
+            >
+              Stop Camera
+            </button>
+          </div>
+          
+          <p className="text-sm text-gray-600 text-center">
+            Scanning for QR code...
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const Verify = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const { substrateClient, ipfsClient, selectedAccount } = useApp();
-  const [mode, setMode] = useState('file'); // 'file' or 'json'
+  const [mode, setMode] = useState('file'); // 'file', 'json', or 'qr'
   const [jsonInput, setJsonInput] = useState('');
   const [verifying, setVerifying] = useState(false);
+  const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [proofData, setProofData] = useState(null); // Store the proof data for workflow continuation
@@ -607,6 +768,138 @@ export const Verify = () => {
     }
   };
 
+  const handleQRScan = async (qrContent) => {
+    const toastId = showLoading('Processing QR code...');
+    
+    try {
+      setVerifying(true);
+      setError(null);
+      setResult(null);
+      setWorkflowHistory(null);
+      setIsHistoryExpanded(false);
+      setExpandedSteps({});
+      setIsProofDetailsExpanded(false);
+      setVerifyingChainOfTrust(false);
+      
+      // Reset workflow continuation states (but keep allRags - needed for workflow detection)
+      setProofData(null);
+      setNextStepSchema(null);
+      setWorkflowInfo(null);
+      setLoadingNextStep(false);
+      setSubmittingStep(false);
+
+      console.log('QR Code scanned:', qrContent);
+      
+      // Check if it's a hash (starts with 0x and is 66 chars)
+      if (qrContent.startsWith('0x') && qrContent.length === 66) {
+        console.log('QR contains a hash, querying blockchain directly...');
+        await verifyDirectHash(qrContent, toastId);
+        return;
+      }
+      
+      // Try to parse as JSON
+      try {
+        const proof = JSON.parse(qrContent);
+        
+        // Check if it's a valid proof structure (has ragData field)
+        if (proof.ragData) {
+          console.log('QR contains valid proof JSON, verifying...');
+          await verifyProof(proof, toastId);
+        } else {
+          // JSON but not a proof structure - hash the content
+          console.log('QR contains JSON but not a proof structure, hashing content...');
+          await verifyFileHash(qrContent, 'QR Code Data', toastId);
+        }
+      } catch {
+        // Not JSON - hash the content
+        console.log('QR does not contain JSON, hashing content...');
+        await verifyFileHash(qrContent, 'QR Code Data', toastId);
+      }
+    } catch (err) {
+      console.error('QR scan error:', err);
+      setError(err.message || 'Failed to process QR code');
+      dismiss(toastId);
+      showError(err.message || 'Failed to process QR code');
+    } finally {
+      setVerifying(false);
+      setScanning(false);
+    }
+  };
+
+  const verifyDirectHash = async (hash, toastId) => {
+    try {
+      console.log('Verifying hash directly:', hash);
+      
+      // Calculate wrapped message hash for display
+      const { stringToU8a, hexToU8a } = await import('@polkadot/util');
+      const contentHashBytes = hexToU8a(hash);
+      const wrappedMessage = new Uint8Array([
+        ...stringToU8a('<Bytes>'),
+        ...contentHashBytes,
+        ...stringToU8a('</Bytes>')
+      ]);
+      const wrappedHashBuffer = await crypto.subtle.digest('SHA-256', wrappedMessage);
+      const wrappedHashArray = Array.from(new Uint8Array(wrappedHashBuffer));
+      const wrappedMessageHash = '0x' + wrappedHashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      // Query blockchain for this hash
+      const verifier = new ProofVerifier(substrateClient);
+      const trail = await verifier.queryBlockchain(hash);
+      
+      if (trail) {
+        const signatureValid = trail.signatureValid ?? false;
+        console.log('Hash found on blockchain!');
+        console.log('Signature valid:', signatureValid);
+        
+        const result = {
+          isValid: signatureValid,
+          message: signatureValid 
+            ? `Hash found on blockchain with valid signature!`
+            : `Hash found but signature verification failed!`,
+          details: {
+            contentHash: hash,
+            wrappedMessageHash,
+            source: 'QR Code',
+            creator: trail.creatorAddress,
+            createdAt: trail.createdAt,
+            expiresAt: trail.expiresAt,
+            signature: trail.substrateSignature,
+            signatureValid: signatureValid ? 'Valid' : 'Invalid',
+          }
+        };
+        
+        setResult(result);
+        
+        if (result.isValid) {
+          dismiss(toastId);
+          showSuccess('Hash verified successfully!');
+        } else {
+          dismiss(toastId);
+          showError(result.message);
+        }
+      } else {
+        console.log('✗ Hash not found on blockchain');
+        const result = {
+          isValid: false,
+          message: 'Hash not found on blockchain',
+          details: {
+            contentHash: hash,
+            wrappedMessageHash,
+            source: 'QR Code',
+            status: 'Not found in blockchain storage'
+          }
+        };
+        
+        setResult(result);
+        dismiss(toastId);
+        showError(result.message);
+      }
+    } catch (err) {
+      console.error('Hash verification error:', err);
+      throw err;
+    }
+  };
+
   const verifyFileHash = async (content, filename, toastId) => {
     try {
       console.log('Verifying file hash for:', filename);
@@ -758,6 +1051,22 @@ export const Verify = () => {
           >
             {t('verify.orPaste')}
           </button>
+          <button
+            onClick={() => {
+              setMode('qr');
+              setScanning(false);
+            }}
+            className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
+              mode === 'qr'
+                ? 'bg-[#003399] text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            </svg>
+            Scan QR Code
+          </button>
         </div>
 
         {/* File Upload Mode */}
@@ -825,6 +1134,16 @@ export const Verify = () => {
               {verifying ? t('verify.verifying') : t('verify.verifyButton')}
             </button>
           </form>
+        )}
+
+        {/* QR Code Scan Mode */}
+        {mode === 'qr' && (
+          <QRCodeScanner
+            onScan={handleQRScan}
+            scanning={scanning}
+            setScanning={setScanning}
+            verifying={verifying}
+          />
         )}
       </div>
 
