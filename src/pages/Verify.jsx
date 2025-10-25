@@ -537,9 +537,9 @@ export const Verify = () => {
           console.log('📜 Workflow history reconstructed:', history);
           
           // Store first step hash for product QR verification (only when workflow history is available)
-          if (history.steps && history.steps.length > 0) {
-            setFirstStepHash(history.steps[0].contentHash);
-            console.log('💾 First step hash stored for product verification:', history.steps[0].contentHash);
+          if (history.history && history.history.length > 0) {
+            setFirstStepHash(history.history[0].contentHash);
+            console.log('💾 First step hash stored for product verification:', history.history[0].contentHash);
           }
           
           // Update result color based on chain of trust
