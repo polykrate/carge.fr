@@ -106,6 +106,8 @@ const resources = {
         faq5A: 'Free for verification. Signing costs ~$0.01-0.10 per proof (blockchain transaction fees). No subscription, no hidden fees. Enterprise packages available for high volume.',
         faq6Q: 'How long does implementation take?',
         faq6A: 'Web interface: immediate (just connect your wallet). API integration: 1-2 weeks typical. Full ERP integration: 4-6 weeks with our support team.',
+        faq7Q: 'How can I deploy my own workflows on the blockchain?',
+        faq7A: 'For now, please contact us at contact@carge.fr to deploy custom workflows. In the near future, you will be able to deploy workflows directly by connecting an AI agent compatible with MCP (Model Context Protocol) to interact with the blockchain.',
         
         useCase4Title: 'AI Invoice Digitization for Chorus Pro',
         useCase4Desc: 'Deploy an on-chain AI process to automatically dematerialize invoices for French government platform Chorus Pro. Secure, auditable, and compliant.',
@@ -471,6 +473,8 @@ const resources = {
         faq5A: 'Gratuit pour la vérification. Signer coûte ~0,01-0,10€ par preuve (frais de transaction blockchain). Pas d\'abonnement, pas de frais cachés. Forfaits entreprise disponibles pour gros volumes.',
         faq6Q: 'Combien de temps prend l\'implémentation ?',
         faq6A: 'Interface web : immédiat (connectez juste votre wallet). Intégration API : 1-2 semaines typique. Intégration ERP complète : 4-6 semaines avec notre équipe support.',
+        faq7Q: 'Comment puis-je déployer mes propres workflows sur la blockchain ?',
+        faq7A: 'Pour l\'instant, contactez-nous à contact@carge.fr pour déployer des workflows personnalisés. À terme, vous pourrez déployer des workflows directement en connectant un agent IA compatible MCP (Model Context Protocol) pour interagir avec la blockchain.',
         
         useCase4Title: 'Dématérialisation des factures pour Chorus Pro',
         useCase4Desc: 'Déployez un processus IA sur la chaîne pour dématérialiser automatiquement vos factures vers la plateforme gouvernementale Chorus Pro. Une solution sécurisée, auditable et conforme.',

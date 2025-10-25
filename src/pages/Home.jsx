@@ -404,7 +404,7 @@ export const Home = () => {
           </div>
 
           <div className="space-y-4">
-            {[1, 2, 3, 4, 5, 6].map((num) => {
+            {[1, 2, 3, 4, 5, 6, 7].map((num) => {
               const isOpen = openFaq === num;
               
               return (
