@@ -584,7 +584,7 @@ export const Verify = () => {
       
       // Step 2: Search blockchain
       update(toastId, {
-        render: '🔍 Searching blockchain...',
+        render: 'Searching blockchain...',
         type: 'info',
         isLoading: true
       });
@@ -596,14 +596,14 @@ export const Verify = () => {
       // Step 3: Check if found and verify signature
       if (verification.found) {
         update(toastId, {
-          render: '✅ Proof found! Verifying signature...',
+          render: 'Proof found! Verifying signature...',
           type: 'info',
           isLoading: true
         });
       } else {
         // Proof not found - show error immediately
         update(toastId, {
-          render: '❌ Proof not found on blockchain',
+          render: 'Proof not found on blockchain',
           type: 'error',
           isLoading: false,
           autoClose: 5000
@@ -625,7 +625,7 @@ export const Verify = () => {
         } else {
           // Signature invalid - show error immediately
           update(toastId, {
-            render: '❌ Signature verification failed!',
+            render: 'Signature verification failed!',
             type: 'error',
             isLoading: false,
             autoClose: 5000
@@ -686,7 +686,7 @@ export const Verify = () => {
         
         // Step 4: Workflow detected
         update(toastId, {
-          render: '🔗 Workflow detected! Analyzing steps...',
+          render: 'Workflow detected! Analyzing steps...',
           type: 'info',
           isLoading: true
         });
@@ -701,7 +701,7 @@ export const Verify = () => {
           
           // Step 5: Reconstruct workflow
           update(toastId, {
-            render: '📜 Reconstructing workflow history...',
+            render: 'Reconstructing workflow history...',
             type: 'info',
             isLoading: true
           });
@@ -714,7 +714,7 @@ export const Verify = () => {
           
           // Step 6: Verify chain of trust
           update(toastId, {
-            render: '🔐 Verifying chain of trust...',
+            render: 'Verifying chain of trust...',
             type: 'info',
             isLoading: true
           });
@@ -761,14 +761,14 @@ export const Verify = () => {
       if (!isChainOfTrustNonVerifiable) {
         if (isValidWithChainOfTrust) {
           update(toastId, {
-            render: '✅ Proof verified successfully!',
+            render: 'Proof verified successfully!',
             type: 'success',
             isLoading: false,
             autoClose: 5000
           });
         } else {
           update(toastId, {
-            render: `❌ ${messageWithChainOfTrust}`,
+            render: messageWithChainOfTrust,
             type: 'error',
             isLoading: false,
             autoClose: 5000
@@ -777,7 +777,7 @@ export const Verify = () => {
       } else {
         // Just dismiss the toast for gray state (non-verifiable)
         update(toastId, {
-          render: 'ℹ️ Proof verified - Chain of trust not verifiable',
+          render: 'Proof verified - Chain of trust not verifiable',
           type: 'info',
           isLoading: false,
           autoClose: 5000
@@ -786,7 +786,7 @@ export const Verify = () => {
     } catch (err) {
       console.error('Verification error:', err);
       update(toastId, {
-        render: `❌ ${err.message || 'Verification failed'}`,
+        render: err.message || 'Verification failed',
         type: 'error',
         isLoading: false,
         autoClose: 5000
@@ -1162,14 +1162,14 @@ export const Verify = () => {
       if (scannedHash === firstStepHash) {
         setProductQRResult({
           isValid: true,
-          message: '✅ Product is authentic!',
+          message: 'Product is authentic!',
           details: 'The scanned QR code matches the first step of the verified workflow. This confirms the product\'s authenticity.'
         });
         showSuccess('Product verified! QR code matches the workflow.');
       } else {
         setProductQRResult({
           isValid: false,
-          message: '❌ Product verification failed!',
+          message: 'Product verification failed!',
           details: 'The scanned QR code does NOT match the first step of the verified workflow. This product may be counterfeit.'
         });
         showError('Product QR does not match the workflow!');
@@ -1178,7 +1178,7 @@ export const Verify = () => {
       console.error('Product QR verification error:', err);
       setProductQRResult({
         isValid: false,
-        message: '⚠️ Verification error',
+        message: 'Verification error',
         details: err.message || 'Failed to verify product QR code'
       });
       showError('Failed to verify product QR code');
@@ -1598,7 +1598,7 @@ export const Verify = () => {
                               ? 'bg-green-500 text-white'
                               : 'bg-red-300 text-white'
                           }`}
-                          title={`${step.stepName}${step.chainOfTrustValid === false ? ' - ⚠️ CHAIN BROKEN' : ''}`}
+                          title={`${step.stepName}${step.chainOfTrustValid === false ? ' - CHAIN BROKEN' : ''}`}
                         >
                           {step.blockchainVerified ? (
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1709,7 +1709,7 @@ export const Verify = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                               </svg>
                               <div className="flex-1">
-                                <h4 className="text-red-900 font-bold text-sm mb-1">⚠️ Chain of Trust Broken</h4>
+                                <h4 className="text-red-900 font-bold text-sm mb-1">Chain of Trust Broken</h4>
                                 <p className="text-red-800 text-sm">
                                   The creator of this step does NOT match the target address of the previous step.
                                 </p>
@@ -1936,7 +1936,7 @@ export const Verify = () => {
             {firstStepHash === '0xb67aa50881387adaba2a3ca4f06102ebb36b88d6e3a8071f9169496b9f31a157' && (
               <div className="mt-3 p-3 bg-green-50 border border-green-300 rounded-lg">
                 <p className="text-xs text-green-900">
-                  💡 <strong>{t('about.qrExampleHint')}</strong> {' '}
+                  <strong>{t('about.qrExampleHint')}</strong> {' '}
                   <a href="/about" className="text-[#003399] font-semibold hover:underline">{t('about.aboutPage')}</a>.
                   {' '}{t('about.downloadOrScan')}
                 </p>
