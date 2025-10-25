@@ -1454,7 +1454,7 @@ export const Verify = () => {
             <p className="text-xs text-blue-700 mt-2">
               Expected hash: <code className="bg-blue-100 px-2 py-1 rounded font-mono">{firstStepHash.substring(0, 20)}...{firstStepHash.substring(firstStepHash.length - 10)}</code>
             </p>
-            {workflowHistory && (workflowHistory.masterWorkflowName?.includes('Macallan') || workflowHistory.masterWorkflowName?.includes('Whisky')) && (
+            {firstStepHash === '0xb67aa50881387adaba2a3ca4f06102ebb36b88d6e3a8071f9169496b9f31a157' && (
               <div className="mt-3 p-3 bg-green-50 border border-green-300 rounded-lg">
                 <p className="text-xs text-green-900">
                   💡 <strong>{t('about.qrExampleHint')}</strong> {' '}
