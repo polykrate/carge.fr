@@ -521,6 +521,10 @@ export const Verify = () => {
       // Store proof data for workflow continuation
       if (result.isValid && proof.ragData) {
         setProofData(proof.ragData);
+        
+        // Store content hash for product QR verification (use the main content hash)
+        setFirstStepHash(verification.contentHash);
+        console.log('💾 Content hash stored for product verification:', verification.contentHash);
       }
       
       // If proof is valid and contains workflow data, reconstruct and verify workflow history
@@ -536,10 +540,10 @@ export const Verify = () => {
           setWorkflowHistory(history);
           console.log('📜 Workflow history reconstructed:', history);
           
-          // Store first step hash for product QR verification
+          // Update first step hash with actual first step from history if available
           if (history.steps && history.steps.length > 0) {
             setFirstStepHash(history.steps[0].contentHash);
-            console.log('💾 First step hash stored for product verification:', history.steps[0].contentHash);
+            console.log('💾 First step hash updated from workflow history:', history.steps[0].contentHash);
           }
           
           // Update result color based on chain of trust
