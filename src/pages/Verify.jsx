@@ -408,6 +408,37 @@ export const Verify = () => {
       setFirstStepHash(null);
 
       console.log('Processing file:', file.name);
+      
+      // Check if it's an image file
+      if (file.type.startsWith('image/')) {
+        console.log('Image file detected, scanning for QR code...');
+        dismiss(toastId);
+        const qrToastId = showLoading('Scanning QR code from image...');
+        
+        try {
+          // Read image and decode QR code
+          const qrContent = await decodeQRCodeFromImage(file);
+          
+          if (qrContent) {
+            console.log('QR code found in image:', qrContent);
+            dismiss(qrToastId);
+            await handleQRScan(qrContent);
+          } else {
+            console.log('No QR code found in image, hashing image content...');
+            dismiss(qrToastId);
+            const text = await file.text();
+            await verifyFileHash(text, file.name, showLoading('Hashing file...'));
+          }
+        } catch (err) {
+          console.error('Failed to scan QR from image:', err);
+          dismiss(qrToastId);
+          showError('Failed to scan QR code from image');
+          throw err;
+        }
+        return;
+      }
+      
+      // Not an image - process as text/JSON
       const text = await file.text();
       
       // Try to parse as JSON proof first
@@ -436,6 +467,58 @@ export const Verify = () => {
     } finally {
       setVerifying(false);
     }
+  };
+
+  // Helper function to decode QR code from an image file
+  const decodeQRCodeFromImage = async (imageFile) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = async (event) => {
+        try {
+          const img = new Image();
+          
+          img.onload = async () => {
+            // Create canvas to draw image
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            
+            canvas.width = img.width;
+            canvas.height = img.height;
+            context.drawImage(img, 0, 0);
+            
+            // Get image data
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // Decode QR code
+            const { default: jsQR } = await import('jsqr');
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+            
+            if (code) {
+              console.log('✓ QR code decoded from image:', code.data);
+              resolve(code.data);
+            } else {
+              console.log('✗ No QR code found in image');
+              resolve(null);
+            }
+          };
+          
+          img.onerror = () => {
+            reject(new Error('Failed to load image'));
+          };
+          
+          img.src = event.target.result;
+        } catch (err) {
+          reject(err);
+        }
+      };
+      
+      reader.onerror = () => {
+        reject(new Error('Failed to read image file'));
+      };
+      
+      reader.readAsDataURL(imageFile);
+    });
   };
 
   const handleJsonSubmit = async (e) => {
@@ -1858,8 +1941,8 @@ export const Verify = () => {
                       </p>
                     </div>
 
-                    {/* Wallet Check */}
-                    {!selectedAccount && (
+                    {/* Wallet Check & Target Address Validation */}
+                    {!selectedAccount ? (
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                         <div className="flex items-center space-x-3">
                           <svg className="w-5 h-5 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1870,13 +1953,57 @@ export const Verify = () => {
                           </div>
                         </div>
                       </div>
-                    )}
+                    ) : (() => {
+                      // Check if connected account matches target address from last step
+                      let targetAddress = null;
+                      if (workflowInfo.livrable) {
+                        // Look for _targetAddress in any section of the delivrable (last one found = most recent)
+                        for (const key of Object.keys(workflowInfo.livrable)) {
+                          if (workflowInfo.livrable[key] && typeof workflowInfo.livrable[key] === 'object' && workflowInfo.livrable[key]._targetAddress) {
+                            targetAddress = workflowInfo.livrable[key]._targetAddress;
+                          }
+                        }
+                      }
+                      
+                      const isCorrectRecipient = !targetAddress || selectedAccount === targetAddress;
+                      
+                      return !isCorrectRecipient ? (
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+                          <div className="flex items-start space-x-3">
+                            <svg className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <div className="text-sm text-orange-900">
+                              <div className="font-semibold mb-1">Wrong wallet connected</div>
+                              <div className="mb-2">This workflow step is designated for another address. Only the intended recipient can continue the workflow.</div>
+                              <div className="text-xs font-mono bg-orange-100 p-2 rounded break-all">
+                                <span className="font-semibold">Expected:</span> {targetAddress}
+                              </div>
+                              <div className="text-xs font-mono bg-orange-100 p-2 rounded mt-1 break-all">
+                                <span className="font-semibold">Connected:</span> {selectedAccount}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : null;
+                    })()}
 
                     {/* Submit Button */}
                     <div className="pt-4 border-t">
                       <button
                         type="submit"
-                        disabled={submittingStep || !selectedAccount}
+                        disabled={submittingStep || !selectedAccount || (() => {
+                          // Disable if connected account doesn't match target address
+                          let targetAddress = null;
+                          if (workflowInfo.livrable) {
+                            for (const key of Object.keys(workflowInfo.livrable)) {
+                              if (workflowInfo.livrable[key] && typeof workflowInfo.livrable[key] === 'object' && workflowInfo.livrable[key]._targetAddress) {
+                                targetAddress = workflowInfo.livrable[key]._targetAddress;
+                              }
+                            }
+                          }
+                          return targetAddress && selectedAccount !== targetAddress;
+                        })()}
                         className="w-full px-4 py-3 bg-[#003399] hover:bg-[#002266] text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {submittingStep ? 'Submitting...' : 'Submit Next Step'}

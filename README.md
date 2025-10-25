@@ -1,86 +1,106 @@
-# Carge - Blockchain-Anchored RAG for AI
+# Carge - Cryptographic Authenticity & RAG Protocol
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Built with React](https://img.shields.io/badge/Built%20with-React-61DAFB?logo=react)](https://reactjs.org/)
 [![Powered by Polkadot](https://img.shields.io/badge/Powered%20by-Polkadot-E6007A?logo=polkadot)](https://polkadot.network/)
 
-**Source**: [github.com/polykrate/carge](https://github.com/polykrate/carge)
+**Source**: [github.com/polykrate/carge](https://github.com/polykrate/carge)  
+**Web App**: [carge.fr](https://carge.fr)
 
-## Inject Certified Context into AI. Work with Everyone.
+## Universal Cryptographic Certification Protocol
 
-**Make AI smarter by injecting blockchain-verified knowledge directly into their context.** CARGE deploys RAG contexts (instructions + resources + schemas) on-chain. AI agents pull optimized, certified context directly from the blockchain.
+**CARGE** is a blockchain-based protocol for creating unfakeable certificates with complete audit trails. Fight counterfeiting, certify documents, and build verifiable multi-party workflows using cryptographic signatures anchored on an immutable ledger.
 
-**Universal collaboration protocol.** Human-Human, AI-Human, AI-AI: same cryptographic rules. No centralized server to hack. No prompt poisoning. Just verifiable execution with complete audit trails.
+**Zero Trust Architecture.** No centralized server. No database to hack. Just client-side cryptography and blockchain verification. Works for Human-Human, AI-Human, or AI-AI interactions with identical security guarantees.
 
 ## Technical Overview
 
-Client-side application for cryptographically verifiable AI/LLM workflows anchored on **Ragchain**, a Substrate parachain. Combines Retrieval-Augmented Generation (RAG) metadata with on-chain proofs and IPFS content addressing.
+Client-side web application for cryptographically verifiable workflows anchored on **Ragchain**, a Substrate parachain. Combines multi-party signatures, RAG (Retrieval-Augmented Generation) metadata, on-chain proofs, and IPFS content addressing to create tamper-proof audit trails.
 
-**RAG Context Components:**
-- **Instruction CID**: AI prompt/instructions (what to do)
-- **Resource CID**: Context documents/data (knowledge base)
-- **Schema CID**: JSON Schema for validation (expected output structure)
-- **Workflow Steps** (optional): Multi-step processes (e.g., KYC → Verification → Approval)
+**Workflow Components:**
+- **Instruction CID**: Workflow instructions/prompts (what needs to be done)
+- **Resource CID**: Supporting documents/data (product info, legal docs, etc.)
+- **Schema CID**: JSON Schema for data validation (expected output format)
+- **Workflow Steps**: Multi-step processes with cryptographic chain of trust (e.g., Production → Export → Import → Retail → Customer)
 
 **Core Properties:**
 - **Zero server trust**: All cryptographic operations in browser, no centralized infrastructure
-- **On-chain RAG registry**: Certified contexts indexed by hash(instruction + resource + schema)
-- **Client-side encryption**: X25519 ECDH, ChaCha20-Poly1305 AEAD for private workflows
+- **On-chain registry**: Workflow metadata and proofs indexed by cryptographic hash
+- **Client-side encryption**: X25519 ECDH, ChaCha20-Poly1305 AEAD for private multi-party workflows
 - **Decentralized storage**: IPFS for content, Ragchain for integrity proofs
-- **Universal protocol**: Same cryptographic primitives for Human-Human, AI-Human, AI-AI
+- **Universal protocol**: Same cryptographic primitives whether participants are humans, automated systems, or AI agents
 
 ## Use Cases
 
-**Multi-Agent AI Systems**: AI agents coordinate using certified RAG contexts without centralized orchestration. Each agent verifies context authenticity before execution.
+### 1. Anti-Counterfeiting & Supply Chain Traceability
+Track premium products (wines, automotive parts, luxury goods) through their entire supply chain. Each actor cryptographically signs their step, creating an unfakeable chain of custody from production to customer.
 
-**Compliance Automation**: AI processes regulatory workflows with cryptographic audit trails. Every decision traceable and verifiable by authorities.
+**Example:** Macallan 25 Years whisky tracked from Scottish distillery → UK export → French import → Hong Kong logistics → Chinese customs → retail store → final customer. Each QR scan verifies the complete blockchain-certified history.
 
-**Hybrid Human-AI Workflows**: Humans and AI collaborate with same cryptographic rules. AI analyzes, humans approve, blockchain certifies.
+### 2. Document Certification & Legal Proof
+Certify contracts, diplomas, certificates, or any document with blockchain-anchored timestamps. Legally recognized in France (2025 Marseille precedent validates cryptographic signatures as court evidence).
 
-**Document Certification**: Sign contracts, certify documents, prove existence. Human-to-human or AI-assisted - identical guarantees.
+**Example:** Sign employment contracts with legally-binding timestamps. No notary required, instant verification, permanent immutable proof.
+
+### 3. Multi-Party Business Workflows
+Build complex workflows requiring validation from multiple parties (KYC processes, regulatory compliance, cross-organization approvals). Each step cryptographically signed and verifiable.
+
+**Example:** Export compliance workflow where customs authorities, freight companies, and importers all sign their validation steps. Complete audit trail for regulatory authorities.
+
+### 4. RAG Context Certification (Advanced)
+AI agents can connect to the protocol via MCP (Model Context Protocol) to retrieve certified contexts for verifiable AI execution. **Note:** MCP server not yet publicly released - contact for early access.
 
 ## Why This Matters
 
-**The AI Agent Economy Needs Trust Infrastructure**
+**$461B Lost to Counterfeiting Annually**
 
-As AI agents become autonomous economic actors, they need verifiable context sources. Traditional centralized RAG databases create:
-- **Single points of failure**: One compromised server poisons all downstream agents
-- **Trust dependencies**: Agents must trust infrastructure providers
-- **Audit gaps**: No cryptographic proof of what context was actually used
+Traditional authentication methods (certificates, holograms, QR codes) are easily faked. Centralized databases can be hacked. Paper trails can be forged.
 
-**CARGE eliminates these risks** by making RAG contexts:
-- **Immutable**: Published on blockchain, impossible to retroactively modify
-- **Verifiable**: Any agent can cryptographically verify context authenticity
-- **Traceable**: Complete audit trail of who used what context, when
-- **Trustless**: No central authority or infrastructure provider required
+**The Problem with Existing Solutions:**
+- **Centralized databases**: Single point of failure, can be compromised or manipulated
+- **Paper certificates**: Trivial to forge, no real-time verification
+- **Simple QR codes**: Can be copied and reused on counterfeit products
+- **No audit trail**: Impossible to reconstruct complete chain of custody
 
-**Market Opportunity**: Every AI agent interaction that requires compliance, audit, or multi-party coordination is a use case.
+**CARGE's Cryptographic Solution:**
+- **Immutable**: Signatures published on blockchain cannot be retroactively modified
+- **Verifiable**: Anyone can cryptographically verify authenticity without trusting a central authority
+- **Traceable**: Complete audit trail showing who signed what, when
+- **Unfakeable**: Would require stealing multiple private keys and rewriting blockchain history
 
-## Interfaces
+**Protocol-First Design**: CARGE is fundamentally a cryptographic protocol. The web interface is one way to use it. Backend systems can integrate directly via the Substrate API. AI agents can connect via MCP for autonomous verification.
 
-**Three ways to interact with Ragchain:**
+## How to Use CARGE
 
-### 1. AI Agent Interface (MCP)
+**Multiple integration options for developers:**
+
+### 1. Web Interface (This Repository)
+Web application at **[carge.fr](https://carge.fr)** for direct user interaction:
+- Visual workflow builder and executor
+- Browser-based wallet integration (Polkadot.js extension)
+- Proof verification and QR code scanning
+- Multi-language support (EN/FR)
+- **Use Case**: Quick prototyping, manual workflows, customer-facing verification
+
+### 2. Direct Blockchain Integration
+Integrate directly with Ragchain using Substrate APIs:
+- Full control over transaction submission and signature logic
+- Custom workflow orchestration in your backend
+- ERP/CRM integration for automated compliance
+- Headless business process execution
+- **Use Case**: Enterprise systems, automated supply chain tracking, custom implementations
+
+### 3. AI Agent Interface via MCP (Coming Soon)
 **Human Context Protocol** - Model Context Protocol server for AI agents:
 - Native integration with Claude Desktop, Cursor, and MCP-compatible AI clients
-- AI agents read/write certified contexts without API keys or SaaS dependencies
-- Autonomous multi-agent coordination with cryptographic verification
-- **Repository**: `github.com/polykrate/human-context-protocol` *(unreleased, contact: jf.meneust@gmail.com)*
+- AI agents can read/write certified contexts and verify proofs autonomously
+- **Status**: Not yet publicly released - contact `jf.meneust@gmail.com` for early access
+- **Repository**: `github.com/polykrate/human-context-protocol` (private)
+- **Use Case**: Autonomous AI verification, AI-assisted compliance workflows
 
-### 2. Human Interface (this repo)
-Web application at **carge.fr** for direct user interaction:
-- Visual workflow builder and executor
-- Wallet integration (Polkadot.js extension)
-- Proof verification and history browsing
-- Multi-language support (EN/FR)
+---
 
-### 3. Backend Integration (Server Mode)
-Enterprise integration for automated compliance:
-- ERP/CRM workflow automation via local server
-- Legacy system bridging with blockchain anchoring
-- Headless business process execution
-
-**Universal Protocol**: All three interfaces use identical cryptographic primitives and blockchain logic. Human-Human, AI-Human, AI-AI: same rules.
+**Universal Cryptographic Protocol**: All three interfaces use identical cryptographic primitives and blockchain logic. Whether you're building for humans, backend systems, or AI agents, the security guarantees are the same.
 
 ## Security Architecture
 

@@ -338,52 +338,34 @@ export class ProofVerifier {
       const history = [];
       
       // Get metadata for each step to identify delivrable keys
-      // ✅ OPTIMIZATION: Parallelize IPFS schema downloads
-      console.log('📦 Fetching all step schemas in parallel...');
-      const stepMetadataPromises = [];
-      
+      const stepMetadataList = [];
       for (let i = 0; i <= currentStepIndex; i++) {
         const stepHashValue = steps[i];
         const stepRag = allRags.find(r => r.hash === stepHashValue);
         
         if (!stepRag) {
           console.warn(`Step ${i + 1} metadata not found: ${stepHashValue}`);
-          stepMetadataPromises.push(Promise.resolve({
-            hash: stepHashValue,
-            metadata: null,
-            keys: []
-          }));
+          stepMetadataList.push({ hash: stepHashValue, metadata: null, keys: [] });
           continue;
         }
         
-        // Fetch schema in parallel
-        const schemaPromise = (async () => {
-          try {
-            const schemaCid = stepRag.metadata.schemaCid;
-            const schemaObj = await ipfsClient.downloadJsonFromHex(schemaCid);
-            const keys = Object.keys(schemaObj.properties || {});
-            console.log(`Step ${i + 1} keys from schema:`, keys);
-            return {
-              hash: stepHashValue,
-              metadata: stepRag.metadata,
-              keys
-            };
-          } catch (error) {
-            console.warn(`Could not retrieve schema for step ${i + 1}:`, error.message);
-            return {
-              hash: stepHashValue,
-              metadata: stepRag.metadata,
-              keys: []
-            };
-          }
-        })();
+        // Try to get schema keys
+        let keys = [];
+        try {
+          const schemaCid = stepRag.metadata.schemaCid;
+          const schemaObj = await ipfsClient.downloadJsonFromHex(schemaCid);
+          keys = Object.keys(schemaObj.properties || {});
+          console.log(`Step ${i + 1} keys from schema:`, keys);
+        } catch (error) {
+          console.warn(`Could not retrieve schema for step ${i + 1}:`, error.message);
+        }
         
-        stepMetadataPromises.push(schemaPromise);
+        stepMetadataList.push({
+          hash: stepHashValue,
+          metadata: stepRag.metadata,
+          keys
+        });
       }
-      
-      // Wait for all schemas to be downloaded in parallel
-      const stepMetadataList = await Promise.all(stepMetadataPromises);
-      console.log('✅ All schemas fetched');
 
       // Reconstruct each step with partial delivrable data
       let accumulatedDelivrable = {};
