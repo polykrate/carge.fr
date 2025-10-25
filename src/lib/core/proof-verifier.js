@@ -337,16 +337,14 @@ export class ProofVerifier {
       // Reconstruct history by going through steps
       const history = [];
       
-      // Get metadata for each step to identify delivrable keys
-      const stepMetadataList = [];
-      for (let i = 0; i <= currentStepIndex; i++) {
-        const stepHashValue = steps[i];
+      // 🚀 OPTIMIZATION 1: Parallelize IPFS schema downloads
+      console.log('📥 Downloading all step schemas in parallel...');
+      const schemaPromises = steps.slice(0, currentStepIndex + 1).map(async (stepHashValue, i) => {
         const stepRag = allRags.find(r => r.hash === stepHashValue);
         
         if (!stepRag) {
           console.warn(`Step ${i + 1} metadata not found: ${stepHashValue}`);
-          stepMetadataList.push({ hash: stepHashValue, metadata: null, keys: [] });
-          continue;
+          return { hash: stepHashValue, metadata: null, keys: [] };
         }
         
         // Try to get schema keys
@@ -360,15 +358,20 @@ export class ProofVerifier {
           console.warn(`Could not retrieve schema for step ${i + 1}:`, error.message);
         }
         
-        stepMetadataList.push({
+        return {
           hash: stepHashValue,
           metadata: stepRag.metadata,
           keys
-        });
-      }
+        };
+      });
+      
+      const stepMetadataList = await Promise.all(schemaPromises);
+      console.log('✅ All schemas downloaded');
 
       // Reconstruct each step with partial delivrable data
+      console.log('🔨 Building step hashes...');
       let accumulatedDelivrable = {};
+      const stepsToVerify = [];
       
       for (let i = 0; i <= currentStepIndex; i++) {
         const stepHashValue = steps[i];
@@ -403,32 +406,62 @@ export class ProofVerifier {
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const contentHash = '0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-        // Verify on blockchain that this hash exists
-        let blockchainVerified = false;
-        let blockchainData = null;
-        
+        stepsToVerify.push({
+          stepIndex: i,
+          stepHash: stepHashValue,
+          stepName: metadata?.name || `Step ${i + 1}`,
+          delivrable: { ...accumulatedDelivrable },
+          stepOnlyData: { ...stepOnlyData },
+          contentHash
+        });
+      }
+
+      // 🚀 OPTIMIZATION 2: Parallelize blockchain verifications
+      console.log('⛓️  Verifying all steps on blockchain in parallel...');
+      const verificationPromises = stepsToVerify.map(async (step) => {
         try {
-          const trail = await this.queryBlockchain(contentHash);
+          const trail = await this.queryBlockchain(step.contentHash);
           if (trail) {
-            blockchainVerified = true;
-            blockchainData = {
-              creator: trail.creatorAddress,
-              createdAt: trail.createdAt,
-              expiresAt: trail.expiresAt,
-              signatureValid: trail.signatureValid
+            console.log(`✅ Step ${step.stepIndex + 1}: Verified on blockchain at block ${trail.createdAt}`);
+            return {
+              ...step,
+              blockchainVerified: true,
+              blockchainData: {
+                creator: trail.creatorAddress,
+                createdAt: trail.createdAt,
+                expiresAt: trail.expiresAt,
+                signatureValid: trail.signatureValid
+              }
             };
-            console.log(`✅ Step ${i + 1}: Verified on blockchain at block ${trail.createdAt}`);
           } else {
-            console.log(`❌ Step ${i + 1}: Hash not found on blockchain: ${contentHash}`);
+            console.log(`❌ Step ${step.stepIndex + 1}: Hash not found on blockchain: ${step.contentHash}`);
+            return {
+              ...step,
+              blockchainVerified: false,
+              blockchainData: null
+            };
           }
         } catch (error) {
-          console.warn(`⚠️ Step ${i + 1}: Blockchain verification error:`, error.message);
+          console.warn(`⚠️ Step ${step.stepIndex + 1}: Blockchain verification error:`, error.message);
+          return {
+            ...step,
+            blockchainVerified: false,
+            blockchainData: null
+          };
         }
+      });
 
-        // Verify chain of trust: target address from previous step should match creator of current step
+      const verifiedSteps = await Promise.all(verificationPromises);
+      console.log('✅ All blockchain verifications complete');
+
+      // Validate chain of trust (must be sequential as each step depends on previous)
+      console.log('🔐 Validating chain of trust...');
+      for (let i = 0; i < verifiedSteps.length; i++) {
+        const step = verifiedSteps[i];
         let chainOfTrustValid = null; // null = not verifiable, true = valid, false = broken
-        if (i > 0 && blockchainData) {
-          const previousStep = history[i - 1];
+
+        if (i > 0 && step.blockchainData) {
+          const previousStep = verifiedSteps[i - 1];
           
           // Extract _targetAddress from any section of the delivrable
           let expectedCreator = null;
@@ -443,7 +476,7 @@ export class ProofVerifier {
           }
           
           if (expectedCreator) {
-            const actualCreator = blockchainData.creator;
+            const actualCreator = step.blockchainData.creator;
             
             if (expectedCreator !== actualCreator) {
               chainOfTrustValid = false;
@@ -461,18 +494,11 @@ export class ProofVerifier {
         }
 
         history.push({
-          stepIndex: i,
-          stepHash: stepHashValue,
-          stepName: metadata?.name || `Step ${i + 1}`,
-          delivrable: { ...accumulatedDelivrable },
-          stepOnlyData: { ...stepOnlyData },
-          contentHash,
-          blockchainVerified,
-          blockchainData,
+          ...step,
           chainOfTrustValid
         });
 
-        console.log(`Step ${i + 1}: hash=${contentHash}, keys=[${Object.keys(accumulatedDelivrable).join(', ')}], verified=${blockchainVerified}`);
+        console.log(`Step ${i + 1}: hash=${step.contentHash}, keys=[${Object.keys(step.delivrable).join(', ')}], verified=${step.blockchainVerified}`);
       }
 
       // Calculate chain of trust status
