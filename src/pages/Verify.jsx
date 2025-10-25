@@ -568,13 +568,69 @@ export const Verify = () => {
     
     try {
       console.log('Starting proof verification...');
+      
+      // Step 1: Calculate hash
+      update(toastId, {
+        render: '🔢 Calculating proof hash...',
+        type: 'info',
+        isLoading: true
+      });
+      
       const verifier = new ProofVerifier(substrateClient);
+      
+      // Small delay so user can see the message
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Step 2: Search blockchain
+      update(toastId, {
+        render: '🔍 Searching blockchain...',
+        type: 'info',
+        isLoading: true
+      });
+      
       const verification = await verifier.verifyProof(proof);
       
       console.log('Verification result:', verification);
       
+      // Step 3: Check if found and verify signature
+      if (verification.found) {
+        update(toastId, {
+          render: '✅ Proof found! Verifying signature...',
+          type: 'info',
+          isLoading: true
+        });
+      } else {
+        // Proof not found - show error immediately
+        update(toastId, {
+          render: '❌ Proof not found on blockchain',
+          type: 'error',
+          isLoading: false,
+          autoClose: 5000
+        });
+      }
+      
       // Format result for display
       const signatureValid = verification.trail?.signatureValid ?? false;
+      
+      // Show signature result
+      if (verification.found) {
+        if (signatureValid) {
+          await new Promise(resolve => setTimeout(resolve, 300));
+          update(toastId, {
+            render: '🔏 Signature verified successfully!',
+            type: 'info',
+            isLoading: true
+          });
+        } else {
+          // Signature invalid - show error immediately
+          update(toastId, {
+            render: '❌ Signature verification failed!',
+            type: 'error',
+            isLoading: false,
+            autoClose: 5000
+          });
+        }
+      }
       
       // Calculate wrapped message hash for display
       const { stringToU8a, hexToU8a } = await import('@polkadot/util');
@@ -625,14 +681,42 @@ export const Verify = () => {
       if (result.isValid && proof.ragData && proof.ragData.ragHash && proof.ragData.stepHash && proof.ragData.livrable) {
         console.log('Valid workflow proof detected, reconstructing history...');
         
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Step 4: Workflow detected
+        update(toastId, {
+          render: '🔗 Workflow detected! Analyzing steps...',
+          type: 'info',
+          isLoading: true
+        });
+        
         // Set intermediate state - proof found but chain of trust not verified yet
         setVerifyingChainOfTrust(true);
         
         try {
           const ragClient = new RagClient(substrateClient);
+          
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          // Step 5: Reconstruct workflow
+          update(toastId, {
+            render: '📜 Reconstructing workflow history...',
+            type: 'info',
+            isLoading: true
+          });
+          
           const history = await verifier.reconstructWorkflowHistory(proof, ragClient, ipfsClient);
           setWorkflowHistory(history);
           console.log('📜 Workflow history reconstructed:', history);
+          
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          // Step 6: Verify chain of trust
+          update(toastId, {
+            render: '🔐 Verifying chain of trust...',
+            type: 'info',
+            isLoading: true
+          });
           
           // Store first step hash for product QR verification (only when workflow history is available)
           if (history.history && history.history.length > 0) {
@@ -674,21 +758,38 @@ export const Verify = () => {
       
       // Don't show success/error toasts if chain of trust is not verifiable (gray state)
       if (!isChainOfTrustNonVerifiable) {
-      if (isValidWithChainOfTrust) {
-        dismiss(toastId);
-        showSuccess('Proof verified successfully!');
-      } else {
-        dismiss(toastId);
-        showError(messageWithChainOfTrust);
+        if (isValidWithChainOfTrust) {
+          update(toastId, {
+            render: '✅ Proof verified successfully!',
+            type: 'success',
+            isLoading: false,
+            autoClose: 5000
+          });
+        } else {
+          update(toastId, {
+            render: `❌ ${messageWithChainOfTrust}`,
+            type: 'error',
+            isLoading: false,
+            autoClose: 5000
+          });
         }
       } else {
         // Just dismiss the toast for gray state (non-verifiable)
-        dismiss(toastId);
+        update(toastId, {
+          render: 'ℹ️ Proof verified - Chain of trust not verifiable',
+          type: 'info',
+          isLoading: false,
+          autoClose: 5000
+        });
       }
     } catch (err) {
       console.error('Verification error:', err);
-      dismiss(toastId);
-      showError(err.message || 'Verification failed');
+      update(toastId, {
+        render: `❌ ${err.message || 'Verification failed'}`,
+        type: 'error',
+        isLoading: false,
+        autoClose: 5000
+      });
       throw err;
     }
   };
