@@ -66,6 +66,7 @@ const icons = {
 
 /**
  * Default toast options - aligned with Carge design system
+ * Brand colors: Primary #003399 (blue), Success #10b981, Error #dc2626
  */
 const defaultOptions = {
   duration: 4000,
@@ -74,12 +75,13 @@ const defaultOptions = {
     borderRadius: '12px',
     background: '#ffffff',
     color: '#1f2937',
-    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+    boxShadow: '0 20px 25px -5px rgba(0, 51, 153, 0.1), 0 10px 10px -5px rgba(0, 51, 153, 0.04)',
     border: '1px solid #e5e7eb',
-    padding: '16px',
-    maxWidth: '420px',
+    padding: '16px 20px',
+    maxWidth: '450px',
     fontSize: '14px',
     fontWeight: '500',
+    fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
   },
 };
 
@@ -94,6 +96,7 @@ export const showSuccess = (message, options = {}) => {
     style: {
       ...defaultOptions.style,
       borderLeft: '4px solid #10b981',
+      background: '#f0fdf4',
     },
     iconTheme: {
       primary: '#10b981',
@@ -113,10 +116,11 @@ export const showError = (message, options = {}) => {
     icon: icons.error,
     style: {
       ...defaultOptions.style,
-      borderLeft: '4px solid #ef4444',
+      borderLeft: '4px solid #dc2626',
+      background: '#fef2f2',
     },
     iconTheme: {
-      primary: '#ef4444',
+      primary: '#dc2626',
       secondary: '#ffffff',
     },
   });
@@ -133,6 +137,7 @@ export const showInfo = (message, options = {}) => {
     style: {
       ...defaultOptions.style,
       borderLeft: '4px solid #003399',
+      background: '#f0f9ff',
     },
   });
 };
@@ -148,6 +153,7 @@ export const showLoading = (message, options = {}) => {
     style: {
       ...defaultOptions.style,
       borderLeft: '4px solid #003399',
+      background: '#eff6ff',
     },
   });
 };
@@ -163,6 +169,7 @@ export const showWarning = (message, options = {}) => {
     style: {
       ...defaultOptions.style,
       borderLeft: '4px solid #f59e0b',
+      background: '#fffbeb',
     },
   });
 };
@@ -198,6 +205,7 @@ export const update = (toastId, options = {}) => {
       style: {
         ...defaultOptions.style,
         borderLeft: '4px solid #003399',
+        background: '#eff6ff',
       },
     });
   } else if (type === 'success') {
@@ -209,6 +217,7 @@ export const update = (toastId, options = {}) => {
       style: {
         ...defaultOptions.style,
         borderLeft: '4px solid #10b981',
+        background: '#f0fdf4',
       },
       iconTheme: {
         primary: '#10b981',
@@ -223,10 +232,11 @@ export const update = (toastId, options = {}) => {
       icon: icons.error,
       style: {
         ...defaultOptions.style,
-        borderLeft: '4px solid #ef4444',
+        borderLeft: '4px solid #dc2626',
+        background: '#fef2f2',
       },
       iconTheme: {
-        primary: '#ef4444',
+        primary: '#dc2626',
         secondary: '#ffffff',
       },
     });
@@ -240,6 +250,7 @@ export const update = (toastId, options = {}) => {
       style: {
         ...defaultOptions.style,
         borderLeft: '4px solid #003399',
+        background: isLoading ? '#eff6ff' : '#f0f9ff',
       },
     });
   }
@@ -274,6 +285,7 @@ export const toastTx = {
       style: {
         ...defaultOptions.style,
         borderLeft: '4px solid #003399',
+        background: '#eff6ff',
       },
     };
     
@@ -291,6 +303,7 @@ export const toastTx = {
       style: {
         ...defaultOptions.style,
         borderLeft: '4px solid #003399',
+        background: '#eff6ff',
       },
     };
     
@@ -308,6 +321,7 @@ export const toastTx = {
       style: {
         ...defaultOptions.style,
         borderLeft: '4px solid #10b981',
+        background: '#f0fdf4',
       },
       iconTheme: {
         primary: '#10b981',
@@ -329,10 +343,11 @@ export const toastTx = {
       icon: icons.error,
       style: {
         ...defaultOptions.style,
-        borderLeft: '4px solid #ef4444',
+        borderLeft: '4px solid #dc2626',
+        background: '#fef2f2',
       },
       iconTheme: {
-        primary: '#ef4444',
+        primary: '#dc2626',
         secondary: '#ffffff',
       },
     };
