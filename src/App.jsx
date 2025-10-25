@@ -22,6 +22,24 @@ const PageLoader = () => (
   </div>
 );
 
+// Error fallback for lazy loading failures
+const LazyLoadError = ({ error, resetErrorBoundary }) => (
+  <div className="flex items-center justify-center min-h-screen p-6">
+    <div className="max-w-md w-full bg-red-50 border border-red-200 rounded-lg p-6">
+      <h2 className="text-xl font-semibold text-red-900 mb-2">Failed to load page</h2>
+      <p className="text-sm text-red-700 mb-4">
+        The page failed to load. This might be a temporary network issue.
+      </p>
+      <button
+        onClick={() => window.location.reload()}
+        className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
+      >
+        Reload Page
+      </button>
+    </div>
+  </div>
+);
+
 function App() {
   return (
     <ErrorBoundary>

@@ -37,10 +37,10 @@ export class ErrorBoundary extends Component {
               We're sorry, but something unexpected happened. The error has been logged and we'll look into it.
             </p>
             
-            {import.meta.env.MODE === 'development' && this.state.error && (
+            {this.state.error && (
               <details className="mb-6 text-left">
                 <summary className="cursor-pointer text-sm text-gray-700 font-medium mb-2">
-                  Error Details (Development Only)
+                  Error Details (Click to expand)
                 </summary>
                 <div className="bg-red-50 border border-red-200 rounded p-3 text-xs font-mono overflow-auto max-h-48">
                   <div className="text-red-800 font-bold mb-2">{this.state.error.toString()}</div>

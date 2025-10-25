@@ -66,14 +66,14 @@ export default defineConfig({
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true, // Remove console.log in production
+        drop_console: false, // Keep console.error for debugging issues in production
         drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug'], // Remove specific console methods
+        pure_funcs: ['console.log', 'console.info', 'console.debug'], // Remove only verbose console methods
       },
     },
     
     // Better source maps for debugging (without bloating bundle)
-    sourcemap: false, // Disable source maps in production for smaller size
+    sourcemap: true, // Enable temporarily for debugging Netlify deployment
   },
   
   // Optimize dev server
