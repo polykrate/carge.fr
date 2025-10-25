@@ -1454,6 +1454,15 @@ export const Verify = () => {
             <p className="text-xs text-blue-700 mt-2">
               Expected hash: <code className="bg-blue-100 px-2 py-1 rounded font-mono">{firstStepHash.substring(0, 20)}...{firstStepHash.substring(firstStepHash.length - 10)}</code>
             </p>
+            {workflowHistory && (workflowHistory.masterWorkflowName?.includes('Macallan') || workflowHistory.masterWorkflowName?.includes('Whisky')) && (
+              <div className="mt-3 p-3 bg-green-50 border border-green-300 rounded-lg">
+                <p className="text-xs text-green-900">
+                  💡 <strong>{t('about.qrExampleHint')}</strong> {' '}
+                  <a href="/about" className="text-[#003399] font-semibold hover:underline">{t('about.aboutPage')}</a>.
+                  {' '}{t('about.downloadOrScan')}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* QR Scanner */}
