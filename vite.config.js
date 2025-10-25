@@ -5,6 +5,9 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
+    // Disable automatic modulepreload to avoid loading all vendors upfront
+    modulePreload: false,
+    
     rollupOptions: {
       output: {
         // 🚀 Optimized chunking strategy for better caching and load performance
