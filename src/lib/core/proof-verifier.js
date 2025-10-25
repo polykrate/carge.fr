@@ -317,9 +317,9 @@ export class ProofVerifier {
       
       console.log(`RAG: ${ragHash}, Current step: ${stepHash}`);
 
-      // Get all RAGs to find the master workflow and steps
-      const allRags = await ragClient.getAllRags();
-      const masterRag = allRags.find(r => r.hash === ragHash);
+      // 🚀 OPTIMIZATION 0: Fetch only the master RAG first to get the steps list
+      console.log('📥 Fetching master workflow RAG...');
+      const masterRag = await ragClient.getRagByHash(ragHash);
       
       if (!masterRag) {
         throw new Error(`Master workflow not found: ${ragHash}`);
@@ -334,13 +334,22 @@ export class ProofVerifier {
 
       console.log(`Current step is ${currentStepIndex + 1}/${steps.length}`);
 
+      // 🚀 OPTIMIZATION 0.5: Fetch only the necessary step RAGs (not all RAGs from blockchain)
+      const neededStepHashes = steps.slice(0, currentStepIndex + 1);
+      console.log(`📥 Fetching only ${neededStepHashes.length} necessary step RAG(s) in parallel...`);
+      const stepRags = await ragClient.getRagsByHashes(neededStepHashes);
+      
+      // Create a map for quick lookup
+      const stepRagMap = new Map(stepRags.map(rag => [rag.hash, rag]));
+      console.log(`✅ Fetched ${stepRags.length}/${neededStepHashes.length} step RAG(s)`);
+
       // Reconstruct history by going through steps
       const history = [];
       
       // 🚀 OPTIMIZATION 1: Parallelize IPFS schema downloads
       console.log('📥 Downloading all step schemas in parallel...');
-      const schemaPromises = steps.slice(0, currentStepIndex + 1).map(async (stepHashValue, i) => {
-        const stepRag = allRags.find(r => r.hash === stepHashValue);
+      const schemaPromises = neededStepHashes.map(async (stepHashValue, i) => {
+        const stepRag = stepRagMap.get(stepHashValue);
         
         if (!stepRag) {
           console.warn(`Step ${i + 1} metadata not found: ${stepHashValue}`);
@@ -373,8 +382,8 @@ export class ProofVerifier {
       let accumulatedDelivrable = {};
       const stepsToVerify = [];
       
-      for (let i = 0; i <= currentStepIndex; i++) {
-        const stepHashValue = steps[i];
+      for (let i = 0; i < neededStepHashes.length; i++) {
+        const stepHashValue = neededStepHashes[i];
         const { keys, metadata } = stepMetadataList[i];
         
         // Extract only this step's data

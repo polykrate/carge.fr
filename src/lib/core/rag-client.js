@@ -51,23 +51,27 @@ export class RagClient {
       const keys = data.result || [];
       console.log(`Found ${keys.length} RAG(s)`);
 
-      // Fetch metadata for each RAG
-      const rags = [];
-      for (const key of keys) {
+      // Fetch metadata for each RAG in parallel (optimized)
+      const ragPromises = keys.map(async (key) => {
         try {
           const metadata = await this.getRagByStorageKey(key);
           if (metadata) {
             // Extract the hash from the storage key (last 32 bytes)
             const hash = '0x' + key.slice(-64);
-            rags.push({
+            return {
               hash,
               metadata
-            });
+            };
           }
+          return null;
         } catch (error) {
           console.error(`Failed to fetch RAG metadata for key ${key}:`, error);
+          return null;
         }
-      }
+      });
+
+      const results = await Promise.all(ragPromises);
+      const rags = results.filter(rag => rag !== null);
 
       return rags;
     } catch (error) {
@@ -242,6 +246,69 @@ export class RagClient {
       result |= BigInt(bytes[offset + i]) << BigInt(i * 8);
     }
     return result;
+  }
+
+  /**
+   * Get a specific RAG by its hash
+   * @param {string} ragHash - RAG hash (0x-prefixed hex string)
+   * @returns Promise<{hash: string, metadata: Object}|null>
+   */
+  async getRagByHash(ragHash) {
+    try {
+      // Build storage key for this specific RAG
+      // Storage key format: xxhash128("Rag") + xxhash128("RagStorage") + blake2_128concat(ragHash)
+      const { blake2AsHex } = await import('@polkadot/util-crypto');
+      
+      const modulePrefix = xxhashAsHex('Rag', 128);
+      const storagePrefix = xxhashAsHex('RagStorage', 128);
+      
+      // Remove 0x prefix from hash
+      const hash = ragHash.startsWith('0x') ? ragHash.slice(2) : ragHash;
+      const hashBytes = hexToU8a('0x' + hash);
+      
+      // blake2_128concat = blake2_128(key) + key
+      const keyHashPrefix = blake2AsHex(hashBytes, 128);
+      const storageKey = modulePrefix + storagePrefix.slice(2) + keyHashPrefix.slice(2) + hash;
+      
+      // Fetch metadata
+      const metadata = await this.getRagByStorageKey(storageKey);
+      
+      if (!metadata) {
+        return null;
+      }
+      
+      return {
+        hash: ragHash,
+        metadata
+      };
+    } catch (error) {
+      console.error(`Error fetching RAG by hash ${ragHash}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Get multiple RAGs by their hashes (parallelized)
+   * @param {string[]} ragHashes - Array of RAG hashes
+   * @returns Promise<Array<{hash: string, metadata: Object}>>
+   */
+  async getRagsByHashes(ragHashes) {
+    try {
+      console.log(`Fetching ${ragHashes.length} specific RAG(s) in parallel...`);
+      
+      // Parallelize all RAG fetches
+      const ragPromises = ragHashes.map(hash => this.getRagByHash(hash));
+      const results = await Promise.all(ragPromises);
+      
+      // Filter out nulls (RAGs not found)
+      const rags = results.filter(rag => rag !== null);
+      
+      console.log(`Successfully fetched ${rags.length}/${ragHashes.length} RAG(s)`);
+      return rags;
+    } catch (error) {
+      console.error('Error fetching RAGs by hashes:', error);
+      return [];
+    }
   }
 }
 
