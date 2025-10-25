@@ -376,9 +376,6 @@ export const Verify = () => {
           if (history.chainOfTrustValid !== null) {
             setVerifyingChainOfTrust(false);
           }
-          
-          // Also try to load next step
-          await loadNextWorkflowStep(proof.ragData);
         } catch (err) {
           console.error('Failed to reconstruct workflow history:', err);
           // Don't fail the whole verification, just log it
