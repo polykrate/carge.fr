@@ -563,6 +563,8 @@ export const Verify = () => {
 
   const verifyProof = async (proof, toastId) => {
     let isChainOfTrustNonVerifiable = false;
+    let isValidWithChainOfTrust;
+    let messageWithChainOfTrust;
     
     try {
       console.log('Starting proof verification...');
@@ -610,6 +612,10 @@ export const Verify = () => {
       
       setResult(result);
       
+      // Initialize with result values (will be updated if chain of trust is checked)
+      isValidWithChainOfTrust = result.isValid;
+      messageWithChainOfTrust = result.message;
+      
       // Store proof data for workflow continuation
       if (result.isValid && proof.ragData) {
         setProofData(proof.ragData);
@@ -638,9 +644,9 @@ export const Verify = () => {
           // If chainOfTrustValid is null (not verifiable), keep verifying state (gray)
           // If chainOfTrustValid is false (broken), mark as invalid
           // If chainOfTrustValid is true (valid), keep current isValid state
-          const isValidWithChainOfTrust = history.chainOfTrustValid === false ? false : result.isValid;
-          const messageWithChainOfTrust = history.chainOfTrustValid === false 
-            ? 'Proof found on blockchain but Chain of Trust is broken!' 
+          isValidWithChainOfTrust = history.chainOfTrustValid === false ? false : result.isValid;
+          messageWithChainOfTrust = history.chainOfTrustValid === false 
+            ? 'Proof hash found on blockchain with valid signature, but Chain of Trust is broken!' 
             : result.message;
           
           setResult(prev => ({
