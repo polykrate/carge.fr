@@ -4,10 +4,11 @@ import { Toaster } from 'react-hot-toast';
 import { AppProvider } from './contexts/AppContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Layout } from './components/Layout';
-import { Home } from './pages/Home';
 import './lib/i18n'; // Initialize i18n
 
-// Lazy load heavy pages for better performance
+// 🚀 Lazy load ALL pages for optimal performance
+// Each page loads only when user navigates to it
+const Home = lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
 const Workflows = lazy(() => import('./pages/Workflows').then(m => ({ default: m.Workflows })));
 const QuickSign = lazy(() => import('./pages/QuickSign').then(m => ({ default: m.QuickSign })));
 const Verify = lazy(() => import('./pages/Verify').then(m => ({ default: m.Verify })));
