@@ -9,16 +9,14 @@ export default defineConfig({
     modulePreload: {
       polyfill: true,
       resolveDependencies: (filename, deps) => {
-        // Only preload react-vendor and critical dependencies
-        // Don't preload heavy vendors (ipfs, polkadot) or page chunks
+        // Preload all vendors except heavy ones (ipfs, polkadot)
+        // Don't preload page chunks (lazy loaded)
         return deps.filter(dep => {
-          const isReactVendor = dep.includes('react-vendor');
-          const isI18n = dep.includes('i18n');
           const isHeavyVendor = dep.includes('ipfs-vendor') || dep.includes('polkadot-vendor');
           const isPageChunk = dep.match(/\/(Home|Verify|About|Workflows|QuickSign|WalletDebug)-/);
           
-          // Preload only react-vendor and i18n (critical), skip heavy vendors and pages
-          return (isReactVendor || isI18n) && !isHeavyVendor && !isPageChunk;
+          // Preload everything except heavy vendors and page chunks
+          return !isHeavyVendor && !isPageChunk;
         });
       }
     },
