@@ -200,6 +200,7 @@ export const Verify = () => {
   const [expandedSteps, setExpandedSteps] = useState({}); // Track which steps are expanded
   const [isProofDetailsExpanded, setIsProofDetailsExpanded] = useState(false); // Accordion state for proof details
   const [verifyingChainOfTrust, setVerifyingChainOfTrust] = useState(false); // Track chain of trust verification
+  const [viewLevel, setViewLevel] = useState(0); // 0=compact, 1=steps list, 2=full details (controlled by expandedSteps)
   
   // Product QR verification states
   const [showProductQRScanner, setShowProductQRScanner] = useState(false);
@@ -1449,17 +1450,18 @@ export const Verify = () => {
         </div>
       )}
 
-      {/* Result - Compact View */}
+      {/* Result - Progressive 3-Level View */}
       {result && (
-        <div role="region" aria-label="Verification results" className={`border rounded-lg overflow-hidden ${
+        <div role="region" aria-label="Verification results" className={`border-2 rounded-lg overflow-hidden ${
           verifyingChainOfTrust
             ? 'bg-gray-50 border-gray-300'
             : result.isValid
             ? 'bg-green-50 border-green-200'
             : 'bg-red-50 border-red-200'
         }`}>
-          {/* Header - Always visible */}
+          {/* NIVEAU 0: Header + Status + Timeline - Always visible */}
           <div className="p-6">
+            {/* Status Header */}
             <div className="flex items-center space-x-3 mb-4">
               {verifyingChainOfTrust ? (
                 result.chainOfTrustVerifiable === false ? (
@@ -1482,7 +1484,7 @@ export const Verify = () => {
                 </svg>
               )}
               <div className="flex-1">
-                <div className="font-medium text-lg">
+                <div className="font-semibold text-xl">
                   {verifyingChainOfTrust 
                     ? (result.chainOfTrustVerifiable === false 
                         ? 'Proof Valid - Chain of Trust Not Verifiable'
@@ -1491,7 +1493,7 @@ export const Verify = () => {
                       ? 'Proof Valid' 
                       : 'Proof Invalid'}
                 </div>
-                <div className="text-sm text-gray-700">
+                <div className="text-sm text-gray-700 mt-1">
                   {verifyingChainOfTrust 
                     ? (result.chainOfTrustVerifiable === false
                         ? 'Workflow steps verified on blockchain, but participant identities cannot be traced (no _targetAddress metadata)'
@@ -1511,61 +1513,332 @@ export const Verify = () => {
               </div>
             </div>
 
-            {/* Toggle Details Button */}
-            {result.details && (
-              <button
-                onClick={() => setIsProofDetailsExpanded(!isProofDetailsExpanded)}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition text-left border ${
-                  verifyingChainOfTrust
-                    ? 'bg-gray-100 hover:bg-gray-200 border-gray-300'
-                    : result.isValid
-                    ? 'bg-green-50 hover:bg-green-100 border-green-200'
-                    : 'bg-red-50 hover:bg-red-100 border-red-200'
-                }`}
-              >
-                <span className="font-medium text-gray-900">Proof Details</span>
-                <svg 
-                  className={`w-5 h-5 text-gray-600 transition-transform ${isProofDetailsExpanded ? 'rotate-180' : ''}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+            {/* Workflow Summary + Timeline (only if workflow) */}
+            {workflowHistory && !verifyingChainOfTrust && (
+              <div className="mt-6 space-y-4">
+                {/* Workflow Info Card */}
+                <div className="bg-white bg-opacity-70 rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 text-lg mb-1">
+                        {workflowHistory.masterWorkflowName}
+                      </h3>
+                      <div className="flex items-center gap-3 text-sm text-gray-600 flex-wrap">
+                        <span className="flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                          </svg>
+                          {workflowHistory.totalSteps} steps
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                          {workflowHistory.history.length} participants
+                        </span>
+                        {workflowHistory.history[0]?.blockchainData && workflowHistory.history[workflowHistory.history.length - 1]?.blockchainData && (
+                          <span className="flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Block #{workflowHistory.history[0].blockchainData.createdAt} → #{workflowHistory.history[workflowHistory.history.length - 1].blockchainData.createdAt}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {workflowHistory.allStepsVerified ? (
+                        <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full whitespace-nowrap flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          All Verified
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full whitespace-nowrap flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                          Partial
+                        </span>
+                      )}
+                      {workflowHistory.chainOfTrustValid === true && (
+                        <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full whitespace-nowrap flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.586-2A2 2 0 0119 9H5a2 2 0 01-1.414-3.414l2-2a2 2 0 012.828 0l2 2a2 2 0 010 2.828l-2 2z" />
+                          </svg>
+                          Chain Valid
+                        </span>
+                      )}
+                      {workflowHistory.chainOfTrustValid === false && (
+                        <span className="px-3 py-1 bg-orange-100 text-orange-800 text-xs font-bold rounded-full whitespace-nowrap flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                          Chain Broken
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Compact Timeline */}
+                  <div className="mt-3">
+                    <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                      {workflowHistory.history.map((step, i) => (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            if (viewLevel === 0) setViewLevel(1); // Jump to level 1 if clicking from level 0
+                            setExpandedSteps(prev => ({ ...prev, [step.stepIndex]: !prev[step.stepIndex] }));
+                          }}
+                          className={`relative flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm transition-all hover:scale-110 ${
+                            step.chainOfTrustValid === false
+                              ? 'bg-red-500 text-white ring-2 ring-red-600 ring-offset-2'
+                              : step.blockchainVerified
+                              ? 'bg-green-500 text-white'
+                              : 'bg-red-300 text-white'
+                          }`}
+                          title={`${step.stepName}${step.chainOfTrustValid === false ? ' - ⚠️ CHAIN BROKEN' : ''}`}
+                        >
+                          {step.blockchainVerified ? (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                          ) : (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          )}
+                          {step.chainOfTrustValid === false && (
+                            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold">!</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Click on any step to view details · {workflowHistory.history.filter(h => h.blockchainVerified).length}/{workflowHistory.history.length} verified
+                    </p>
+                  </div>
+                </div>
+              </div>
             )}
-          </div>
 
-          {/* Collapsible Details Section */}
-          {result.details && isProofDetailsExpanded && (
-            <div className={`px-6 pb-6 border-t ${
-              verifyingChainOfTrust
-                ? 'border-gray-300'
-                : result.isValid 
-                  ? 'border-green-200' 
-                  : 'border-red-200'
-            }`}>
-              <div className="pt-4 space-y-2 text-sm">
-                {Object.entries(result.details).map(([key, value]) => (
-                  <div key={key} className="flex flex-col">
-                    <span className="text-gray-500 font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span>
-                    {key === 'createdAt' || key === 'expiresAt' ? (
-                      <a 
-                        href={getBlockExplorerLink(value)} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="font-mono text-xs text-blue-600 hover:underline break-all mt-1"
+            {/* NIVEAU 1: Step List View */}
+            {workflowHistory && viewLevel >= 1 && !verifyingChainOfTrust && (
+              <div className="mt-6 space-y-3">
+                {workflowHistory.history.map((step) => (
+                  <div key={step.stepIndex} className={`rounded-lg overflow-hidden border-2 ${
+                    step.chainOfTrustValid === false 
+                      ? 'border-red-500' 
+                      : 'border-gray-200'
+                  }`}>
+                    {/* Step Header - Always Visible (Niveau 1) */}
+                    <button
+                      onClick={() => setExpandedSteps(prev => ({
+                        ...prev,
+                        [step.stepIndex]: !prev[step.stepIndex]
+                      }))}
+                      className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition text-left ${
+                        step.chainOfTrustValid === false 
+                          ? 'bg-red-50 border-l-4 border-red-500' 
+                          : step.blockchainVerified 
+                            ? 'bg-white' 
+                            : 'bg-red-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 flex-1">
+                        {step.blockchainVerified ? (
+                          <svg className="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        ) : (
+                          <svg className="w-6 h-6 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="font-semibold text-gray-900 text-base">
+                              {step.stepIndex + 1}. {step.stepName}
+                            </h3>
+                            {step.chainOfTrustValid === false && (
+                              <span className="px-2 py-0.5 bg-red-600 text-white text-xs font-bold rounded flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                CHAIN BROKEN
+                              </span>
+                            )}
+                          </div>
+                          {step.blockchainData && (
+                            <div className="flex items-center gap-3 mt-1 flex-wrap text-xs text-gray-500">
+                              <span className="inline-flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                {step.blockchainData.creator.slice(0, 10)}...
+                              </span>
+                              <span className="inline-flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                                </svg>
+                                Block #{step.blockchainData.createdAt}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <svg 
+                        className={`w-5 h-5 text-gray-600 transition-transform flex-shrink-0 ${expandedSteps[step.stepIndex] ? 'rotate-180' : ''}`}
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
                       >
-                        Block #{value} →
-                      </a>
-                    ) : (
-                      <span className="font-mono text-xs text-gray-700 break-all mt-1">{value}</span>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    {/* NIVEAU 2: Step Details - Expanded */}
+                    {expandedSteps[step.stepIndex] && (
+                      <div className="px-4 py-4 bg-gray-50 border-t space-y-4">
+                        {/* Chain of Trust Warning */}
+                        {step.chainOfTrustValid === false && (
+                          <div className="bg-red-100 border-l-4 border-red-600 p-4 rounded">
+                            <div className="flex items-start gap-3">
+                              <svg className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                              </svg>
+                              <div className="flex-1">
+                                <h4 className="text-red-900 font-bold text-sm mb-1">⚠️ Chain of Trust Broken</h4>
+                                <p className="text-red-800 text-sm">
+                                  The creator of this step does NOT match the target address of the previous step.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Step Content */}
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+                          <div className="flex items-center gap-2 mb-3">
+                            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <h4 className="font-semibold text-gray-900">Step Data</h4>
+                          </div>
+                          <DeliverableDisplay data={step.stepOnlyData || step.delivrable} />
+                        </div>
+
+                        {/* Technical Details - Collapsed by default */}
+                        <details className="pt-2 border-t">
+                          <summary className="cursor-pointer text-sm text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            </svg>
+                            Technical Details
+                          </summary>
+                          <div className="mt-3 space-y-3 pl-6 text-xs">
+                            <div>
+                              <span className="text-gray-500 font-medium">Content Hash:</span>
+                              <p className="font-mono text-gray-700 break-all mt-0.5">{step.contentHash}</p>
+                            </div>
+                            {step.blockchainData && (
+                              <>
+                                <div>
+                                  <span className="text-gray-500 font-medium">Full Creator Address:</span>
+                                  <p className="font-mono text-gray-700 break-all mt-0.5">{step.blockchainData.creator}</p>
+                                </div>
+                                <div>
+                                  <span className="text-gray-500 font-medium">Signature:</span>
+                                  <span
+                                    className={`ml-1 px-2 py-0.5 rounded ${
+                                      step.blockchainData.signatureValid
+                                        ? 'bg-green-200 text-green-800'
+                                        : 'bg-red-200 text-red-800'
+                                    }`}
+                                  >
+                                    {step.blockchainData.signatureValid ? 'Valid' : 'Invalid'}
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </details>
+                      </div>
                     )}
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+
+            {/* View Level Toggle Button */}
+            {workflowHistory && !verifyingChainOfTrust && (
+              <div className="mt-6">
+                <button
+                  onClick={() => setViewLevel(viewLevel === 0 ? 1 : 0)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition text-left border ${
+                    result.isValid
+                      ? 'bg-green-50 hover:bg-green-100 border-green-200'
+                      : 'bg-gray-100 hover:bg-gray-200 border-gray-300'
+                  }`}
+                >
+                  <span className="font-medium text-gray-900">
+                    {viewLevel === 0 ? '▼ View Step Details' : '▲ Hide Step Details'}
+                  </span>
+                  <span className="text-xs text-gray-600">
+                    {workflowHistory.history.length} steps
+                  </span>
+                </button>
+              </div>
+            )}
+
+            {/* Technical Proof Details (for non-workflow proofs) */}
+            {!workflowHistory && result.details && (
+              <div className="mt-6">
+                <button
+                  onClick={() => setIsProofDetailsExpanded(!isProofDetailsExpanded)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition text-left border ${
+                    verifyingChainOfTrust
+                      ? 'bg-gray-100 hover:bg-gray-200 border-gray-300'
+                      : result.isValid
+                      ? 'bg-green-50 hover:bg-green-100 border-green-200'
+                      : 'bg-red-50 hover:bg-red-100 border-red-200'
+                  }`}
+                >
+                  <span className="font-medium text-gray-900">Proof Details</span>
+                  <svg 
+                    className={`w-5 h-5 text-gray-600 transition-transform ${isProofDetailsExpanded ? 'rotate-180' : ''}`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {isProofDetailsExpanded && (
+                  <div className="mt-4 space-y-2 text-sm">
+                    {Object.entries(result.details).map(([key, value]) => (
+                      <div key={key} className="flex flex-col">
+                        <span className="text-gray-500 font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span>
+                        {key === 'createdAt' || key === 'expiresAt' ? (
+                          <a 
+                            href={getBlockExplorerLink(value)} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="font-mono text-xs text-blue-600 hover:underline break-all mt-1"
+                          >
+                            Block #{value} →
+                          </a>
+                        ) : (
+                          <span className="font-mono text-xs text-gray-700 break-all mt-1">{value}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Continue Workflow Button for valid RAG proofs */}
           {result.isValid && proofData && proofData.ragHash && proofData.stepHash && (
@@ -1734,331 +2007,6 @@ export const Verify = () => {
                   Close
                 </button>
               </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Workflow History Section - Compact View */}
-      {workflowHistory && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mt-8">
-          {/* Header with Summary */}
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-xl font-semibold">Workflow History</h2>
-              {workflowHistory.allStepsVerified ? (
-                <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  All Steps Verified
-                </span>
-              ) : (
-                <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                  Some Steps Unverified
-                </span>
-              )}
-              {workflowHistory.chainOfTrustValid !== undefined && workflowHistory.chainOfTrustValid !== null && (
-                workflowHistory.chainOfTrustValid === true ? (
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.586-2A2 2 0 0119 9H5a2 2 0 01-1.414-3.414l2-2a2 2 0 012.828 0l2 2a2 2 0 010 2.828l-2 2z" />
-                    </svg>
-                    Chain of Trust Valid
-                  </span>
-                ) : (
-                  <span className="px-3 py-1 bg-orange-100 text-orange-800 text-sm font-medium rounded-full flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    Chain of Trust Broken
-                  </span>
-                )
-              )}
-              {workflowHistory.chainOfTrustValid === null && (
-                <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Chain of Trust Not Verifiable
-                </span>
-              )}
-            </div>
-            <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-              {workflowHistory.currentStepIndex + 1} / {workflowHistory.totalSteps} Steps
-            </span>
-          </div>
-
-          {/* Compact workflow info */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-4">
-            <p className="text-sm text-gray-900 font-medium mb-1">{workflowHistory.masterWorkflowName}</p>
-            <div className="flex items-center gap-4 text-xs text-gray-600">
-              <span>
-                {workflowHistory.history.filter(h => h.blockchainVerified).length} / {workflowHistory.history.length} steps verified
-              </span>
-              <span className="font-mono">{workflowHistory.masterWorkflowHash.slice(0, 10)}...{workflowHistory.masterWorkflowHash.slice(-8)}</span>
-            </div>
-          </div>
-
-          {/* Toggle Details Button */}
-          <button
-            onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
-            className="w-full flex items-center justify-between px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-left"
-          >
-            <span className="font-medium text-gray-900">History Details</span>
-            <svg 
-              className={`w-5 h-5 text-gray-600 transition-transform ${isHistoryExpanded ? 'rotate-180' : ''}`}
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-
-          {/* Collapsible Details Section */}
-          {isHistoryExpanded && (
-            <div className="mt-4 space-y-3">
-              {/* Timeline of steps */}
-              {workflowHistory.history.map((step) => (
-                <div key={step.stepIndex} className={`rounded-lg overflow-hidden ${
-                  step.chainOfTrustValid === false 
-                    ? 'border-2 border-red-500' 
-                    : 'border border-gray-200'
-                }`}>
-                  {/* Step Header - Always Visible */}
-                  <button
-                    onClick={() => setExpandedSteps(prev => ({
-                      ...prev,
-                      [step.stepIndex]: !prev[step.stepIndex]
-                    }))}
-                    className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition text-left ${
-                      step.chainOfTrustValid === false 
-                        ? 'bg-red-100 border-l-4 border-red-500' 
-                        : step.blockchainVerified 
-                          ? 'bg-green-50' 
-                          : 'bg-red-50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 flex-1">
-                      {step.blockchainVerified ? (
-                        <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      ) : (
-                        <svg className="w-5 h-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold text-gray-900 text-sm">
-                            Step {step.stepIndex + 1}: {step.stepName}
-                          </h3>
-                          {step.chainOfTrustValid === false && (
-                            <span className="px-2 py-0.5 bg-red-600 text-white text-xs font-bold rounded flex items-center gap-1">
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                              </svg>
-                              CHAIN OF TRUST BROKEN
-                            </span>
-                          )}
-                        </div>
-                        {step.blockchainData && (
-                          <div className="flex items-center gap-3 mt-1 flex-wrap">
-                            <p className="text-xs text-gray-500">
-                              <span className="inline-flex items-center gap-1">
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                                {step.blockchainData.creator.slice(0, 8)}...
-                              </span>
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              <span className="inline-flex items-center gap-1">
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                                </svg>
-                                Block #{step.blockchainData.createdAt}
-                              </span>
-                            </p>
-                            {Object.keys(step.stepOnlyData || step.delivrable).length > 0 && (
-                              <p className="text-xs text-gray-500">
-                                <span className="inline-flex items-center gap-1">
-                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                  </svg>
-                                  {Object.keys(step.stepOnlyData || step.delivrable).length} {Object.keys(step.stepOnlyData || step.delivrable).length === 1 ? 'field' : 'fields'}
-                                </span>
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`text-xs px-2 py-1 rounded font-medium ${
-                            step.blockchainVerified
-                              ? 'bg-green-200 text-green-800'
-                              : 'bg-red-200 text-red-800'
-                          }`}
-                        >
-                          {step.blockchainVerified ? '✓ Verified' : '✗ Not Found'}
-                        </span>
-                        <svg 
-                          className={`w-4 h-4 text-gray-600 transition-transform ${expandedSteps[step.stepIndex] ? 'rotate-180' : ''}`}
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </div>
-                    </div>
-                  </button>
-
-                  {/* Step Details - Collapsible */}
-                  {expandedSteps[step.stepIndex] && (
-                    <div className="px-4 py-3 bg-white border-t space-y-4">
-                      {/* Chain of Trust Broken Alert */}
-                      {step.chainOfTrustValid === false && (
-                        <div className="bg-red-100 border-l-4 border-red-600 p-4 rounded">
-                          <div className="flex items-start gap-3">
-                            <svg className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            <div className="flex-1">
-                              <h4 className="text-red-900 font-bold text-sm mb-1">⚠️ Chain of Trust Broken</h4>
-                              <p className="text-red-800 text-sm">
-                                The creator of this step does NOT match the target address of the previous step. 
-                                This workflow may have been tampered with or incorrectly processed.
-                              </p>
-                              {step.stepIndex > 0 && workflowHistory.history[step.stepIndex - 1] && (
-                                <div className="mt-2 text-xs text-red-700 space-y-1">
-                                  <p>
-                                    <strong>Expected:</strong> <span className="font-mono">{workflowHistory.history[step.stepIndex - 1].targetAddress || 'N/A'}</span>
-                                  </p>
-                                  <p>
-                                    <strong>Actual:</strong> <span className="font-mono">{step.blockchainData?.creator || 'N/A'}</span>
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Priority Info: Who & When */}
-                      {step.blockchainData && (
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm">
-                            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            <span className="text-gray-700 font-medium">Signed by:</span>
-                            <span className="font-mono text-xs text-gray-600">{step.blockchainData.creator.slice(0, 12)}...{step.blockchainData.creator.slice(-8)}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span className="text-gray-700 font-medium">Block:</span>
-                            <a 
-                              href={getBlockExplorerLink(step.blockchainData.createdAt)} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="font-mono text-xs text-blue-600 hover:underline"
-                            >
-                              #{step.blockchainData.createdAt} →
-                            </a>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Priority Data: Step Content */}
-                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
-                        <div className="flex items-center gap-2 mb-3">
-                          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          <h4 className="font-semibold text-gray-900">Step Data</h4>
-                        </div>
-                        <DeliverableDisplay data={step.stepOnlyData || step.delivrable} />
-                      </div>
-
-                      {/* Technical Details - Collapsible */}
-                      <details className="pt-2 border-t">
-                        <summary className="cursor-pointer text-sm text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                          </svg>
-                          Technical Details
-                        </summary>
-                        <div className="mt-3 space-y-3 pl-6">
-                          {/* Hashes */}
-                          <div className="space-y-2 text-xs">
-                            <div>
-                              <span className="text-gray-500 font-medium">Content Hash:</span>
-                              <p className="font-mono text-gray-700 break-all mt-0.5">{step.contentHash}</p>
-                            </div>
-                            <div>
-                              <span className="text-gray-500 font-medium">Step Hash:</span>
-                              <p className="font-mono text-gray-700 break-all mt-0.5">{step.stepHash}</p>
-                            </div>
-                          </div>
-                          
-                          {/* Blockchain Data */}
-                          {step.blockchainData && (
-                            <div className="pt-2 border-t space-y-2 text-xs">
-                              <div>
-                                <span className="text-gray-500 font-medium">Full Creator Address:</span>
-                                <p className="font-mono text-gray-700 break-all mt-0.5">{step.blockchainData.creator}</p>
-                              </div>
-                              <div className="flex flex-wrap items-center gap-4">
-                                <div>
-                                  <span className="text-gray-500 font-medium">Signature:</span>
-                                  <span
-                                    className={`ml-1 px-2 py-0.5 rounded ${
-                                      step.blockchainData.signatureValid
-                                        ? 'bg-green-200 text-green-800'
-                                        : 'bg-red-200 text-red-800'
-                                    }`}
-                                  >
-                                    {step.blockchainData.signatureValid ? 'Valid' : 'Invalid'}
-                                  </span>
-                                </div>
-                                {step.stepIndex > 0 && step.chainOfTrustValid !== undefined && (
-                                  <div>
-                                    <span className="text-gray-500 font-medium">Chain of Trust:</span>
-                                    <span
-                                      className={`ml-1 px-2 py-0.5 rounded ${
-                                        step.chainOfTrustValid === true
-                                          ? 'bg-blue-200 text-blue-800'
-                                          : step.chainOfTrustValid === false
-                                            ? 'bg-orange-200 text-orange-800'
-                                            : 'bg-gray-200 text-gray-700'
-                                      }`}
-                                    >
-                                      {step.chainOfTrustValid === true 
-                                        ? '✓ Valid' 
-                                        : step.chainOfTrustValid === false 
-                                          ? '✗ Broken' 
-                                          : 'ℹ Not Verifiable'}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </details>
-                    </div>
-                  )}
-                </div>
-              ))}
             </div>
           )}
         </div>
