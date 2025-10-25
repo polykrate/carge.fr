@@ -5,72 +5,22 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
-    // Only preload critical chunks (core vendors), not page-specific chunks
-    modulePreload: {
-      polyfill: true,
-      resolveDependencies: (filename, deps) => {
-        // Preload all vendors except heavy ones (ipfs, polkadot)
-        // Don't preload page chunks (lazy loaded)
-        return deps.filter(dep => {
-          const isHeavyVendor = dep.includes('ipfs-vendor') || dep.includes('polkadot-vendor');
-          const isPageChunk = dep.match(/\/(Home|Verify|About|Workflows|QuickSign|WalletDebug)-/);
-          
-          // Preload everything except heavy vendors and page chunks
-          return !isHeavyVendor && !isPageChunk;
-        });
-      }
-    },
-    
     rollupOptions: {
       output: {
-        // 🚀 Optimized chunking strategy for better caching and load performance
-        manualChunks: (id) => {
-          // Core React dependencies (needed everywhere, cache well)
-          if (id.includes('node_modules/react') || 
-              id.includes('node_modules/react-dom') || 
-              id.includes('node_modules/react-router')) {
-            return 'react-vendor';
-          }
+        // 🚀 Simplified chunking strategy - group only heavy vendors separately
+        manualChunks: {
+          // Core dependencies loaded upfront
+          'react-vendor': ['react', 'react-dom', 'react-router-dom', 'react-hot-toast'],
           
-          // Polkadot dependencies (only loaded when wallet features are used)
-          if (id.includes('@polkadot/')) {
-            return 'polkadot-vendor';
-          }
+          // Heavy vendors loaded on demand
+          'polkadot-vendor': [
+            '@polkadot/api',
+            '@polkadot/extension-dapp',
+            '@polkadot/util',
+            '@polkadot/util-crypto'
+          ],
           
-          // IPFS/Helia dependencies (only loaded on Verify/Workflows/QuickSign pages)
-          if (id.includes('helia') || 
-              id.includes('@helia/') ||
-              id.includes('multiformats') ||
-              id.includes('ipfs') ||
-              id.includes('libp2p')) {
-            return 'ipfs-vendor';
-          }
-          
-          // QR code library (only used in Verify page)
-          if (id.includes('jsqr') || id.includes('jsQR')) {
-            return 'jsQR';
-          }
-          
-          // i18n dependencies (lightweight, loaded early)
-          if (id.includes('i18next') || id.includes('react-i18next')) {
-            return 'i18n';
-          }
-          
-          // UI libraries (toast, etc.)
-          if (id.includes('react-hot-toast')) {
-            return 'ui-vendor';
-          }
-          
-          // Crypto utilities (used across many features)
-          if (id.includes('node_modules') && 
-              (id.includes('crypto') || id.includes('hash') || id.includes('buffer'))) {
-            return 'crypto-vendor';
-          }
-          
-          // All other node_modules go into a common vendor chunk
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
+          // Note: IPFS is too complex to chunk manually, let Vite handle it
         }
       }
     },
