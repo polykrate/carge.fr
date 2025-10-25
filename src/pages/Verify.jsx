@@ -1701,7 +1701,11 @@ export const Verify = () => {
             <div className="mt-4 space-y-3">
               {/* Timeline of steps */}
               {workflowHistory.history.map((step) => (
-                <div key={step.stepIndex} className="border border-gray-200 rounded-lg overflow-hidden">
+                <div key={step.stepIndex} className={`rounded-lg overflow-hidden ${
+                  step.chainOfTrustValid === false 
+                    ? 'border-2 border-red-500' 
+                    : 'border border-gray-200'
+                }`}>
                   {/* Step Header - Always Visible */}
                   <button
                     onClick={() => setExpandedSteps(prev => ({
@@ -1709,7 +1713,11 @@ export const Verify = () => {
                       [step.stepIndex]: !prev[step.stepIndex]
                     }))}
                     className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition text-left ${
-                      step.blockchainVerified ? 'bg-green-50' : 'bg-red-50'
+                      step.chainOfTrustValid === false 
+                        ? 'bg-red-100 border-l-4 border-red-500' 
+                        : step.blockchainVerified 
+                          ? 'bg-green-50' 
+                          : 'bg-red-50'
                     }`}
                   >
                     <div className="flex items-center gap-3 flex-1">
@@ -1723,9 +1731,19 @@ export const Verify = () => {
                         </svg>
                       )}
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 text-sm">
-                          Step {step.stepIndex + 1}: {step.stepName}
-                        </h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-semibold text-gray-900 text-sm">
+                            Step {step.stepIndex + 1}: {step.stepName}
+                          </h3>
+                          {step.chainOfTrustValid === false && (
+                            <span className="px-2 py-0.5 bg-red-600 text-white text-xs font-bold rounded flex items-center gap-1">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                              </svg>
+                              CHAIN OF TRUST BROKEN
+                            </span>
+                          )}
+                        </div>
                         {step.blockchainData && (
                           <div className="flex items-center gap-3 mt-1 flex-wrap">
                             <p className="text-xs text-gray-500">
@@ -1782,6 +1800,34 @@ export const Verify = () => {
                   {/* Step Details - Collapsible */}
                   {expandedSteps[step.stepIndex] && (
                     <div className="px-4 py-3 bg-white border-t space-y-4">
+                      {/* Chain of Trust Broken Alert */}
+                      {step.chainOfTrustValid === false && (
+                        <div className="bg-red-100 border-l-4 border-red-600 p-4 rounded">
+                          <div className="flex items-start gap-3">
+                            <svg className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <div className="flex-1">
+                              <h4 className="text-red-900 font-bold text-sm mb-1">⚠️ Chain of Trust Broken</h4>
+                              <p className="text-red-800 text-sm">
+                                The creator of this step does NOT match the target address of the previous step. 
+                                This workflow may have been tampered with or incorrectly processed.
+                              </p>
+                              {step.stepIndex > 0 && workflowHistory.history[step.stepIndex - 1] && (
+                                <div className="mt-2 text-xs text-red-700 space-y-1">
+                                  <p>
+                                    <strong>Expected:</strong> <span className="font-mono">{workflowHistory.history[step.stepIndex - 1].targetAddress || 'N/A'}</span>
+                                  </p>
+                                  <p>
+                                    <strong>Actual:</strong> <span className="font-mono">{step.blockchainData?.creator || 'N/A'}</span>
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
                       {/* Priority Info: Who & When */}
                       {step.blockchainData && (
                         <div className="space-y-2">
