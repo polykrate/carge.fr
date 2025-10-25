@@ -5,8 +5,23 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
-    // Disable automatic modulepreload to avoid loading all vendors upfront
-    modulePreload: false,
+    // Only preload critical chunks (core vendors), not page-specific chunks
+    modulePreload: {
+      polyfill: true,
+      resolveDependencies: (filename, deps) => {
+        // Only preload react-vendor and critical dependencies
+        // Don't preload heavy vendors (ipfs, polkadot) or page chunks
+        return deps.filter(dep => {
+          const isReactVendor = dep.includes('react-vendor');
+          const isI18n = dep.includes('i18n');
+          const isHeavyVendor = dep.includes('ipfs-vendor') || dep.includes('polkadot-vendor');
+          const isPageChunk = dep.match(/\/(Home|Verify|About|Workflows|QuickSign|WalletDebug)-/);
+          
+          // Preload only react-vendor and i18n (critical), skip heavy vendors and pages
+          return (isReactVendor || isI18n) && !isHeavyVendor && !isPageChunk;
+        });
+      }
+    },
     
     rollupOptions: {
       output: {
