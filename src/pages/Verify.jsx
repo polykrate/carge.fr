@@ -1455,7 +1455,7 @@ export const Verify = () => {
   return (
     <>
       {/* Compact Page Header */}
-      <div className="border-b border-gray-200 bg-white">
+      <div className="bg-white">
         <div className="container mx-auto px-6 py-6 max-w-6xl">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             {/* Title and Description */}
@@ -1489,7 +1489,7 @@ export const Verify = () => {
 
           {/* Expandable How it works section */}
           {showHowItWorks && (
-            <div className="mt-6 pt-6 border-t border-gray-200 animate-fadeIn">
+            <div className="mt-6 animate-fadeIn">
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
