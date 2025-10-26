@@ -1872,13 +1872,13 @@ export const Verify = () => {
                             : 'border-red-200'
                         }`}
                       >
-                        {/* Step Card Header - Always Visible (compact mobile view) */}
+                        {/* Step Card Header - Mobile Optimized Layout */}
                         <button
                           onClick={() => setExpandedSteps(prev => ({
                             ...prev,
                             [step.stepIndex]: !prev[step.stepIndex]
                           }))}
-                          className={`w-full flex items-start gap-3 p-4 hover:bg-gray-50 transition text-left ${
+                          className={`w-full p-4 hover:bg-gray-50 transition text-left ${
                             step.chainOfTrustValid === false 
                               ? 'bg-red-50' 
                               : step.blockchainVerified 
@@ -1886,114 +1886,100 @@ export const Verify = () => {
                                 : 'bg-red-50'
                           }`}
                         >
-                          {/* Status Icon */}
-                          <div className="flex-shrink-0 mt-1">
-                            {step.blockchainVerified ? (
-                              <div className="relative">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                  step.chainOfTrustValid === false 
-                                    ? 'bg-red-500 ring-2 ring-red-600' 
-                                    : 'bg-green-500'
-                                }`}>
+                          <div className="flex items-start gap-3">
+                            {/* Status Icon */}
+                            <div className="flex-shrink-0">
+                              {step.blockchainVerified ? (
+                                <div className="relative">
+                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                    step.chainOfTrustValid === false 
+                                      ? 'bg-red-500 ring-2 ring-red-600' 
+                                      : 'bg-green-500'
+                                  }`}>
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  </div>
+                                  {step.chainOfTrustValid === false && (
+                                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold ring-2 ring-white">!</span>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
                                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                                   </svg>
                                 </div>
-                                {step.chainOfTrustValid === false && (
-                                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold ring-2 ring-white">!</span>
-                                )}
-                              </div>
-                            ) : (
-                              <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
-                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Step Info */}
-                          <div className="flex-1 min-w-0">
-                            {/* Step Number + Function (with truncation) */}
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <span className="text-xs font-bold text-gray-500">STEP {step.stepIndex + 1}</span>
-                              <span 
-                                className="text-sm sm:text-base font-bold text-gray-900" 
-                                title={stepFunction}
-                              >
-                                {truncateText(stepFunction, 25)}
-                              </span>
-                              {step.chainOfTrustValid === false && (
-                                <span className="px-2 py-0.5 bg-red-600 text-white text-xs font-bold rounded flex items-center gap-1">
-                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01" />
-                                  </svg>
-                                  BROKEN
-                                </span>
                               )}
                             </div>
                             
-                            {/* Participant Identity (with truncation) */}
-                            <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">
-                              <svg className="w-4 h-4 flex-shrink-0 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                              </svg>
-                              <span 
-                                className="font-medium truncate" 
-                                title={stepIdentity}
-                              >
-                                {truncateText(stepIdentity, 30)}
-                              </span>
-                            </div>
-                            
-                            {/* Blockchain Info - Compact */}
-                            {step.blockchainData && (
-                              <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
-                                <span className="inline-flex items-center gap-1">
-                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-                                  </svg>
-                                  Block #{step.blockchainData.createdAt}
-                                </span>
-                                <span className="inline-flex items-center gap-1 truncate max-w-[150px] sm:max-w-none">
-                                  <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                                  </svg>
-                                  {step.blockchainData.creator.slice(0, 8)}...
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Timestamp Display - Right Side */}
-                          {step.blockchainData?.createdAt && (
-                            <div className="flex flex-col items-end justify-center text-right ml-2 flex-shrink-0">
-                              {blockTimestamps[step.blockchainData.createdAt] ? (
-                                <>
-                                  <div className="text-xs font-medium text-gray-700">
+                            {/* Step Info - Full Width on Mobile */}
+                            <div className="flex-1 min-w-0">
+                              {/* Header: Step Number + Timestamp */}
+                              <div className="flex items-center justify-between gap-2 mb-2">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-xs font-bold text-gray-500">STEP {step.stepIndex + 1}</span>
+                                  {step.chainOfTrustValid === false && (
+                                    <span className="px-2 py-0.5 bg-red-600 text-white text-xs font-bold rounded flex items-center gap-1">
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01" />
+                                      </svg>
+                                      BROKEN
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                {/* Timestamp - Right Side */}
+                                {step.blockchainData?.createdAt && blockTimestamps[step.blockchainData.createdAt] && (
+                                  <div className="text-xs font-medium text-gray-700 flex-shrink-0">
                                     {formatTimestamp(blockTimestamps[step.blockchainData.createdAt])}
                                   </div>
-                                  <div className="text-xs text-gray-400 mt-0.5">
-                                    {new Date(blockTimestamps[step.blockchainData.createdAt]).toLocaleDateString('en-US', { year: 'numeric' })}
-                                  </div>
-                                </>
-                              ) : (
-                                <div className="text-xs text-gray-400 animate-pulse">
-                                  Loading...
+                                )}
+                              </div>
+                              
+                              {/* Function Name - Full Width */}
+                              <div className="mb-2">
+                                <span 
+                                  className="text-base font-bold text-gray-900 block" 
+                                  title={stepFunction}
+                                >
+                                  {stepFunction}
+                                </span>
+                              </div>
+                              
+                              {/* Participant Identity - Full Width */}
+                              <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">
+                                <svg className="w-4 h-4 flex-shrink-0 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span 
+                                  className="font-medium" 
+                                  title={stepIdentity}
+                                >
+                                  {stepIdentity}
+                                </span>
+                              </div>
+                              
+                              {/* Blockchain Info - Compact */}
+                              {step.blockchainData && (
+                                <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
+                                  <span className="inline-flex items-center gap-1">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                                    </svg>
+                                    Block #{step.blockchainData.createdAt}
+                                  </span>
+                                  <span className="inline-flex items-center gap-1 truncate max-w-[150px] sm:max-w-none">
+                                    <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                    </svg>
+                                    {step.blockchainData.creator.slice(0, 8)}...
+                                  </span>
                                 </div>
                               )}
                             </div>
-                          )}
+                          </div>
                           
-                          {/* Expand Icon */}
-                          <svg 
-                            className={`w-5 h-5 text-gray-600 transition-transform flex-shrink-0 mt-2 ${isExpanded ? 'rotate-180' : ''}`}
-                            fill="none" 
-                            stroke="currentColor" 
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                          </svg>
                         </button>
 
                         {/* Expanded Step Details */}
