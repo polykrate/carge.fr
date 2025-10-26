@@ -317,8 +317,10 @@ export class RagClient {
    * @returns Promise<Array<{hash: string, metadata: Object}>>
    */
   async searchRagsByTags(tags) {
+    let api = null;
+    
     try {
-      if (!this.substrateClient || !this.substrateClient.api) {
+      if (!this.substrateClient || !this.substrateClient.rpcUrl) {
         throw new Error('Substrate client not initialized');
       }
 
@@ -340,14 +342,23 @@ export class RagClient {
 
       console.log(`🔍 Searching RAGs with tags (AND logic): [${tags.join(', ')}]`);
 
-      // Call the runtime API
-      const api = this.substrateClient.api;
+      // Create a temporary API connection for runtime call
+      console.log('Creating temporary API connection for runtime call...');
+      const { ApiPromise, WsProvider } = await import('@polkadot/api');
+      const wsUrl = this.substrateClient.rpcUrl
+        .replace('https://', 'wss://')
+        .replace('http://', 'ws://');
+      
+      const wsProvider = new WsProvider(wsUrl);
+      api = await ApiPromise.create({ provider: wsProvider });
+      console.log('✅ API connected for runtime call');
       
       // Convert tags to bytes (UTF-8 encoding)
-      const { stringToU8a, u8aToHex, hexToU8a, u8aToString } = await import('@polkadot/util');
+      const { stringToU8a, u8aToHex } = await import('@polkadot/util');
       const tagBytes = tags.map(tag => stringToU8a(tag));
       
       // Call the runtime API
+      console.log('Calling ragApi.findByTags...');
       const searchResults = await api.call.ragApi.findByTags(tagBytes);
       
       console.log('Raw search results:', searchResults);
@@ -402,9 +413,26 @@ export class RagClient {
       const rags = results.filter(rag => rag !== null);
 
       console.log(`✅ Successfully retrieved ${rags.length} RAG(s) from search results`);
+      
+      // Disconnect the temporary API
+      if (api) {
+        await api.disconnect();
+        console.log('API disconnected');
+      }
+      
       return rags;
     } catch (error) {
       console.error('Error searching RAGs by tags:', error);
+      
+      // Clean up API connection on error
+      if (api) {
+        try {
+          await api.disconnect();
+        } catch (disconnectError) {
+          console.error('Error disconnecting API:', disconnectError);
+        }
+      }
+      
       throw error;
     }
   }
