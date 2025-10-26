@@ -424,7 +424,7 @@ const resources = {
       home: {
         title: 'CARGE',
         subtitle: '461 Milliards $ Perdus Chaque Année. Protégez Votre Chiffre d\'Affaires.',
-        badge: 'Anti-Contrefaçon Blockchain',
+        badge: 'Blockchain Anti-Contrefaçon',
         heroTitle: 'Protégez Votre Marque Premium Avec des Certificats Infalsifiables',
         heroDesc: 'Un seul QR code. Vérification blockchain complète. Chaque étape signée et traçable. Prouvez l\'authenticité instantanément à vos clients.',
         heroPoint1: 'Éliminez les faux certificats',

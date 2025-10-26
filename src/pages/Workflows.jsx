@@ -328,27 +328,22 @@ export const Workflows = () => {
       const url = `https://ipfs.io/ipfs/${cidString}`;
       
       return (
-        <tr>
-          <td className="text-gray-500 text-xs py-1 pr-3">{label}</td>
-          <td className="font-mono text-xs py-1">
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 hover:underline break-all"
-              title="Open in IPFS gateway"
-            >
-              {cidString}
-            </a>
-          </td>
-        </tr>
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-mono text-xs text-blue-600 hover:text-blue-800 hover:underline break-all inline-flex items-center gap-1"
+          title="Open in IPFS gateway"
+        >
+          {cidString}
+          <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
       );
     } catch {
       return (
-        <tr>
-          <td className="text-gray-500 text-xs py-1 pr-3">{label}</td>
-          <td className="font-mono text-xs text-red-500 py-1">Invalid CID</td>
-        </tr>
+        <span className="font-mono text-xs text-red-500">Invalid CID</span>
       );
     }
   };
@@ -446,24 +441,54 @@ export const Workflows = () => {
 
       {/* RAG Details */}
       {selectedRag && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+        <div className="bg-gradient-to-br from-white to-blue-50 border-2 border-[#003399] rounded-xl shadow-lg p-6 mb-6 animate-fadeIn">
           <div className="space-y-4">
-            {/* Name & Description */}
-            <div className="pb-4 border-b">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{selectedRag.metadata.name || t('workflows.unnamed')}</h3>
-              {selectedRag.metadata.description && (
-                <p className="text-gray-600 text-sm">{selectedRag.metadata.description}</p>
-              )}
+            {/* Name & Description with Visual Enhancement */}
+            <div className="pb-4 border-b-2 border-gray-200">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-[#003399] mb-2">{selectedRag.metadata.name || t('workflows.unnamed')}</h3>
+                  {selectedRag.metadata.description && (
+                    <p className="text-gray-700 text-sm leading-relaxed">{selectedRag.metadata.description}</p>
+                  )}
+                  {selectedRag.metadata.steps && selectedRag.metadata.steps.length > 0 && (
+                    <div className="mt-3 flex items-center gap-2 flex-wrap">
+                      <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        {selectedRag.metadata.steps.length} Steps
+                      </span>
+                      <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Active
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
-            {/* Workflow Details Toggle */}
+            {/* Workflow Details Toggle with Better Design */}
             <button
               onClick={() => setIsDetailsExpanded(!isDetailsExpanded)}
-              className="w-full flex items-center justify-between px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-left"
+              className="w-full flex items-center justify-between px-5 py-4 bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-[#003399] rounded-xl transition-all text-left shadow-sm"
             >
-              <span className="font-medium text-gray-900">{t('workflows.detailsToggle')}</span>
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-semibold text-gray-900">{t('workflows.detailsToggle')}</span>
+              </div>
               <svg 
-                className={`w-5 h-5 text-gray-600 transition-transform ${isDetailsExpanded ? 'rotate-180' : ''}`}
+                className={`w-6 h-6 text-[#003399] transition-transform duration-300 ${isDetailsExpanded ? 'rotate-180' : ''}`}
                 fill="none" 
                 stroke="currentColor" 
                 viewBox="0 0 24 24"
@@ -472,85 +497,172 @@ export const Workflows = () => {
               </svg>
             </button>
 
-            {/* Collapsible Details Section */}
+            {/* Collapsible Details Section with Enhanced Design */}
             {isDetailsExpanded && (
-              <div className="space-y-4 animate-slideDown">
-                {/* Metadata Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm pb-4 border-b">
-                  <div>
-                    <span className="text-gray-500">{t('workflows.publisher')}:</span>
-                    <p className="font-mono text-xs mt-1 break-all">{selectedRag.metadata.publisherSS58 || selectedRag.metadata.publisher}</p>
+              <div className="space-y-6 animate-slideDown">
+                {/* Metadata Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Publisher Card */}
+                  <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                      <svg className="w-4 h-4 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      <span className="text-xs font-semibold text-gray-500 uppercase">{t('workflows.publisher')}</span>
+                    </div>
+                    <p className="font-mono text-xs break-all text-gray-700">{selectedRag.metadata.publisherSS58 || selectedRag.metadata.publisher}</p>
                   </div>
-                  <div>
-                    <span className="text-gray-500">{t('workflows.createdAt')}:</span>
+                  
+                  {/* Created At Card */}
+                  <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                      <svg className="w-4 h-4 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-xs font-semibold text-gray-500 uppercase">{t('workflows.createdAt')}</span>
+                    </div>
                     <a
                       href={getBlockExplorerLink(selectedRag.metadata.createdAt)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-1 text-blue-600 hover:text-blue-800 hover:underline font-medium inline-block"
+                      className="text-blue-600 hover:text-blue-800 hover:underline font-medium inline-flex items-center gap-1"
                       title="View block in explorer"
                     >
-                      #{selectedRag.metadata.createdAt.toLocaleString()}
+                      Block #{selectedRag.metadata.createdAt.toLocaleString()}
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
                     </a>
                   </div>
+                  
+                  {/* Expires At Card */}
                   {selectedRag.metadata.expiresAt && (
-                    <div>
-                      <span className="text-gray-500">{t('workflows.expiresAt')}:</span>
+                    <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                      <div className="flex items-center gap-2 mb-2">
+                        <svg className="w-4 h-4 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span className="text-xs font-semibold text-gray-500 uppercase">{t('workflows.expiresAt')}</span>
+                      </div>
                       <a
                         href={getBlockExplorerLink(selectedRag.metadata.expiresAt)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-1 text-blue-600 hover:text-blue-800 hover:underline font-medium inline-block"
+                        className="text-blue-600 hover:text-blue-800 hover:underline font-medium inline-flex items-center gap-1"
                         title="View block in explorer"
                       >
-                        #{selectedRag.metadata.expiresAt.toLocaleString()}
+                        Block #{selectedRag.metadata.expiresAt.toLocaleString()}
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
                       </a>
                     </div>
                   )}
+                  
+                  {/* Staked Amount Card */}
                   {selectedRag.metadata.stakedAmount && selectedRag.metadata.stakedAmount !== '0' && (
-                    <div>
-                      <span className="text-gray-500">{t('workflows.staked')}:</span>
-                      <p className="mt-1 font-medium">{formatTokenAmount(selectedRag.metadata.stakedAmount)} RAG</p>
+                    <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                      <div className="flex items-center gap-2 mb-2">
+                        <svg className="w-4 h-4 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-xs font-semibold text-gray-500 uppercase">{t('workflows.staked')}</span>
+                      </div>
+                      <p className="font-bold text-lg text-[#003399]">{formatTokenAmount(selectedRag.metadata.stakedAmount)} RAG</p>
                     </div>
                   )}
                 </div>
 
-                {/* CIDs Section */}
-                <div className="space-y-3 pb-4 border-b">
-                  <h4 className="font-medium text-gray-900">{t('workflows.ipfsResources')}</h4>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <table className="w-full">
-                      <tbody>
-                        <CidLink hexCid={selectedRag.metadata.instructionCid} label={t('workflows.instructions')} />
-                        <CidLink hexCid={selectedRag.metadata.resourceCid} label={t('workflows.resources')} />
-                        <CidLink hexCid={selectedRag.metadata.schemaCid} label={t('workflows.schema')} />
-                      </tbody>
-                    </table>
+                {/* IPFS Resources Section with Icons */}
+                <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                  <div className="flex items-center gap-2 mb-4">
+                    <svg className="w-5 h-5 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                    </svg>
+                    <h4 className="font-semibold text-gray-900">{t('workflows.ipfsResources')}</h4>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <svg className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-gray-500 mb-1">{t('workflows.instructions')}</p>
+                        <CidLink hexCid={selectedRag.metadata.instructionCid} label="" />
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <svg className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-gray-500 mb-1">{t('workflows.resources')}</p>
+                        <CidLink hexCid={selectedRag.metadata.resourceCid} label="" />
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <svg className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                      </svg>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-gray-500 mb-1">{t('workflows.schema')}</p>
+                        <CidLink hexCid={selectedRag.metadata.schemaCid} label="" />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Steps (for Master RAGs) */}
+                {/* Workflow Steps with Timeline */}
                 {selectedRag.metadata.steps && selectedRag.metadata.steps.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-gray-900">
-                      {t('workflows.multiStep')} ({selectedRag.metadata.steps.length} {selectedRag.metadata.steps.length > 1 ? t('workflows.steps') : t('workflows.step')})
-                    </h4>
-                    <div className="space-y-2">
+                  <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <svg className="w-5 h-5 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        <h4 className="font-semibold text-gray-900">{t('workflows.multiStep')}</h4>
+                      </div>
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded">
+                        {selectedRag.metadata.steps.length} {selectedRag.metadata.steps.length > 1 ? t('workflows.steps') : t('workflows.step')}
+                      </span>
+                    </div>
+                    <div className="relative space-y-3">
+                      {/* Vertical Timeline Line */}
+                      <div className="absolute left-5 top-8 bottom-8 w-0.5 bg-gradient-to-b from-[#003399] to-blue-200"></div>
+                      
                       {selectedRag.metadata.steps.map((stepHash, i) => {
                         const stepRag = allRags.find(r => r.hash === stepHash);
+                        const isFirst = i === 0;
+                        const isLast = i === selectedRag.metadata.steps.length - 1;
+                        
                         return (
                           <div 
                             key={i} 
-                            className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition"
+                            className="relative flex items-start gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-lg hover:from-blue-50 hover:to-white border border-gray-200 hover:border-[#003399] cursor-pointer transition-all shadow-sm hover:shadow-md"
                             onClick={() => stepRag && selectRag(stepRag)}
                           >
-                            <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                            {/* Step Number Badge */}
+                            <div className={`relative flex-shrink-0 w-10 h-10 ${isFirst ? 'bg-green-500' : isLast ? 'bg-[#003399]' : 'bg-blue-500'} text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md z-10`}>
                               {i + 1}
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium text-sm">{stepRag?.metadata.name || t('workflows.unknownStep')}</div>
-                              {stepRag?.metadata.description && (
-                                <div className="text-xs text-gray-600 mt-1">{stepRag.metadata.description}</div>
+                            
+                            {/* Step Content */}
+                            <div className="flex-1 min-w-0 pt-1">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1">
+                                  <div className="font-semibold text-gray-900">{stepRag?.metadata.name || t('workflows.unknownStep')}</div>
+                                  {stepRag?.metadata.description && (
+                                    <div className="text-sm text-gray-600 mt-1 leading-relaxed">{stepRag.metadata.description}</div>
+                                  )}
+                                </div>
+                                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                              </div>
+                              {isFirst && (
+                                <span className="inline-block mt-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">
+                                  Start Here
+                                </span>
                               )}
                             </div>
                           </div>

@@ -199,6 +199,8 @@ export const Verify = () => {
   const [expandedSteps, setExpandedSteps] = useState({}); // Track which steps are expanded
   const [isProofDetailsExpanded, setIsProofDetailsExpanded] = useState(false); // Accordion state for proof details
   const [verifyingChainOfTrust, setVerifyingChainOfTrust] = useState(false); // Track chain of trust verification
+  const [blockTimestamps, setBlockTimestamps] = useState({}); // Cache for block timestamps
+  const [chronologicalOrderValid, setChronologicalOrderValid] = useState(null); // Track chronological order validation
   
   // Product QR verification states
   const [showProductQRScanner, setShowProductQRScanner] = useState(false);
@@ -270,6 +272,147 @@ export const Verify = () => {
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   };
+  
+  // Helper function to truncate text with ellipsis
+  const truncateText = (text, maxLength = 30) => {
+    if (!text) return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
+  
+  // Helper function to format timestamp
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return null;
+    
+    try {
+      const date = new Date(timestamp);
+      
+      // Format: "Oct 26, 11:14 AM"
+      const options = {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      };
+      
+      return date.toLocaleString('en-US', options);
+    } catch (err) {
+      console.error('Failed to format timestamp:', err);
+      return null;
+    }
+  };
+  
+  // Helper function to format duration between two timestamps
+  const formatDuration = (startTimestamp, endTimestamp) => {
+    if (!startTimestamp || !endTimestamp) return null;
+    
+    const diffMs = endTimestamp - startTimestamp;
+    
+    if (diffMs < 0) return null; // Invalid duration
+    
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    
+    if (diffDays > 0) {
+      const hours = diffHours % 24;
+      return `${diffDays}d ${hours}h`;
+    } else if (diffHours > 0) {
+      const minutes = diffMinutes % 60;
+      return `${diffHours}h ${minutes}m`;
+    } else if (diffMinutes > 0) {
+      const seconds = diffSeconds % 60;
+      return `${diffMinutes}m ${seconds}s`;
+    } else {
+      return `${diffSeconds}s`;
+    }
+  };
+  
+  // Load block timestamp for a given block number
+  const loadBlockTimestamp = async (blockNumber) => {
+    // Check cache first
+    if (blockTimestamps[blockNumber]) {
+      return blockTimestamps[blockNumber];
+    }
+    
+    try {
+      const timestamp = await substrateClient.getBlockTimestamp(blockNumber);
+      if (timestamp) {
+        setBlockTimestamps(prev => ({ ...prev, [blockNumber]: timestamp }));
+        return timestamp;
+      }
+    } catch (err) {
+      console.error('Failed to load timestamp for block', blockNumber, err);
+    }
+    
+    return null;
+  };
+  
+  // Verify chronological order of steps
+  const verifyChronologicalOrder = async (history) => {
+    if (!history || history.length < 2) {
+      return true; // Single step or no steps, order is valid
+    }
+    
+    console.log('🕐 Verifying chronological order of steps...');
+    
+    // Load all timestamps first
+    const timestampsPromises = history.map(step => {
+      if (step.blockchainData?.createdAt) {
+        return loadBlockTimestamp(step.blockchainData.createdAt);
+      }
+      return Promise.resolve(null);
+    });
+    
+    const timestamps = await Promise.all(timestampsPromises);
+    
+    // Check if all timestamps are in ascending order
+    for (let i = 1; i < timestamps.length; i++) {
+      const prevTimestamp = timestamps[i - 1];
+      const currentTimestamp = timestamps[i];
+      
+      if (!prevTimestamp || !currentTimestamp) {
+        console.warn(`⚠️ Missing timestamp for step ${i - 1} or ${i}`);
+        continue; // Skip if timestamps are not available
+      }
+      
+      if (currentTimestamp < prevTimestamp) {
+        console.error(`❌ Chronological order violation: Step ${i} (${new Date(currentTimestamp).toISOString()}) is before Step ${i - 1} (${new Date(prevTimestamp).toISOString()})`);
+        return false;
+      }
+      
+      console.log(`  ✓ Step ${i - 1} → Step ${i}: ${new Date(prevTimestamp).toISOString()} → ${new Date(currentTimestamp).toISOString()}`);
+    }
+    
+    console.log('✅ All steps are in chronological order');
+    return true;
+  };
+  
+  // Load timestamps for all steps in the workflow history and verify chronological order
+  useEffect(() => {
+    if (workflowHistory && workflowHistory.history) {
+      // Load timestamps for all steps and verify chronological order
+      const verifyOrder = async () => {
+        const isValid = await verifyChronologicalOrder(workflowHistory.history);
+        setChronologicalOrderValid(isValid);
+        
+        // Update result if chronological order is invalid
+        if (!isValid) {
+          setResult(prev => ({
+            ...prev,
+            isValid: false,
+            message: 'Proof found on blockchain with valid signature, but steps are NOT in chronological order!',
+            chronologicalOrderValid: false
+          }));
+        }
+      };
+      
+      verifyOrder();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workflowHistory]);
   
   // Example proof JSON - Macallan 25 Years Scotland → China
   const exampleProof = {
@@ -426,6 +569,7 @@ export const Verify = () => {
       setExpandedSteps({});
       setIsProofDetailsExpanded(false);
       setVerifyingChainOfTrust(false);
+      setChronologicalOrderValid(null);
       
       // Reset workflow continuation states (but keep allRags - needed for workflow detection)
       setProofData(null);
@@ -567,6 +711,7 @@ export const Verify = () => {
       setExpandedSteps({});
       setIsProofDetailsExpanded(false);
       setVerifyingChainOfTrust(false);
+      setChronologicalOrderValid(null);
       
       // Reset workflow continuation states (but keep allRags - needed for workflow detection)
       setProofData(null);
@@ -1042,6 +1187,7 @@ export const Verify = () => {
       setExpandedSteps({});
       setIsProofDetailsExpanded(false);
       setVerifyingChainOfTrust(false);
+      setChronologicalOrderValid(null);
       
       // Reset workflow continuation states (but keep allRags - needed for workflow detection)
       setProofData(null);
@@ -1545,6 +1691,16 @@ export const Verify = () => {
                     </div>
                   </div>
                 )}
+                {chronologicalOrderValid === false && !verifyingChainOfTrust && (
+                  <div className="mt-3 flex items-start gap-2 p-3 bg-red-100 border border-red-300 rounded-lg">
+                    <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div className="text-xs text-red-800">
+                      <strong className="font-bold">Chronological Order Violation:</strong> The workflow steps are NOT in chronological order. This indicates that the timestamps have been manipulated or the workflow was not executed sequentially.
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1613,6 +1769,35 @@ export const Verify = () => {
                           Chain Broken
                         </span>
                       )}
+                      {chronologicalOrderValid === false && (
+                        <span className="px-3 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full whitespace-nowrap flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Time Order Invalid
+                        </span>
+                      )}
+                      {chronologicalOrderValid === true && workflowHistory.history && workflowHistory.history.length > 1 && (() => {
+                        // Calculate duration between first and last step
+                        const firstBlock = workflowHistory.history[0]?.blockchainData?.createdAt;
+                        const lastBlock = workflowHistory.history[workflowHistory.history.length - 1]?.blockchainData?.createdAt;
+                        
+                        if (firstBlock && lastBlock && blockTimestamps[firstBlock] && blockTimestamps[lastBlock]) {
+                          const duration = formatDuration(blockTimestamps[firstBlock], blockTimestamps[lastBlock]);
+                          
+                          if (duration) {
+                            return (
+                              <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full whitespace-nowrap flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Duration: {duration}
+                              </span>
+                            );
+                          }
+                        }
+                        return null;
+                      })()}
                     </div>
                   </div>
                   
@@ -1688,10 +1873,15 @@ export const Verify = () => {
                           
                           {/* Step Info */}
                           <div className="flex-1 min-w-0">
-                            {/* Step Number + Function */}
+                            {/* Step Number + Function (with truncation) */}
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                               <span className="text-xs font-bold text-gray-500">STEP {step.stepIndex + 1}</span>
-                              <span className="text-sm sm:text-base font-bold text-gray-900">{stepFunction}</span>
+                              <span 
+                                className="text-sm sm:text-base font-bold text-gray-900" 
+                                title={stepFunction}
+                              >
+                                {truncateText(stepFunction, 25)}
+                              </span>
                               {step.chainOfTrustValid === false && (
                                 <span className="px-2 py-0.5 bg-red-600 text-white text-xs font-bold rounded flex items-center gap-1">
                                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1702,12 +1892,17 @@ export const Verify = () => {
                               )}
                             </div>
                             
-                            {/* Participant Identity */}
+                            {/* Participant Identity (with truncation) */}
                             <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">
                               <svg className="w-4 h-4 flex-shrink-0 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                               </svg>
-                              <span className="font-medium truncate">{stepIdentity}</span>
+                              <span 
+                                className="font-medium truncate" 
+                                title={stepIdentity}
+                              >
+                                {truncateText(stepIdentity, 30)}
+                              </span>
                             </div>
                             
                             {/* Blockchain Info - Compact */}
@@ -1715,7 +1910,7 @@ export const Verify = () => {
                               <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
                                 <span className="inline-flex items-center gap-1">
                                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
                                   </svg>
                                   Block #{step.blockchainData.createdAt}
                                 </span>
@@ -1728,6 +1923,26 @@ export const Verify = () => {
                               </div>
                             )}
                           </div>
+                          
+                          {/* Timestamp Display - Right Side */}
+                          {step.blockchainData?.createdAt && (
+                            <div className="flex flex-col items-end justify-center text-right ml-2 flex-shrink-0">
+                              {blockTimestamps[step.blockchainData.createdAt] ? (
+                                <>
+                                  <div className="text-xs font-medium text-gray-700">
+                                    {formatTimestamp(blockTimestamps[step.blockchainData.createdAt])}
+                                  </div>
+                                  <div className="text-xs text-gray-400 mt-0.5">
+                                    {new Date(blockTimestamps[step.blockchainData.createdAt]).toLocaleDateString('en-US', { year: 'numeric' })}
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="text-xs text-gray-400 animate-pulse">
+                                  Loading...
+                                </div>
+                              )}
+                            </div>
+                          )}
                           
                           {/* Expand Icon */}
                           <svg 

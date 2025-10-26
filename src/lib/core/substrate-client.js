@@ -285,6 +285,178 @@ export class SubstrateClient {
   }
 
   /**
+   * Get block timestamp from block number
+   * Extracts timestamp from the timestamp.set extrinsic in the block
+   */
+  async getBlockTimestamp(blockNumber) {
+    await this.ensureConnected();
+    
+    try {
+      // First, get the block hash for this block number
+      const hashResponse = await fetch(this.rpcUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'chain_getBlockHash',
+          params: [blockNumber],
+          id: Date.now()
+        })
+      });
+      
+      if (!hashResponse.ok) {
+        throw new Error(`HTTP error! status: ${hashResponse.status}`);
+      }
+      
+      const hashData = await hashResponse.json();
+      
+      if (hashData.error || !hashData.result) {
+        console.error('Failed to get block hash:', hashData.error);
+        return null;
+      }
+      
+      const blockHash = hashData.result;
+      
+      // Now get the block with this hash
+      const blockResponse = await fetch(this.rpcUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'chain_getBlock',
+          params: [blockHash],
+          id: Date.now()
+        })
+      });
+      
+      if (!blockResponse.ok) {
+        throw new Error(`HTTP error! status: ${blockResponse.status}`);
+      }
+      
+      const blockData = await blockResponse.json();
+      
+      if (blockData.error || !blockData.result) {
+        console.error('Failed to get block:', blockData.error);
+        return null;
+      }
+      
+      // Look for timestamp.set extrinsic (usually the first inherent extrinsic)
+      const extrinsics = blockData.result.block.extrinsics;
+      
+      console.log(`🔍 Searching timestamp in block ${blockNumber} (${extrinsics.length} extrinsics)`);
+      
+      for (let i = 0; i < extrinsics.length; i++) {
+        const extrinsic = extrinsics[i];
+        
+        // Decode the extrinsic to find timestamp.set
+        // The timestamp.set extrinsic starts with specific bytes
+        if (extrinsic.startsWith('0x28')) {
+          try {
+            // Remove 0x prefix
+            const hex = extrinsic.slice(2);
+            console.log(`  Extrinsic ${i}: ${hex.slice(0, 20)}...`);
+            
+            // Look for the pattern: timestamp pallet + set call (usually 0200 or 0300)
+            // On this chain, timestamp pallet has index 2
+            let pattern = '0200';
+            let patternIndex = hex.toLowerCase().indexOf(pattern);
+            
+            // Fallback to pallet index 3 if not found
+            if (patternIndex === -1) {
+              pattern = '0300';
+              patternIndex = hex.toLowerCase().indexOf(pattern);
+            }
+            
+            if (patternIndex !== -1) {
+              console.log(`  ✓ Found timestamp.set pattern at position ${patternIndex}`);
+              
+              // After '0300', we have the compact-encoded timestamp
+              const afterPattern = hex.slice(patternIndex + 4);
+              console.log(`  Timestamp data: ${afterPattern.slice(0, 40)}`);
+              
+              // Check the first byte for compact encoding format
+              const firstByte = parseInt(afterPattern.slice(0, 2), 16);
+              const mode = firstByte & 0x03;
+              let timestamp = 0;
+              
+              console.log(`  First byte: 0x${afterPattern.slice(0, 2)}, mode: ${mode}`);
+              
+              if (mode === 0x03) {
+                // BigInt mode (0x03): The first byte encodes the length
+                // Format: bottom 2 bits = mode (11), top 6 bits = (length - 4)
+                // So if byte = 0x0b = 0000 1011, length = (0b >> 2) + 4 = 2 + 4 = 6 bytes
+                const lengthMinusFour = firstByte >> 2;
+                const byteLength = lengthMinusFour + 4;
+                
+                console.log(`  BigInt mode - Length: ${byteLength} bytes`);
+                
+                // Extract the timestamp bytes (skip the first byte which was the length indicator)
+                const timestampHex = afterPattern.slice(2, 2 + byteLength * 2); // Each byte = 2 hex chars
+                
+                console.log(`  BigInt mode - Timestamp hex: ${timestampHex}`);
+                
+                // Convert little-endian hex to number
+                for (let j = 0; j < timestampHex.length; j += 2) {
+                  const byte = parseInt(timestampHex.substr(j, 2), 16);
+                  timestamp += byte * Math.pow(256, j / 2);
+                }
+              } else if (mode === 0x02) {
+                // Four-byte mode
+                const bytes = afterPattern.slice(0, 8); // 4 bytes = 8 hex chars
+                // Convert little-endian hex to number
+                let val = 0;
+                for (let j = 0; j < 8; j += 2) {
+                  const byte = parseInt(bytes.substr(j, 2), 16);
+                  val += byte * Math.pow(256, j / 2);
+                }
+                timestamp = val >> 2;
+                console.log(`  Four-byte mode - Raw value: ${val}, timestamp: ${timestamp}`);
+              } else if (mode === 0x01) {
+                // Two-byte mode
+                const bytes = afterPattern.slice(0, 4); // 2 bytes = 4 hex chars
+                // Convert little-endian
+                const byte1 = parseInt(bytes.substr(0, 2), 16);
+                const byte2 = parseInt(bytes.substr(2, 2), 16);
+                const val = byte1 + (byte2 * 256);
+                timestamp = val >> 2;
+                console.log(`  Two-byte mode - Raw value: ${val}, timestamp: ${timestamp}`);
+              } else {
+                // Single-byte mode: value = byte >> 2
+                timestamp = firstByte >> 2;
+                console.log(`  Single-byte mode - timestamp: ${timestamp}`);
+              }
+              
+              console.log(`  📅 Decoded timestamp: ${timestamp}`);
+              
+              // Validate timestamp (should be in milliseconds and reasonable)
+              // Valid range: year 2000 to year 2100 in milliseconds
+              if (timestamp > 946684800000 && timestamp < 4102444800000) {
+                const date = new Date(timestamp);
+                console.log(`  ✅ Valid timestamp for block ${blockNumber}: ${date.toISOString()}`);
+                return timestamp;
+              } else {
+                console.warn(`  ⚠️ Invalid timestamp value: ${timestamp} (not in valid range)`);
+              }
+            }
+          } catch (err) {
+            console.error(`  ❌ Failed to parse extrinsic ${i}:`, err);
+          }
+        }
+      }
+      
+      console.warn(`❌ No timestamp.set extrinsic found in block ${blockNumber}`);
+      return null;
+    } catch (error) {
+      console.error('Failed to get block timestamp:', error);
+      return null;
+    }
+  }
+
+  /**
    * Vérifie si connecté
    */
   getIsConnected() {
