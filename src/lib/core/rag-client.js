@@ -310,5 +310,103 @@ export class RagClient {
       return [];
     }
   }
+
+  /**
+   * Search RAG metadata by tags using runtime API (AND logic)
+   * @param {string[]} tags - Array of tags to search for (all must match)
+   * @returns Promise<Array<{hash: string, metadata: Object}>>
+   */
+  async searchRagsByTags(tags) {
+    try {
+      if (!this.substrateClient || !this.substrateClient.api) {
+        throw new Error('Substrate client not initialized');
+      }
+
+      // Validate tags
+      if (!tags || tags.length === 0) {
+        console.log('No tags provided for search');
+        return [];
+      }
+
+      if (tags.length > 10) {
+        throw new Error('Maximum 10 tags allowed for search');
+      }
+
+      for (const tag of tags) {
+        if (tag.length === 0 || tag.length > 15) {
+          throw new Error(`Invalid tag "${tag}": must be between 1 and 15 characters`);
+        }
+      }
+
+      console.log(`🔍 Searching RAGs with tags (AND logic): [${tags.join(', ')}]`);
+
+      // Call the runtime API
+      const api = this.substrateClient.api;
+      
+      // Convert tags to bytes (UTF-8 encoding)
+      const { stringToU8a, u8aToHex, hexToU8a, u8aToString } = await import('@polkadot/util');
+      const tagBytes = tags.map(tag => stringToU8a(tag));
+      
+      // Call the runtime API
+      const searchResults = await api.call.ragApi.findByTags(tagBytes);
+      
+      console.log('Raw search results:', searchResults);
+      
+      // Convert BTreeMap to entries array
+      let resultsEntries = [];
+      
+      if (searchResults && typeof searchResults === 'object') {
+        if (searchResults instanceof Map) {
+          resultsEntries = Array.from(searchResults.entries());
+        } else if (Array.isArray(searchResults)) {
+          resultsEntries = searchResults;
+        } else if (typeof searchResults.entries === 'function') {
+          resultsEntries = Array.from(searchResults.entries());
+        } else if (searchResults.constructor === Object) {
+          resultsEntries = Object.entries(searchResults);
+        }
+      }
+
+      if (resultsEntries.length === 0) {
+        console.log(`No RAGs found matching all tags: [${tags.join(', ')}]`);
+        return [];
+      }
+
+      console.log(`Found ${resultsEntries.length} RAG(s) matching all tags`);
+
+      // Process results - fetch full metadata for each hash
+      const ragPromises = resultsEntries.map(async ([metadataHashRaw]) => {
+        try {
+          // Convert hash to hex string format
+          let metadataHash;
+          if (typeof metadataHashRaw === 'string') {
+            metadataHash = metadataHashRaw.startsWith('0x') ? metadataHashRaw : `0x${metadataHashRaw}`;
+          } else if (metadataHashRaw instanceof Uint8Array) {
+            metadataHash = u8aToHex(metadataHashRaw);
+          } else if (Array.isArray(metadataHashRaw)) {
+            metadataHash = u8aToHex(new Uint8Array(metadataHashRaw));
+          } else {
+            metadataHash = u8aToHex(new Uint8Array(Object.values(metadataHashRaw)));
+          }
+
+          // Fetch the RAG by its hash
+          const rag = await this.getRagByHash(metadataHash);
+          return rag;
+        } catch (error) {
+          console.error(`Error processing search result:`, error);
+          return null;
+        }
+      });
+
+      const results = await Promise.all(ragPromises);
+      const rags = results.filter(rag => rag !== null);
+
+      console.log(`✅ Successfully retrieved ${rags.length} RAG(s) from search results`);
+      return rags;
+    } catch (error) {
+      console.error('Error searching RAGs by tags:', error);
+      throw error;
+    }
+  }
 }
 
