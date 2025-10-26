@@ -1783,7 +1783,14 @@ export const Verify = () => {
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                           </svg>
-                          {workflowHistory.history.length} participants
+                          {(() => {
+                            const uniqueParticipants = new Set(
+                              workflowHistory.history
+                                .filter(step => step.blockchainData?.creator)
+                                .map(step => step.blockchainData.creator)
+                            );
+                            return uniqueParticipants.size;
+                          })()} participants
                         </span>
                         {workflowHistory.history[0]?.blockchainData && workflowHistory.history[workflowHistory.history.length - 1]?.blockchainData && (
                           <span className="flex items-center gap-1 whitespace-nowrap">
@@ -1825,6 +1832,22 @@ export const Verify = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                           </svg>
                           Chain Broken
+                        </span>
+                      )}
+                      {workflowHistory.allSchemasValid === true && (
+                        <span className="px-3 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full whitespace-nowrap flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          {t('verify.schemasValid')}
+                        </span>
+                      )}
+                      {workflowHistory.allSchemasValid === false && (
+                        <span className="px-3 py-1 bg-orange-100 text-orange-800 text-xs font-bold rounded-full whitespace-nowrap flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                          {t('verify.schemasInvalid')}
                         </span>
                       )}
                       {chronologicalOrderValid === false && (
@@ -1942,6 +1965,22 @@ export const Verify = () => {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01" />
                                       </svg>
                                       BROKEN
+                                    </span>
+                                  )}
+                                  {step.schemaValidation?.valid === true && (
+                                    <span className="px-2 py-0.5 bg-purple-100 text-purple-800 text-xs font-medium rounded flex items-center gap-1">
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                      </svg>
+                                      {t('verify.schemaValid')}
+                                    </span>
+                                  )}
+                                  {step.schemaValidation?.valid === false && (
+                                    <span className="px-2 py-0.5 bg-orange-100 text-orange-800 text-xs font-bold rounded flex items-center gap-1">
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01" />
+                                      </svg>
+                                      {t('verify.schemaInvalid')}
                                     </span>
                                   )}
                                 </div>
@@ -2424,13 +2463,13 @@ export const Verify = () => {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
                             <div className="text-sm text-orange-900">
-                              <div className="font-semibold mb-1">Wrong wallet connected</div>
-                              <div className="mb-2">This workflow step is designated for another address. Only the intended recipient can continue the workflow.</div>
+                              <div className="font-semibold mb-1">{t('verify.wrongWalletTitle')}</div>
+                              <div className="mb-2">{t('verify.wrongWalletDesc')}</div>
                               <div className="text-xs font-mono bg-orange-100 p-2 rounded break-all">
-                                <span className="font-semibold">Expected:</span> {targetAddress}
+                                <span className="font-semibold">{t('verify.wrongWalletExpected')}</span> {targetAddress}
                               </div>
                               <div className="text-xs font-mono bg-orange-100 p-2 rounded mt-1 break-all">
-                                <span className="font-semibold">Connected:</span> {selectedAccount}
+                                <span className="font-semibold">{t('verify.wrongWalletConnected')}</span> {selectedAccount}
                               </div>
                             </div>
                           </div>

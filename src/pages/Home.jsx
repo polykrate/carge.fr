@@ -139,13 +139,13 @@ export const Home = () => {
             <div className="space-y-8">
               {[1, 2, 3, 4, 5, 6, 7].map((step) => {
                 const stepData = {
-                  1: { emoji: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', title: t('home.workflowStep1'), desc: t('home.workflowStep1Desc'), icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
-                  2: { emoji: '🇬🇧', title: t('home.workflowStep2'), desc: t('home.workflowStep2Desc'), icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
-                  3: { emoji: '🇫🇷', title: t('home.workflowStep3'), desc: t('home.workflowStep3Desc'), icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
-                  4: { emoji: '🇭🇰', title: t('home.workflowStep4'), desc: t('home.workflowStep4Desc'), icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
-                  5: { emoji: '🇨🇳', title: t('home.workflowStep5'), desc: t('home.workflowStep5Desc'), icon: 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0' },
-                  6: { emoji: '🏛️', title: t('home.workflowStep6'), desc: t('home.workflowStep6Desc'), icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
-                  7: { emoji: '👤', title: t('home.workflowStep7'), desc: t('home.workflowStep7Desc'), icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' }
+                  1: { title: t('home.workflowStep1'), desc: t('home.workflowStep1Desc'), icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+                  2: { title: t('home.workflowStep2'), desc: t('home.workflowStep2Desc'), icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+                  3: { title: t('home.workflowStep3'), desc: t('home.workflowStep3Desc'), icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+                  4: { title: t('home.workflowStep4'), desc: t('home.workflowStep4Desc'), icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
+                  5: { title: t('home.workflowStep5'), desc: t('home.workflowStep5Desc'), icon: 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0' },
+                  6: { title: t('home.workflowStep6'), desc: t('home.workflowStep6Desc'), icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
+                  7: { title: t('home.workflowStep7'), desc: t('home.workflowStep7Desc'), icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' }
                 };
                 
                 const data = stepData[step];
@@ -179,8 +179,8 @@ export const Home = () => {
                         <div className="p-4 sm:p-6">
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
-                              {/* Icon and Emoji - Stack on mobile */}
-                              <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                              {/* Icon */}
+                              <div className="flex-shrink-0">
                                 <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center transition-colors duration-300 ${
                                   isExpanded ? 'bg-[#003399]' : 'bg-gray-100'
                                 }`}>
@@ -188,7 +188,6 @@ export const Home = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={data.icon} />
                                   </svg>
                                 </div>
-                                <span className="text-xl sm:text-2xl leading-none">{data.emoji}</span>
                               </div>
 
                               {/* Title */}

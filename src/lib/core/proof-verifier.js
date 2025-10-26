@@ -8,6 +8,51 @@ export class ProofVerifier {
     this.substrate = substrateClient;
   }
 
+  /**
+   * Validate deliverable data against workflow requirements
+   * Checks required fields and data types based on JSON Schema format
+   */
+  validateAgainstSchema(data, schema) {
+    if (!schema || !schema.properties) {
+      return { valid: true, errors: [] };
+    }
+
+    const errors = [];
+    const required = schema.required || [];
+
+    // Check required fields
+    for (const field of required) {
+      if (!(field in data)) {
+        errors.push(`Missing required field: ${field}`);
+      }
+    }
+
+    // Check types for each property
+    for (const [key, value] of Object.entries(data)) {
+      const propSchema = schema.properties[key];
+      if (!propSchema) continue;
+
+      const type = propSchema.type;
+      const actualType = Array.isArray(value) ? 'array' : typeof value;
+
+      if (type === 'string' && actualType !== 'string') {
+        errors.push(`Field '${key}' should be string, got ${actualType}`);
+      } else if (type === 'number' && actualType !== 'number') {
+        errors.push(`Field '${key}' should be number, got ${actualType}`);
+      } else if (type === 'boolean' && actualType !== 'boolean') {
+        errors.push(`Field '${key}' should be boolean, got ${actualType}`);
+      } else if (type === 'array' && actualType !== 'array') {
+        errors.push(`Field '${key}' should be array, got ${actualType}`);
+      } else if (type === 'object' && (actualType !== 'object' || value === null)) {
+        errors.push(`Field '${key}' should be object, got ${actualType}`);
+      }
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors
+    };
+  }
 
   /**
    * Calcule le hash blake2-256 du champ ragData d'une preuve (Substrate-compatible)
@@ -358,12 +403,14 @@ export class ProofVerifier {
           return { hash: stepHashValue, metadata: null, keys: [] };
         }
         
-        // Try to get schema keys
+        // Try to get schema keys and full schema
         let keys = [];
+        let schema = null;
         try {
           const schemaCid = stepRag.metadata.schemaCid;
           const schemaObj = await ipfsClient.downloadJsonFromHex(schemaCid);
           keys = Object.keys(schemaObj.properties || {});
+          schema = schemaObj;
           console.log(`Step ${i + 1} keys from schema:`, keys);
         } catch (error) {
           console.warn(`Could not retrieve schema for step ${i + 1}:`, error.message);
@@ -372,7 +419,8 @@ export class ProofVerifier {
         return {
           hash: stepHashValue,
           metadata: stepRag.metadata,
-          keys
+          keys,
+          schema
         };
       });
       
@@ -386,13 +434,24 @@ export class ProofVerifier {
       
       for (let i = 0; i < neededStepHashes.length; i++) {
         const stepHashValue = neededStepHashes[i];
-        const { keys, metadata } = stepMetadataList[i];
+        const { keys, metadata, schema } = stepMetadataList[i];
         
         // Extract only this step's data
         const stepOnlyData = {};
         for (const key of keys) {
           if (livrable[key] !== undefined) {
             stepOnlyData[key] = livrable[key];
+          }
+        }
+        
+        // Validate step data against schema
+        let schemaValidation = { valid: true, errors: [] };
+        if (schema) {
+          schemaValidation = this.validateAgainstSchema(stepOnlyData, schema);
+          if (schemaValidation.valid) {
+            console.log(`✅ Step ${i + 1}: Data validation passed`);
+          } else {
+            console.warn(`⚠️ Step ${i + 1}: Data validation failed:`, schemaValidation.errors);
           }
         }
         
@@ -425,7 +484,8 @@ export class ProofVerifier {
           stepName: metadata?.name || `Step ${i + 1}`,
           delivrable: { ...accumulatedDelivrable },
           stepOnlyData: { ...stepOnlyData },
-          contentHash
+          contentHash,
+          schemaValidation
         });
       }
 
@@ -520,6 +580,9 @@ export class ProofVerifier {
       const hasAnyNonVerifiable = chainOfTrustStatuses.includes(null);
       const allValid = chainOfTrustStatuses.every(status => status === true);
       
+      // Calculate data validation status
+      const allSchemasValid = history.every(h => h.schemaValidation?.valid !== false);
+      
       return {
         masterWorkflowHash: ragHash,
         masterWorkflowName: masterRag.metadata?.name || 'Unknown Workflow',
@@ -528,7 +591,8 @@ export class ProofVerifier {
         history,
         allStepsVerified: history.every(h => h.blockchainVerified),
         chainOfTrustValid: hasAnyBroken ? false : (hasAnyNonVerifiable ? null : true),
-        chainOfTrustVerifiable: !hasAnyNonVerifiable
+        chainOfTrustVerifiable: !hasAnyNonVerifiable,
+        allSchemasValid
       };
     } catch (error) {
       console.error('Failed to reconstruct workflow history:', error);
