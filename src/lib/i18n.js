@@ -185,6 +185,7 @@ const resources = {
       // Workflows page
       workflows: {
         title: 'Workflows',
+        badge: 'Certified Workflows',
         description: 'Select a workflow from the blockchain and execute it with your signature',
         howItWorksTitle: 'How Workflows Work',
         step1Title: 'Choose Your Workflow',
@@ -568,6 +569,7 @@ const resources = {
       // Page Workflows
       workflows: {
         title: 'Workflows',
+        badge: 'Workflows Certifiés',
         description: 'Sélectionnez un workflow sur la blockchain et exécutez-le avec votre signature',
         howItWorksTitle: 'Comment Fonctionnent les Workflows',
         step1Title: 'Choisissez Votre Workflow',
