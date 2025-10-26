@@ -1891,13 +1891,8 @@ export const Verify = () => {
                   </p>
                 </div>
                 
-                {/* Vertical Timeline */}
-                <div className="relative">
-                  {/* Vertical Line - Responsive positioning */}
-                  <div className="absolute left-6 sm:left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#003399] via-blue-400 to-[#003399]"></div>
-
-                  {/* Timeline Steps */}
-                  <div className="space-y-8">
+                {/* Timeline Steps */}
+                <div className="space-y-4">
                   {workflowHistory.history.map((step, i) => {
                     // Extract step identity and function
                     const stepKey = Object.keys(proofData?.livrable || {})[i] || step.stepName;
@@ -1907,28 +1902,7 @@ export const Verify = () => {
                     const isExpanded = expandedSteps[step.stepIndex];
                     
                     return (
-                      <div key={step.stepIndex} className="relative flex items-start gap-3 sm:gap-6">
-                        {/* Circle Badge - Responsive size */}
-                        <button
-                          onClick={() => setExpandedSteps(prev => ({
-                            ...prev,
-                            [step.stepIndex]: !prev[step.stepIndex]
-                          }))}
-                          className={`relative z-10 flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center font-bold text-base sm:text-xl transition-all duration-300 shadow-lg ${
-                            step.chainOfTrustValid === false
-                              ? 'bg-red-500 text-white ring-4 ring-red-500/20 scale-110'
-                              : !step.blockchainVerified
-                              ? 'bg-red-500 text-white ring-4 ring-red-500/20'
-                              : isExpanded
-                              ? 'bg-[#003399] text-white ring-4 ring-[#003399]/20 sm:scale-110'
-                              : 'bg-[#003399] text-white border-2 border-[#003399]/30 hover:border-[#003399] hover:scale-105'
-                          }`}
-                        >
-                          {step.stepIndex + 1}
-                        </button>
-
-                        {/* Card Content - Like Home */}
-                        <div className="flex-1 pb-4 min-w-0">
+                      <div key={step.stepIndex} className="w-full">
                           <button
                             onClick={() => setExpandedSteps(prev => ({
                               ...prev,
@@ -2155,7 +2129,6 @@ export const Verify = () => {
                       </div>
                     );
                   })}
-                  </div>
                 </div>
               </div>
             )}
