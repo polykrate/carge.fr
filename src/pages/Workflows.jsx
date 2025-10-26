@@ -423,74 +423,35 @@ export const Workflows = () => {
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="relative py-16 md:py-24 bg-gradient-to-br from-gray-50 via-white to-blue-50 overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-20 right-10 w-72 h-72 bg-[#003399]/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 left-10 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl"></div>
-        </div>
-        
-        <div className="container mx-auto px-6 text-center max-w-6xl relative z-10">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#003399] text-white rounded-full text-sm font-medium mb-6 shadow-lg">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-            </svg>
-            {t('workflows.badge')}
+      {/* Compact Header */}
+      <section className="bg-gradient-to-r from-[#003399] to-blue-700 py-8 shadow-md">
+        <div className="container mx-auto px-6 max-w-6xl">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                  </svg>
+                </div>
+                <h1 className="text-3xl md:text-4xl font-bold text-white">
+                  {t('workflows.title')}
+                </h1>
+              </div>
+              <p className="text-blue-100 text-lg">
+                {t('workflows.description')}
+              </p>
+            </div>
+            {!loading && (
+              <div className="flex items-center gap-3 px-5 py-3 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-2xl font-bold text-white">{displayRags.length}</span>
+                </div>
+                <span className="text-blue-100 text-sm">{displayRags.length === 1 ? 'Active Workflow' : 'Active Workflows'}</span>
+              </div>
+            )}
           </div>
-
-          {/* Main Title */}
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight bg-gradient-to-r from-gray-900 via-[#003399] to-gray-900 bg-clip-text text-transparent">
-            {t('workflows.title')}
-          </h1>
-
-          {/* Subtitle */}
-          <p className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed max-w-3xl mx-auto">
-            {t('workflows.description')}
-          </p>
-
-          {/* Key Benefits */}
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
-            <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-lg">
-              <div className="w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-gray-900 mb-2">{t('workflows.step1Title')}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">{t('workflows.step1Desc')}</p>
-            </div>
-            <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-lg">
-              <div className="w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-gray-900 mb-2">{t('workflows.step2Title')}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">{t('workflows.step2Desc')}</p>
-            </div>
-            <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-lg">
-              <div className="w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-gray-900 mb-2">{t('workflows.step3Title')}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">{t('workflows.step3Desc')}</p>
-            </div>
-          </div>
-
-          {/* Workflow Count */}
-          {!loading && (
-            <div className="inline-flex items-center gap-3 px-6 py-3 bg-white rounded-full shadow-lg border border-gray-200">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-lg font-bold text-[#003399]">{displayRags.length}</span>
-              </div>
-              <span className="text-gray-600">{displayRags.length === 1 ? 'Active Workflow' : 'Active Workflows'}</span>
-            </div>
-          )}
         </div>
       </section>
 
