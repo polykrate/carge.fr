@@ -1948,23 +1948,23 @@ export const Verify = () => {
                             <div className="p-3 sm:p-6">
                               <div className="flex items-center justify-between gap-3">
                                 <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
-                                  {/* Status Icon */}
-                                  <div className="flex-shrink-0">
-                                    <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center transition-colors duration-300 ${
+                                  {/* Step Number Badge with Chronological Indicator */}
+                                  <div className="flex-shrink-0 flex flex-col items-center gap-0.5">
+                                    <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center font-bold text-sm sm:text-lg transition-colors duration-300 ${
                                       step.chainOfTrustValid === false
-                                        ? 'bg-red-500'
+                                        ? 'bg-red-500 text-white'
                                         : !step.blockchainVerified
-                                        ? 'bg-red-500'
-                                        : isExpanded ? 'bg-[#003399]' : 'bg-[#003399]/10'
+                                        ? 'bg-red-500 text-white'
+                                        : isExpanded ? 'bg-[#003399] text-white' : 'bg-[#003399]/10 text-[#003399]'
                                     }`}>
-                                      <svg className={`w-4 h-4 sm:w-6 sm:h-6 ${
-                                        step.chainOfTrustValid === false || !step.blockchainVerified
-                                          ? 'text-white'
-                                          : isExpanded ? 'text-white' : 'text-[#003399]'
-                                      }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                      </svg>
+                                      {step.stepIndex + 1}
                                     </div>
+                                    {/* Chronological arrow indicator */}
+                                    {i < workflowHistory.history.length - 1 && (
+                                      <svg className="w-3 h-3 text-[#003399]/50" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                      </svg>
+                                    )}
                                   </div>
 
                                   {/* Title */}
