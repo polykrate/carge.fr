@@ -58,12 +58,13 @@ export const QuickSign = () => {
         console.log('Not JSON, hashing file content as-is...');
       }
       
-      // Calculate SHA-256 hash of the content
+      // Calculate blake2-256 hash of the content (Substrate-compatible)
+      const { blake2AsU8a } = await import('@polkadot/util-crypto');
+      
       const encoder = new TextEncoder();
       const data = encoder.encode(contentToHash);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const fileHashHex = '0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      const hashArray = blake2AsU8a(data, 256);
+      const fileHashHex = '0x' + Array.from(hashArray).map(b => b.toString(16).padStart(2, '0')).join('');
       
       setFileHash(fileHashHex);
       console.log('File hash calculated:', fileHashHex);

@@ -196,11 +196,9 @@ export const Verify = () => {
   const [error, setError] = useState(null);
   const [proofData, setProofData] = useState(null); // Store the proof data for workflow continuation
   const [workflowHistory, setWorkflowHistory] = useState(null); // Store reconstructed workflow history
-  const [isHistoryExpanded, setIsHistoryExpanded] = useState(false); // Accordion state for history details
   const [expandedSteps, setExpandedSteps] = useState({}); // Track which steps are expanded
   const [isProofDetailsExpanded, setIsProofDetailsExpanded] = useState(false); // Accordion state for proof details
   const [verifyingChainOfTrust, setVerifyingChainOfTrust] = useState(false); // Track chain of trust verification
-  const [viewLevel, setViewLevel] = useState(0); // 0=compact, 1=steps list, 2=full details (controlled by expandedSteps)
   
   // Product QR verification states
   const [showProductQRScanner, setShowProductQRScanner] = useState(false);
@@ -224,104 +222,139 @@ export const Verify = () => {
     }
   }, [selectedAccount]);
   
+  // Helper function to extract step identity (first meaningful field)
+  const extractStepIdentity = (stepData, stepKey) => {
+    if (!stepData || typeof stepData !== 'object') return null;
+    
+    // Priority fields for identity extraction
+    const identityFields = [
+      'distilleryName', 'distributorName', 'importerName', 'exporterName', 
+      'retailerName', 'consumerName', 'companyName', 'organizationName',
+      'name', 'supplier', 'manufacturer'
+    ];
+    
+    // Try to find a matching identity field
+    for (const field of identityFields) {
+      if (stepData[field]) {
+        return stepData[field];
+      }
+    }
+    
+    // Fallback: return first non-technical string field
+    for (const [key, value] of Object.entries(stepData)) {
+      if (typeof value === 'string' && 
+          !key.startsWith('_') && 
+          !key.toLowerCase().includes('date') &&
+          !key.toLowerCase().includes('notes') &&
+          !key.toLowerCase().includes('number') &&
+          !key.toLowerCase().includes('certificate') &&
+          value.length > 3 && value.length < 100) {
+        return value;
+      }
+    }
+    
+    return 'Unknown';
+  };
+  
+  // Helper function to format step function name (from key)
+  const formatStepFunction = (stepKey) => {
+    if (!stepKey) return 'Unknown';
+    
+    // Convert camelCase or snake_case to Title Case with spaces
+    return stepKey
+      .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+      .replace(/_/g, ' ') // Replace underscores with spaces
+      .replace(/\d+/g, '') // Remove numbers (like import1 -> import)
+      .trim()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+  
   // Example proof JSON - Macallan 25 Years Scotland → China
   const exampleProof = {
     "ragData": {
       "ragHash": "0x505346475f911b5349f111b97ed57014c8da358f4bbf72a4738a6f7ef84881cd",
-      "stepHash": "0x677219e1ad53c5abf937aa694b9a7b84f8770b4fe08e45805f1c1978975a8bd3",
+      "stepHash": "0xb87839fd9ed47114d6e54a3ba2d8e53daab0815bab17d0b16a6d93249bd8da9b",
       "livrable": {
         "production": {
-          "distilleryName": "Macallan Distillery",
+          "distilleryName": "The Macallan Distillery",
           "spiritType": "Whisky",
           "appellation": "Scotch Single Malt Speyside",
-          "distillationYear": 1999,
+          "distillationYear": 2000,
           "age": 25,
-          "batchNumber": "MAC-2024-B47-0892",
+          "batchNumber": "MAC-2000-25Y-001",
           "bottleNumber": "892/2400",
           "bottlesProduced": 2400,
           "caskType": "Sherry Oak Casks (European Oak)",
           "alcoholDegree": 43,
           "qrCodeApplied": true,
-          "productionNotes": "Matured exclusively in hand-picked sherry seasoned European oak casks from Jerez, Spain. Deep mahogany color. Production date: 1999, Bottled: 2024. This is bottle 892 of 2400 from batch B47. Unique QR code applied on label for blockchain traceability.",
+          "productionNotes": "Matured exclusively in hand-picked sherry seasoned oak casks from Jerez, Spain. Rich mahogany color with complex flavors of dried fruits, spice and chocolate.",
           "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
         },
         "nationalDistribution": {
-          "distributorName": "Edrington UK",
-          "receptionDate": "2024-02-15",
-          "storageConditions": "Temperature-controlled warehouse 16°C, high security vault, monitored 24/7",
-          "certifiedDistributor": true,
-          "licenseNumber": "UK-DIST-SPIRITS-2024-8847",
+          "distributorName": "Edrington UK Ltd",
+          "receptionDate": "2025-10-15",
+          "distributionNotes": "Secured warehouse with climate control and 24/7 surveillance. Exclusive distributor for Macallan in UK market.",
           "quantityReceived": 2400,
-          "distributionNotes": "Official distributor for Macallan. Received complete batch B47. All bottles inspected for quality control. Stored in bonded warehouse awaiting customs clearance for international distribution.",
+          "storageConditions": "Climate controlled at 18°C, humidity 60%, security grade A vault",
+          "certifiedDistributor": true,
+          "licenseNumber": "HMRC-AWR-ED-2024-001",
           "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
         },
         "import1": {
-          "importerName": "La Maison du Whisky Paris",
           "originCountry": "United Kingdom",
-          "destinationCountry": "France",
-          "importLicenseNumber": "FR-IMP-SPIRITS-2024-3392",
-          "customsClearanceDate": "2024-03-01",
-          "originCertificate": "UK-ORIGIN-SCOTCH-2024-7712",
-          "healthCertificate": "EU-HEALTH-SPIRITS-2024-5529",
-          "exciseCertificate": "FR-EXCISE-2024-8841",
-          "transportConditions": "Road transport from UK, temperature-controlled truck 18°C, GPS tracked",
-          "quantityImported": 500,
-          "import1Notes": "Imported 500 bottles from batch B47 for French market and re-export to Asia. Full customs clearance completed. Certificate of authenticity verified. Stored in Paris warehouse pending retail distribution and export.",
+          "destinationCountry": "Hong Kong",
+          "originCertificate": "SWA-2025-MAC-25Y-001",
+          "exciseCertificate": "HMRC-EXC-2025-10-4521",
+          "importerName": "Golden Dragon Premium Spirits Ltd",
+          "customsClearanceDate": "2025-11-05",
+          "quantityImported": 2400,
+          "import1Notes": "Air freight from Edinburgh to Hong Kong. Transit hub for mainland China distribution. All bottles sealed and temperature monitored during transport.",
+          "transportConditions": "Air freight, climate controlled cargo, GPS tracked, insured for $15M USD",
+          "importLicenseNumber": "HKSAR-IMP-LIQ-2024-789",
+          "healthCertificate": "HKFS-2025-11-0892",
           "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
         },
         "export": {
-          "exporterName": "Golden Dragon Spirits Hong Kong",
-          "originCountry": "France",
-          "finalDestinationCountry": "China",
-          "exportLicenseNumber": "HK-EXP-SPIRITS-2024-9987",
-          "shipmentDate": "2024-04-10",
-          "exportDocuments": "DAU FR-HK-2024-9987, AWB (Air Waybill) CX8847-HKG",
-          "transportMethod": "Aérien",
           "securedTransport": true,
-          "insuranceValue": 180000,
-          "quantityExported": 150,
-          "exportNotes": "Air cargo secured container from Paris CDG to Hong Kong. 150 bottles selected for Chinese premium market. GPS tracking active. Temperature controlled 18°C. Insurance €180,000. ETA Hong Kong: 2024-04-11.",
+          "shipmentDate": "2025-11-10",
+          "exportNotes": "Re-export from Hong Kong to mainland China. All customs documentation prepared with Chinese labeling. High-value cargo with armed escort to port.",
+          "quantityExported": 2400,
+          "finalDestinationCountry": "China",
+          "exporterName": "Golden Dragon Premium Spirits Ltd",
+          "exportLicenseNumber": "HKSAR-EXP-2024-892",
+          "insuranceValue": 12000000,
+          "exportDocuments": "DAU-HK-2025-11-4821, AWB CX-8892-HK-SHA, GACC Import Permit CN-2025-MAC-892",
+          "transportMethod": "Aérien",
+          "originCountry": "Hong Kong",
           "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
         },
         "import2": {
-          "importerName": "Shanghai Premium Imports Co. Ltd",
-          "destinationCountry": "China",
-          "importLicenseNumber": "CN-IMP-SPIRITS-2024-5571",
-          "customsClearanceDate": "2024-04-15",
-          "gaccCertificate": "GACC-SPIRITS-2024-CN-8834",
-          "healthCertificate": "CN-HEALTH-IMPORT-2024-7729",
-          "originCertificate": "UK-SCOTCH-ORIGIN-2024-7712",
+          "quantityImported": 2400,
           "chineseLabelingCompliant": true,
-          "bondedWarehouse": "Shanghai Free Trade Zone - Bonded Warehouse B7",
-          "quantityImported": 150,
-          "import2Notes": "Customs clearance completed. Chinese labeling applied (bilingual EN/CN). GACC health certificate obtained. All 150 bottles inspected and verified authentic via QR code blockchain. Stored in bonded warehouse pending retail distribution. Taxes: Duty 10% + Consumption 10% + VAT 13% = 33% total.",
+          "bondedWarehouse": "Shanghai Free Trade Zone - Pudong Bonded Warehouse 3",
+          "gaccCertificate": "GACC-2025-11-SHA-8892",
+          "destinationCountry": "China",
+          "customsClearanceDate": "2025-11-12",
+          "import2Notes": "Final import into mainland China. All 2400 bottles cleared customs with full GACC certification. Chinese labeling applied. Stored in bonded warehouse pending distribution. Total taxes calculated: ~€792,000 (33% of CIF value €2.4M)",
+          "importLicenseNumber": "CN-IMP-SPR-2024-4521",
+          "healthCertificate": "GACC-HEALTH-2025-MAC-8892",
+          "originCertificate": "SWA-2025-MAC-25Y-001",
+          "importerName": "Shanghai Premium Imports Co. Ltd",
           "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
         },
         "retail": {
-          "retailerName": "Emperor's Cellar Shanghai",
-          "receptionDate": "2024-05-01",
+          "qualityInspection": "All bottles inspected: QR codes scanned and verified on blockchain, seals intact, labels perfect condition, fill levels correct. Authentication confirmed.",
+          "stockAvailable": 2400,
+          "retailPrice": 8500,
+          "receptionDate": "2025-11-20",
           "authenticityVerified": true,
-          "qualityInspection": "QR code blockchain verified. Bottle 892/2400 confirmed authentic. Capsule intact. Label perfect condition.",
-          "storageConditions": "Climate-controlled cellar 18°C, 65% humidity. High-security display case. 24/7 surveillance.",
-          "retailPrice": 28800,
           "priceCurrency": "CNY",
-          "stockAvailable": 1,
-          "premiumServices": "VIP tasting room available. Certificate of authenticity provided. Delivery available. Expert consultation included.",
-          "retailNotes": "Ultra-premium whisky specialist. Macallan 25 Years batch B47 bottle 892. Retail price: ¥28,800 CNY (~€3,600). Full provenance blockchain-verified from Scotland to Shanghai. Ready for premium sale to collector.",
-          "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
-        },
-        "consumer": {
-          "consumerName": "Mr. Wei Chen",
-          "purchaseDate": "2024-05-15",
-          "purchaseLocation": "Emperor's Cellar Shanghai",
-          "purchasePrice": 28800,
-          "priceCurrency": "CNY",
-          "usage": "Collection",
-          "tastingDate": "2024-06-01",
-          "tastingNotes": "Exceptional whisky. Nose: Rich sherry, dried fruits (raisins, figs), dark chocolate, Christmas cake, subtle oak. Palate: Full-bodied, velvety smooth. Sherry sweetness balanced with spice (ginger, cinnamon). Dark fruits, orange zest, hints of coffee and leather. Finish: Very long, warm, lingering sherry and oak. Absolutely magnificent. Worth every yuan.",
-          "rating": 5,
-          "wouldRecommend": true,
-          "consumerNotes": "Purchased for my premium collection. Full blockchain traceability from Macallan Distillery Scotland to Shanghai verified via QR code. Complete provenance: 7 actors, all signatures validated. This is what I call authentic luxury. Certificate of authenticity received. Bottle 892/2400 from batch B47 distilled 1999. A masterpiece.",
+          "premiumServices": "Expert consultation, private tasting room, climate-controlled personal storage lockers, rare bottle sourcing, delivery service",
+          "retailNotes": "Flagship store in Shanghai Financial District. VIP clientele including collectors. All 2400 bottles allocated pre-sale to registered collectors. Blockchain traceability demonstrated to each buyer.",
+          "storageConditions": "Climate controlled vault at 18°C, 60% humidity, no UV exposure, bottles stored upright, 24/7 security",
+          "retailerName": "Emperor's Cellar Shanghai",
           "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
         }
       }
@@ -390,7 +423,6 @@ export const Verify = () => {
       setError(null);
       setResult(null);
       setWorkflowHistory(null);
-      setIsHistoryExpanded(false);
       setExpandedSteps({});
       setIsProofDetailsExpanded(false);
       setVerifyingChainOfTrust(false);
@@ -532,7 +564,6 @@ export const Verify = () => {
       setError(null);
       setResult(null);
       setWorkflowHistory(null);
-      setIsHistoryExpanded(false);
       setExpandedSteps({});
       setIsProofDetailsExpanded(false);
       setVerifyingChainOfTrust(false);
@@ -618,7 +649,7 @@ export const Verify = () => {
         if (signatureValid) {
           await new Promise(resolve => setTimeout(resolve, 300));
           update(toastId, {
-            render: '🔏 Signature verified successfully!',
+            render: 'Signature verified successfully!',
             type: 'info',
             isLoading: true
           });
@@ -635,15 +666,17 @@ export const Verify = () => {
       
       // Calculate wrapped message hash for display
       const { stringToU8a, hexToU8a } = await import('@polkadot/util');
+      const { blake2AsU8a } = await import('@polkadot/util-crypto');
       const contentHashBytes = hexToU8a(verification.contentHash);
       const wrappedMessage = new Uint8Array([
         ...stringToU8a('<Bytes>'),
         ...contentHashBytes,
         ...stringToU8a('</Bytes>')
       ]);
-      const wrappedHashBuffer = await crypto.subtle.digest('SHA-256', wrappedMessage);
-      const wrappedHashArray = Array.from(new Uint8Array(wrappedHashBuffer));
-      const wrappedMessageHash = '0x' + wrappedHashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      // Use blake2 for hashing (compatible with Substrate)
+      const wrappedHashArray = blake2AsU8a(wrappedMessage, 256);
+      const wrappedMessageHash = '0x' + Array.from(wrappedHashArray).map(b => b.toString(16).padStart(2, '0')).join('');
       
       const result = {
         isValid: verification.found && signatureValid,
@@ -1006,7 +1039,6 @@ export const Verify = () => {
       setError(null);
       setResult(null);
       setWorkflowHistory(null);
-      setIsHistoryExpanded(false);
       setExpandedSteps({});
       setIsProofDetailsExpanded(false);
       setVerifyingChainOfTrust(false);
@@ -1068,15 +1100,17 @@ export const Verify = () => {
       
       // Calculate wrapped message hash for display
       const { stringToU8a, hexToU8a } = await import('@polkadot/util');
+      const { blake2AsU8a } = await import('@polkadot/util-crypto');
       const contentHashBytes = hexToU8a(hash);
       const wrappedMessage = new Uint8Array([
         ...stringToU8a('<Bytes>'),
         ...contentHashBytes,
         ...stringToU8a('</Bytes>')
       ]);
-      const wrappedHashBuffer = await crypto.subtle.digest('SHA-256', wrappedMessage);
-      const wrappedHashArray = Array.from(new Uint8Array(wrappedHashBuffer));
-      const wrappedMessageHash = '0x' + wrappedHashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      // Use blake2 for hashing (compatible with Substrate)
+      const wrappedHashArray = blake2AsU8a(wrappedMessage, 256);
+      const wrappedMessageHash = '0x' + Array.from(wrappedHashArray).map(b => b.toString(16).padStart(2, '0')).join('');
       
       // Query blockchain for this hash
       const verifier = new ProofVerifier(substrateClient);
@@ -1189,26 +1223,27 @@ export const Verify = () => {
     try {
       console.log('Verifying file hash for:', filename);
       
-      // Hash the content using the same method as Quick Sign
+      // Hash the content using blake2 (Substrate-compatible)
+      const { stringToU8a, hexToU8a } = await import('@polkadot/util');
+      const { blake2AsU8a } = await import('@polkadot/util-crypto');
+      
       const encoder = new TextEncoder();
       const contentBytes = encoder.encode(content);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', contentBytes);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const contentHash = '0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      const hashArray = blake2AsU8a(contentBytes, 256);
+      const contentHash = '0x' + Array.from(hashArray).map(b => b.toString(16).padStart(2, '0')).join('');
       
       console.log('Content hash:', contentHash);
       
       // Calculate wrapped message hash for display
-      const { stringToU8a, hexToU8a } = await import('@polkadot/util');
       const contentHashBytes = hexToU8a(contentHash);
       const wrappedMessage = new Uint8Array([
         ...stringToU8a('<Bytes>'),
         ...contentHashBytes,
         ...stringToU8a('</Bytes>')
       ]);
-      const wrappedHashBuffer = await crypto.subtle.digest('SHA-256', wrappedMessage);
-      const wrappedHashArray = Array.from(new Uint8Array(wrappedHashBuffer));
-      const wrappedMessageHash = '0x' + wrappedHashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      const wrappedHashArray = blake2AsU8a(wrappedMessage, 256);
+      const wrappedMessageHash = '0x' + Array.from(wrappedHashArray).map(b => b.toString(16).padStart(2, '0')).join('');
       
       // Query blockchain for this hash
       const verifier = new ProofVerifier(substrateClient);
@@ -1513,31 +1548,31 @@ export const Verify = () => {
               </div>
             </div>
 
-            {/* Workflow Summary + Timeline (only if workflow) */}
+            {/* Workflow Summary + Vertical Steps Timeline (mobile-optimized) */}
             {workflowHistory && !verifyingChainOfTrust && (
               <div className="mt-6 space-y-4">
-                {/* Workflow Info Card */}
+                {/* Compact Workflow Summary */}
                 <div className="bg-white bg-opacity-70 rounded-lg p-4 border border-gray-200">
-                  <div className="flex items-start justify-between gap-4 mb-3">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 text-lg mb-1">
+                      <h3 className="font-semibold text-gray-900 text-lg mb-2">
                         {workflowHistory.masterWorkflowName}
                       </h3>
-                      <div className="flex items-center gap-3 text-sm text-gray-600 flex-wrap">
-                        <span className="flex items-center gap-1">
+                      <div className="flex items-center gap-3 text-xs sm:text-sm text-gray-600 flex-wrap">
+                        <span className="flex items-center gap-1 whitespace-nowrap">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                           </svg>
                           {workflowHistory.totalSteps} steps
                         </span>
-                        <span className="flex items-center gap-1">
+                        <span className="flex items-center gap-1 whitespace-nowrap">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                           </svg>
                           {workflowHistory.history.length} participants
                         </span>
                         {workflowHistory.history[0]?.blockchainData && workflowHistory.history[workflowHistory.history.length - 1]?.blockchainData && (
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1 whitespace-nowrap">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -1546,7 +1581,7 @@ export const Verify = () => {
                         )}
                       </div>
                     </div>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-row sm:flex-col gap-2 flex-wrap">
                       {workflowHistory.allStepsVerified ? (
                         <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full whitespace-nowrap flex items-center gap-1">
                           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1581,216 +1616,216 @@ export const Verify = () => {
                     </div>
                   </div>
                   
-                  {/* Compact Timeline */}
-                  <div className="mt-3">
-                    <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                      {workflowHistory.history.map((step, i) => (
+                  {/* Info text */}
+                  <p className="text-xs text-gray-500 mt-3 flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Click on any step below to view details · {workflowHistory.history.filter(h => h.blockchainVerified).length}/{workflowHistory.history.length} verified
+                  </p>
+                </div>
+                
+                {/* Vertical Steps List - Mobile Optimized */}
+                <div className="space-y-3">
+                  {workflowHistory.history.map((step, i) => {
+                    // Extract step identity and function
+                    const stepKey = Object.keys(proofData?.livrable || {})[i] || step.stepName;
+                    const stepData = (proofData?.livrable || {})[stepKey] || step.delivrable;
+                    const stepIdentity = extractStepIdentity(stepData, stepKey);
+                    const stepFunction = formatStepFunction(stepKey);
+                    const isExpanded = expandedSteps[step.stepIndex];
+                    
+                    return (
+                      <div 
+                        key={step.stepIndex} 
+                        className={`rounded-lg overflow-hidden border-2 transition-all ${
+                          step.chainOfTrustValid === false 
+                            ? 'border-red-500 shadow-lg' 
+                            : step.blockchainVerified
+                            ? 'border-green-200 hover:border-green-300'
+                            : 'border-red-200'
+                        }`}
+                      >
+                        {/* Step Card Header - Always Visible (compact mobile view) */}
                         <button
-                          key={i}
-                          onClick={() => {
-                            if (viewLevel === 0) setViewLevel(1); // Jump to level 1 if clicking from level 0
-                            setExpandedSteps(prev => ({ ...prev, [step.stepIndex]: !prev[step.stepIndex] }));
-                          }}
-                          className={`relative flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm transition-all hover:scale-110 ${
-                            step.chainOfTrustValid === false
-                              ? 'bg-red-500 text-white ring-2 ring-red-600 ring-offset-2'
-                              : step.blockchainVerified
-                              ? 'bg-green-500 text-white'
-                              : 'bg-red-300 text-white'
+                          onClick={() => setExpandedSteps(prev => ({
+                            ...prev,
+                            [step.stepIndex]: !prev[step.stepIndex]
+                          }))}
+                          className={`w-full flex items-start gap-3 p-4 hover:bg-gray-50 transition text-left ${
+                            step.chainOfTrustValid === false 
+                              ? 'bg-red-50' 
+                              : step.blockchainVerified 
+                                ? 'bg-white' 
+                                : 'bg-red-50'
                           }`}
-                          title={`${step.stepName}${step.chainOfTrustValid === false ? ' - CHAIN BROKEN' : ''}`}
                         >
-                          {step.blockchainVerified ? (
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                          ) : (
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          )}
-                          {step.chainOfTrustValid === false && (
-                            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold">!</span>
-                          )}
+                          {/* Status Icon */}
+                          <div className="flex-shrink-0 mt-1">
+                            {step.blockchainVerified ? (
+                              <div className="relative">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                  step.chainOfTrustValid === false 
+                                    ? 'bg-red-500 ring-2 ring-red-600' 
+                                    : 'bg-green-500'
+                                }`}>
+                                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                  </svg>
+                                </div>
+                                {step.chainOfTrustValid === false && (
+                                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold ring-2 ring-white">!</span>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Step Info */}
+                          <div className="flex-1 min-w-0">
+                            {/* Step Number + Function */}
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span className="text-xs font-bold text-gray-500">STEP {step.stepIndex + 1}</span>
+                              <span className="text-sm sm:text-base font-bold text-gray-900">{stepFunction}</span>
+                              {step.chainOfTrustValid === false && (
+                                <span className="px-2 py-0.5 bg-red-600 text-white text-xs font-bold rounded flex items-center gap-1">
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01" />
+                                  </svg>
+                                  BROKEN
+                                </span>
+                              )}
+                            </div>
+                            
+                            {/* Participant Identity */}
+                            <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">
+                              <svg className="w-4 h-4 flex-shrink-0 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                              <span className="font-medium truncate">{stepIdentity}</span>
+                            </div>
+                            
+                            {/* Blockchain Info - Compact */}
+                            {step.blockchainData && (
+                              <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
+                                <span className="inline-flex items-center gap-1">
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  Block #{step.blockchainData.createdAt}
+                                </span>
+                                <span className="inline-flex items-center gap-1 truncate max-w-[150px] sm:max-w-none">
+                                  <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                  </svg>
+                                  {step.blockchainData.creator.slice(0, 8)}...
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Expand Icon */}
+                          <svg 
+                            className={`w-5 h-5 text-gray-600 transition-transform flex-shrink-0 mt-2 ${isExpanded ? 'rotate-180' : ''}`}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                          </svg>
                         </button>
-                      ))}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                      Click on any step to view details · {workflowHistory.history.filter(h => h.blockchainVerified).length}/{workflowHistory.history.length} verified
-                    </p>
-                  </div>
+
+                        {/* Expanded Step Details */}
+                        {isExpanded && (
+                          <div className="px-4 pb-4 bg-gray-50 border-t space-y-4">
+                            {/* Chain of Trust Warning */}
+                            {step.chainOfTrustValid === false && (
+                              <div className="bg-red-100 border-l-4 border-red-600 p-3 rounded">
+                                <div className="flex items-start gap-2">
+                                  <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                  </svg>
+                                  <div className="flex-1">
+                                    <h4 className="text-red-900 font-bold text-sm mb-1">Chain of Trust Broken</h4>
+                                    <p className="text-red-800 text-xs">
+                                      The creator of this step does NOT match the target address of the previous step.
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Step Deliverable */}
+                            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+                              <div className="flex items-center gap-2 mb-3">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <h4 className="font-semibold text-gray-900">Step Data</h4>
+                              </div>
+                              <DeliverableDisplay data={step.stepOnlyData || step.delivrable} />
+                            </div>
+
+                            {/* Technical Details - Collapsible */}
+                            <details className="pt-2 border-t">
+                              <summary className="cursor-pointer text-sm text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2 py-2">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                </svg>
+                                Technical Details
+                              </summary>
+                              <div className="mt-3 space-y-3 pl-6 text-xs">
+                                <div>
+                                  <span className="text-gray-500 font-medium">Content Hash:</span>
+                                  <p className="font-mono text-gray-700 break-all mt-0.5 bg-gray-100 p-2 rounded">{step.contentHash}</p>
+                                </div>
+                                {step.blockchainData && (
+                                  <>
+                                    <div>
+                                      <span className="text-gray-500 font-medium">Full Creator Address:</span>
+                                      <p className="font-mono text-gray-700 break-all mt-0.5 bg-gray-100 p-2 rounded">{step.blockchainData.creator}</p>
+                                    </div>
+                                    <div>
+                                      <span className="text-gray-500 font-medium">Signature Status:</span>
+                                      <span
+                                        className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
+                                          step.blockchainData.signatureValid
+                                            ? 'bg-green-200 text-green-900'
+                                            : 'bg-red-200 text-red-900'
+                                        }`}
+                                      >
+                                        {step.blockchainData.signatureValid ? '✓ Valid' : '✗ Invalid'}
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className="text-gray-500 font-medium">Block Number:</span>
+                                      <a 
+                                        href={getBlockExplorerLink(step.blockchainData.createdAt)} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="ml-2 text-blue-600 hover:underline font-mono"
+                                      >
+                                        #{step.blockchainData.createdAt} →
+                                      </a>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            </details>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
-            {/* NIVEAU 1: Step List View */}
-            {workflowHistory && viewLevel >= 1 && !verifyingChainOfTrust && (
-              <div className="mt-6 space-y-3">
-                {workflowHistory.history.map((step) => (
-                  <div key={step.stepIndex} className={`rounded-lg overflow-hidden border-2 ${
-                    step.chainOfTrustValid === false 
-                      ? 'border-red-500' 
-                      : 'border-gray-200'
-                  }`}>
-                    {/* Step Header - Always Visible (Niveau 1) */}
-                    <button
-                      onClick={() => setExpandedSteps(prev => ({
-                        ...prev,
-                        [step.stepIndex]: !prev[step.stepIndex]
-                      }))}
-                      className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition text-left ${
-                        step.chainOfTrustValid === false 
-                          ? 'bg-red-50 border-l-4 border-red-500' 
-                          : step.blockchainVerified 
-                            ? 'bg-white' 
-                            : 'bg-red-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 flex-1">
-                        {step.blockchainVerified ? (
-                          <svg className="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        ) : (
-                          <svg className="w-6 h-6 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-semibold text-gray-900 text-base">
-                              {step.stepIndex + 1}. {step.stepName}
-                            </h3>
-                            {step.chainOfTrustValid === false && (
-                              <span className="px-2 py-0.5 bg-red-600 text-white text-xs font-bold rounded flex items-center gap-1">
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
-                                CHAIN BROKEN
-                              </span>
-                            )}
-                          </div>
-                          {step.blockchainData && (
-                            <div className="flex items-center gap-3 mt-1 flex-wrap text-xs text-gray-500">
-                              <span className="inline-flex items-center gap-1">
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                                {step.blockchainData.creator.slice(0, 10)}...
-                              </span>
-                              <span className="inline-flex items-center gap-1">
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                                </svg>
-                                Block #{step.blockchainData.createdAt}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <svg 
-                        className={`w-5 h-5 text-gray-600 transition-transform flex-shrink-0 ${expandedSteps[step.stepIndex] ? 'rotate-180' : ''}`}
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-
-                    {/* NIVEAU 2: Step Details - Expanded */}
-                    {expandedSteps[step.stepIndex] && (
-                      <div className="px-4 py-4 bg-gray-50 border-t space-y-4">
-                        {/* Chain of Trust Warning */}
-                        {step.chainOfTrustValid === false && (
-                          <div className="bg-red-100 border-l-4 border-red-600 p-4 rounded">
-                            <div className="flex items-start gap-3">
-                              <svg className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                              </svg>
-                              <div className="flex-1">
-                                <h4 className="text-red-900 font-bold text-sm mb-1">Chain of Trust Broken</h4>
-                                <p className="text-red-800 text-sm">
-                                  The creator of this step does NOT match the target address of the previous step.
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Step Content */}
-                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
-                          <div className="flex items-center gap-2 mb-3">
-                            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <h4 className="font-semibold text-gray-900">Step Data</h4>
-                          </div>
-                          <DeliverableDisplay data={step.stepOnlyData || step.delivrable} />
-                        </div>
-
-                        {/* Technical Details - Collapsed by default */}
-                        <details className="pt-2 border-t">
-                          <summary className="cursor-pointer text-sm text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                            </svg>
-                            Technical Details
-                          </summary>
-                          <div className="mt-3 space-y-3 pl-6 text-xs">
-                            <div>
-                              <span className="text-gray-500 font-medium">Content Hash:</span>
-                              <p className="font-mono text-gray-700 break-all mt-0.5">{step.contentHash}</p>
-                            </div>
-                            {step.blockchainData && (
-                              <>
-                                <div>
-                                  <span className="text-gray-500 font-medium">Full Creator Address:</span>
-                                  <p className="font-mono text-gray-700 break-all mt-0.5">{step.blockchainData.creator}</p>
-                                </div>
-                                <div>
-                                  <span className="text-gray-500 font-medium">Signature:</span>
-                                  <span
-                                    className={`ml-1 px-2 py-0.5 rounded ${
-                                      step.blockchainData.signatureValid
-                                        ? 'bg-green-200 text-green-800'
-                                        : 'bg-red-200 text-red-800'
-                                    }`}
-                                  >
-                                    {step.blockchainData.signatureValid ? 'Valid' : 'Invalid'}
-                                  </span>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        </details>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* View Level Toggle Button */}
-            {workflowHistory && !verifyingChainOfTrust && (
-              <div className="mt-6">
-                <button
-                  onClick={() => setViewLevel(viewLevel === 0 ? 1 : 0)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition text-left border ${
-                    result.isValid
-                      ? 'bg-green-50 hover:bg-green-100 border-green-200'
-                      : 'bg-gray-100 hover:bg-gray-200 border-gray-300'
-                  }`}
-                >
-                  <span className="font-medium text-gray-900">
-                    {viewLevel === 0 ? '▼ View Step Details' : '▲ Hide Step Details'}
-                  </span>
-                  <span className="text-xs text-gray-600">
-                    {workflowHistory.history.length} steps
-                  </span>
-                </button>
-              </div>
-            )}
 
             {/* Technical Proof Details (for non-workflow proofs) */}
             {!workflowHistory && result.details && (
@@ -1933,7 +1968,7 @@ export const Verify = () => {
             <p className="text-xs text-blue-700 mt-2">
               Expected hash: <code className="bg-blue-100 px-2 py-1 rounded font-mono">{firstStepHash.substring(0, 20)}...{firstStepHash.substring(firstStepHash.length - 10)}</code>
             </p>
-            {firstStepHash === '0xb67aa50881387adaba2a3ca4f06102ebb36b88d6e3a8071f9169496b9f31a157' && (
+            {firstStepHash === '0x610b90a3472cab175af976348cf4d1c3e7b76b928ec1c37ce9617a55a55b03e9' && (
               <div className="mt-3 p-3 bg-green-50 border border-green-300 rounded-lg">
                 <p className="text-xs text-green-900">
                   <strong>{t('about.qrExampleHint')}</strong> {' '}
@@ -2033,13 +2068,9 @@ export const Verify = () => {
             )}
           </div>
 
-          {/* Previous Deliverables */}
+          {/* Previous Deliverables Info */}
           <div className="mb-6">
-            <h3 className="font-semibold text-gray-900 mb-3">Previous Steps Summary:</h3>
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 max-h-[600px] overflow-y-auto border border-blue-200">
-              <DeliverableDisplay data={workflowInfo.livrable} />
-            </div>
-            <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+            <p className="text-xs text-gray-500 flex items-center gap-1">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>

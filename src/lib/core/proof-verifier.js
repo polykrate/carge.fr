@@ -10,19 +10,21 @@ export class ProofVerifier {
 
 
   /**
-   * Calcule le hash SHA-256 du champ ragData d'une preuve
+   * Calcule le hash blake2-256 du champ ragData d'une preuve (Substrate-compatible)
    */
   async calculateRagDataHash(proof) {
     if (!proof.ragData) {
       throw new Error('Invalid proof format: missing ragData field');
     }
 
+    await this.waitForPolkadot();
+    const { blake2AsU8a } = window.polkadotUtilCrypto;
+    
     const ragDataString = JSON.stringify(proof.ragData);
     const encoder = new TextEncoder();
     const data = encoder.encode(ragDataString);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const hashArray = blake2AsU8a(data, 256);
+    const hashHex = Array.from(hashArray).map(b => b.toString(16).padStart(2, '0')).join('');
     
     return '0x' + hashHex;
   }
@@ -401,19 +403,21 @@ export class ProofVerifier {
           }
         }
 
-        // Calculate hash for this step
+        // Calculate hash for this step using blake2 (Substrate-compatible)
         const stepRagData = {
           ragHash,
           stepHash: stepHashValue,
           livrable: { ...accumulatedDelivrable }
         };
         
+        await this.waitForPolkadot();
+        const { blake2AsU8a } = window.polkadotUtilCrypto;
+        
         const ragDataString = JSON.stringify(stepRagData);
         const encoder = new TextEncoder();
         const data = encoder.encode(ragDataString);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const contentHash = '0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        const hashArray = blake2AsU8a(data, 256);
+        const contentHash = '0x' + Array.from(hashArray).map(b => b.toString(16).padStart(2, '0')).join('');
 
         stepsToVerify.push({
           stepIndex: i,

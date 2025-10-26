@@ -76,11 +76,13 @@ export async function signContentHash(signer, accountAddress, contentHash) {
  * @returns {Promise<string>} Hash (0x prefixed)
  */
 export async function calculateHash(content) {
+  // Use blake2-256 for Substrate compatibility
+  const { blake2AsU8a } = await import('@polkadot/util-crypto');
+  
   const encoder = new TextEncoder();
   const contentBytes = encoder.encode(content);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', contentBytes);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return '0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const hashArray = blake2AsU8a(contentBytes, 256);
+  return '0x' + Array.from(hashArray).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 /**
@@ -92,15 +94,18 @@ export async function calculateWrappedHash(contentHash) {
   await waitForPolkadot();
   
   const { stringToU8a, hexToU8a } = window.polkadotUtil;
+  const { blake2AsU8a } = window.polkadotUtilCrypto;
+  
   const contentHashBytes = hexToU8a(contentHash);
   const wrappedMessage = new Uint8Array([
     ...stringToU8a('<Bytes>'),
     ...contentHashBytes,
     ...stringToU8a('</Bytes>')
   ]);
-  const wrappedHashBuffer = await crypto.subtle.digest('SHA-256', wrappedMessage);
-  const wrappedHashArray = Array.from(new Uint8Array(wrappedHashBuffer));
-  return '0x' + wrappedHashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  
+  // Use blake2-256 for Substrate compatibility
+  const wrappedHashArray = blake2AsU8a(wrappedMessage, 256);
+  return '0x' + Array.from(wrappedHashArray).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 /**
