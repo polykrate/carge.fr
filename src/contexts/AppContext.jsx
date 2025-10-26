@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { MultiWalletConnector } from '../lib/core/multi-wallet-connector.js';
 import { SubstrateClient } from '../lib/core/substrate-client.js';
 import { IpfsClient } from '../lib/core/ipfs-client.js';
@@ -75,13 +75,51 @@ export const AppProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const detectWallets = async () => {
+  const detectWallets = useCallback(async () => {
     const wallets = await walletConnector.detectInstalledWallets();
     setInstalledWallets(wallets);
     console.log('📱 Detected wallets:', wallets.map(w => w.name).join(', '));
-  };
+  }, [walletConnector]);
 
-  const checkKudoNodeAvailability = async () => {
+  // Use useCallback for checkKudoNodeAvailability and updateKuboPeerCount
+  // Note: These are defined before being used in checkKudoNodeAvailability
+  const updateKuboPeerCount = useCallback(async (force = false) => {
+    // Use ref instead of state to avoid closure issues
+    if (!force && !kudoNodeAvailableRef.current) {
+      console.log('⏭️ Skipping Kubo peer count (node not available)');
+      setKuboPeerCount(0);
+      return;
+    }
+
+    try {
+      console.log('🔍 Fetching Kubo peer count...');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+      
+      const response = await fetch('http://127.0.0.1:5001/api/v0/swarm/peers', {
+        method: 'POST',
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        const peerCount = data.Peers ? data.Peers.length : 0;
+        console.log(`📊 Kubo has ${peerCount} peers connected`);
+        setKuboPeerCount(peerCount);
+      } else {
+        const text = await response.text();
+        console.warn(`⚠️ Kubo swarm/peers returned status ${response.status}:`, text);
+        setKuboPeerCount(0);
+      }
+    } catch (error) {
+      console.error('❌ Failed to get Kubo peer count:', error);
+      setKuboPeerCount(0);
+    }
+  }, []);
+
+  const checkKudoNodeAvailability = useCallback(async () => {
     console.log('🎯 checkKudoNodeAvailability called');
     
     if (!config.IPFS_UPLOAD_URL || 
@@ -143,55 +181,19 @@ export const AppProvider = ({ children }) => {
 
     // Recheck every 30 seconds
     setTimeout(checkKudoNodeAvailability, 30000);
-  };
+  }, [updateKuboPeerCount]);
 
-  const updateHeliaPeerCount = () => {
+  const updateHeliaPeerCount = useCallback(() => {
     try {
       if (ipfsClient && ipfsClient.helia?.libp2p) {
         const peers = ipfsClient.helia.libp2p.getPeers();
         setHeliaPeerCount(peers.length);
       }
-    } catch (error) {
+    } catch {
       // Silent fail - not critical
       setHeliaPeerCount(0);
     }
-  };
-
-  const updateKuboPeerCount = async (force = false) => {
-    // Use ref instead of state to avoid closure issues
-    if (!force && !kudoNodeAvailableRef.current) {
-      console.log('⏭️ Skipping Kubo peer count (node not available)');
-      setKuboPeerCount(0);
-      return;
-    }
-
-    try {
-      console.log('🔍 Fetching Kubo peer count...');
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
-      
-      const response = await fetch('http://127.0.0.1:5001/api/v0/swarm/peers', {
-        method: 'POST',
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        const peerCount = data.Peers ? data.Peers.length : 0;
-        console.log(`📊 Kubo has ${peerCount} peers connected`);
-        setKuboPeerCount(peerCount);
-      } else {
-        const text = await response.text();
-        console.warn(`⚠️ Kubo swarm/peers returned status ${response.status}:`, text);
-        setKuboPeerCount(0);
-      }
-    } catch (error) {
-      console.error('❌ Failed to get Kubo peer count:', error);
-      setKuboPeerCount(0);
-    }
-  };
+  }, [ipfsClient]);
 
   const setupAccountChangeListener = async () => {
     // Wait for extension to be ready
@@ -392,7 +394,7 @@ export const AppProvider = ({ children }) => {
     return { blockUpdateInterval, unsubscribeConnection: unsubscribe };
   };
 
-  const connectWallet = async (walletId = 'polkadot-js') => {
+  const connectWallet = useCallback(async (walletId = 'polkadot-js') => {
     try {
       console.log('🔌 Connecting wallet:', walletId);
       await walletConnector.connect(walletId);
@@ -409,9 +411,9 @@ export const AppProvider = ({ children }) => {
       alert(`Wallet connection failed: ${error.message}\n\nPlease install a Substrate wallet.`);
       throw error;
     }
-  };
+  }, [walletConnector]);
 
-  const selectAccount = async (address) => {
+  const selectAccount = useCallback(async (address) => {
     try {
       await walletConnector.selectAccount(address);
       setSelectedAccount(address);
@@ -421,16 +423,16 @@ export const AppProvider = ({ children }) => {
       console.error('Account selection failed:', error);
       throw error;
     }
-  };
+  }, [walletConnector]);
 
-  const disconnectWallet = () => {
+  const disconnectWallet = useCallback(() => {
     setSelectedAccount(null);
     setAccounts([]);
     localStorage.removeItem('carge_selected_account');
     setIsWalletMenuOpen(false);
-  };
+  }, []);
 
-  const toggleWalletMenu = async () => {
+  const toggleWalletMenu = useCallback(async () => {
     console.log('🔄 Toggle wallet menu, current state:', { isWalletMenuOpen, accountsLength: accounts.length });
     if (!isWalletMenuOpen && accounts.length === 0) {
       // Show wallet selection first
@@ -438,9 +440,10 @@ export const AppProvider = ({ children }) => {
     } else {
       setIsWalletMenuOpen(!isWalletMenuOpen);
     }
-  };
+  }, [isWalletMenuOpen, accounts.length]);
 
-  const value = {
+  // Memoize context value to prevent unnecessary re-renders
+  const value = useMemo(() => ({
     // Services
     walletConnector,
     substrateClient,
@@ -461,14 +464,39 @@ export const AppProvider = ({ children }) => {
     heliaPeerCount,
     kuboPeerCount,
     
-    // Actions
+    // Actions (memoized with useCallback)
     connectWallet,
     selectAccount,
     disconnectWallet,
     toggleWalletMenu,
     setIsWalletMenuOpen,
     setIsWalletSelectOpen,
-  };
+  }), [
+    // Services (stable, created once)
+    walletConnector,
+    substrateClient,
+    ipfsClient,
+    
+    // State dependencies
+    selectedAccount,
+    selectedWallet,
+    installedWallets,
+    accounts,
+    isWalletMenuOpen,
+    isWalletSelectOpen,
+    substrateConnected,
+    ipfsReady,
+    kudoNodeAvailable,
+    currentBlock,
+    heliaPeerCount,
+    kuboPeerCount,
+    
+    // Action dependencies (already memoized)
+    connectWallet,
+    selectAccount,
+    disconnectWallet,
+    toggleWalletMenu,
+  ]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

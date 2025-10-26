@@ -107,7 +107,7 @@ const resources = {
         faq6Q: 'How long does implementation take?',
         faq6A: 'Web interface: immediate (just connect your wallet). API integration: 1-2 weeks typical. Full ERP integration: 4-6 weeks with our support team.',
         faq7Q: 'How can I deploy my own workflows on the blockchain?',
-        faq7A: 'For now, please contact us at contact@carge.fr to deploy custom workflows. In the near future, you will be able to deploy workflows directly by connecting an AI agent compatible with MCP (Model Context Protocol) to interact with the blockchain.',
+        faq7A: 'For now, please contact us at admin@carge.fr to deploy custom workflows. In the near future, you will be able to deploy workflows directly by connecting an AI agent compatible with MCP (Model Context Protocol) to interact with the blockchain.',
         
         useCase4Title: 'AI Invoice Digitization for Chorus Pro',
         useCase4Desc: 'Deploy an on-chain AI process to automatically dematerialize invoices for French government platform Chorus Pro. Secure, auditable, and compliant.',
@@ -429,7 +429,7 @@ const resources = {
         heroTitle: 'Protégez Votre Marque Premium Avec des Certificats Infalsifiables',
         heroDesc: 'Un seul QR code. Vérification blockchain complète. Chaque étape signée et traçable. Prouvez l\'authenticité instantanément à vos clients.',
         heroPoint1: 'Éliminez les faux certificats',
-        heroPoint2: 'Vérifiez toute la chaîne d\'approvisionnement',
+        heroPoint2: 'Vérifiez toute la chaîne logistique',
         heroPoint3: 'Gagnez la confiance de vos clients',
         ctaSeeExample: 'Voir Comment Ça Marche',
         ctaVerify: 'Vérifier un Produit',
@@ -491,7 +491,7 @@ const resources = {
         faq6Q: 'Combien de temps prend l\'implémentation ?',
         faq6A: 'Interface web : immédiat (il suffit de connecter votre portefeuille). Intégration API : 1-2 semaines en moyenne. Intégration ERP complète : 4-6 semaines avec notre équipe support.',
         faq7Q: 'Comment puis-je déployer mes propres workflows sur la blockchain ?',
-        faq7A: 'Pour l\'instant, contactez-nous à contact@carge.fr pour déployer des workflows personnalisés. À terme, vous pourrez déployer des workflows directement en connectant un agent IA compatible MCP (Model Context Protocol) pour interagir avec la blockchain.',
+        faq7A: 'Pour l\'instant, contactez-nous à admin@carge.fr pour déployer des workflows personnalisés. À terme, vous pourrez déployer des workflows directement en connectant un agent IA compatible MCP (Model Context Protocol) pour interagir avec la blockchain.',
         
         useCase4Title: 'Dématérialisation des factures pour Chorus Pro',
         useCase4Desc: 'Déployez un processus IA sur la chaîne pour dématérialiser automatiquement vos factures vers la plateforme gouvernementale Chorus Pro. Une solution sécurisée, auditable et conforme.',

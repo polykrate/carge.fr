@@ -23,6 +23,7 @@ describe('ProofVerifier', () => {
         cryptoWaitReady: vi.fn().mockResolvedValue(true),
         xxhashAsHex: vi.fn((str, bits) => '0x' + '00'.repeat(bits / 8)),
         blake2AsHex: vi.fn((data, bits) => '0x' + '00'.repeat(bits / 8)),
+        blake2AsU8a: vi.fn((data, bits) => new Uint8Array((bits || 256) / 8).fill(0)),
         encodeAddress: vi.fn((bytes, prefix) => '5GrwvaEF5zXb26Fz'),
         signatureVerify: vi.fn((message, signature, address) => ({
           isValid: true,
