@@ -204,30 +204,32 @@ export const QuickSign = () => {
 
   return (
     <>
-      {/* Compact Header */}
-      <section className="bg-gradient-to-r from-[#003399] to-blue-700 py-8 shadow-md">
+      {/* Page Header */}
+      <section className="py-12 bg-white border-b border-gray-100">
         <div className="container mx-auto px-6 max-w-6xl">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center mb-8">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#003399] text-white rounded-full text-sm font-medium mb-4 shadow-lg">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
+              Quick Signature
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-white">
+            
+            {/* Title */}
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-[#003399] to-gray-900 bg-clip-text text-transparent">
               {t('quickSign.title')}
             </h1>
+            
+            {/* Description */}
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              {t('quickSign.description')}
+            </p>
           </div>
-          <p className="text-blue-100 text-lg">
-            {t('quickSign.description')}
-          </p>
-        </div>
-      </section>
 
-      {/* Key Benefits */}
-      <div className="bg-gray-50 py-8 border-b border-gray-200">
-        <div className="container mx-auto px-6 max-w-6xl">
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-md">
+          {/* Key Benefits */}
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div className="bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-md">
               <div className="w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -236,7 +238,7 @@ export const QuickSign = () => {
               <h3 className="font-bold text-gray-900 mb-2">{t('quickSign.step1Title')}</h3>
               <p className="text-sm text-gray-600 leading-relaxed">{t('quickSign.step1Desc')}</p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-md">
+            <div className="bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-md">
               <div className="w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -245,7 +247,7 @@ export const QuickSign = () => {
               <h3 className="font-bold text-gray-900 mb-2">{t('quickSign.step2Title')}</h3>
               <p className="text-sm text-gray-600 leading-relaxed">{t('quickSign.step2Desc')}</p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-md">
+            <div className="bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-md">
               <div className="w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -256,7 +258,7 @@ export const QuickSign = () => {
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Main Content */}
       <div className="container mx-auto px-6 py-12 max-w-4xl">
