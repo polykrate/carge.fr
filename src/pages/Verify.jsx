@@ -1937,26 +1937,26 @@ export const Verify = () => {
                                 )}
                               </div>
                               
-                              {/* Function Name - Full Width */}
+                              {/* Function Name - Full Width with truncation */}
                               <div className="mb-2">
                                 <span 
-                                  className="text-base font-bold text-gray-900 block" 
+                                  className="text-base font-bold text-gray-900 block truncate" 
                                   title={stepFunction}
                                 >
-                                  {stepFunction}
+                                  {truncateText(stepFunction, 50)}
                                 </span>
                               </div>
                               
-                              {/* Participant Identity - Full Width */}
+                              {/* Participant Identity - Full Width with truncation */}
                               <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">
                                 <svg className="w-4 h-4 flex-shrink-0 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                                 <span 
-                                  className="font-medium" 
+                                  className="font-medium truncate" 
                                   title={stepIdentity}
                                 >
-                                  {stepIdentity}
+                                  {truncateText(stepIdentity, 60)}
                                 </span>
                               </div>
                               
