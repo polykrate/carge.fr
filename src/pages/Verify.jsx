@@ -2470,7 +2470,8 @@ export const Verify = () => {
           )}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 
