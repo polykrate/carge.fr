@@ -1452,56 +1452,97 @@ export const Verify = () => {
   };
 
   return (
-    <div className="container mx-auto px-6 py-12 max-w-4xl">
-      <h1 className="text-4xl font-light mb-4">{t('verify.title')}</h1>
-      <p className="text-gray-600 mb-8">
-        {t('verify.description')}
-      </p>
+    <>
+      {/* Hero Section */}
+      <section className="relative py-16 md:py-24 bg-gradient-to-br from-gray-50 via-white to-blue-50 overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-20 right-10 w-72 h-72 bg-[#003399]/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 left-10 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="container mx-auto px-6 text-center max-w-6xl relative z-10">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#003399] text-white rounded-full text-sm font-medium mb-6 shadow-lg">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            Verify Proof
+          </div>
 
-      {/* Type of Proof */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-        <h2 className="text-xl font-semibold text-[#003399] mb-6">{t('verify.howItWorksTitle')}</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">{t('verify.step1Title')}</h3>
-            <p className="text-sm text-gray-700 text-justify">{t('verify.step1Desc')}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">{t('verify.step2Title')}</h3>
-            <p className="text-sm text-gray-700 text-justify">{t('verify.step2Desc')}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">{t('verify.step3Title')}</h3>
-            <p className="text-sm text-gray-700 text-justify">{t('verify.step3Desc')}</p>
+          {/* Main Title */}
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight bg-gradient-to-r from-gray-900 via-[#003399] to-gray-900 bg-clip-text text-transparent">
+            {t('verify.title')}
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed max-w-3xl mx-auto">
+            {t('verify.description')}
+          </p>
+
+          {/* Key Benefits */}
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-lg">
+              <div className="w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center mx-auto mb-4">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">{t('verify.step1Title')}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">{t('verify.step1Desc')}</p>
+            </div>
+            <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-lg">
+              <div className="w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center mx-auto mb-4">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">{t('verify.step2Title')}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">{t('verify.step2Desc')}</p>
+            </div>
+            <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-lg">
+              <div className="w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center mx-auto mb-4">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">{t('verify.step3Title')}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">{t('verify.step3Desc')}</p>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Mode Tabs */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-medium">{t('verify.title')}</h2>
-          <button
-            type="button"
-            onClick={loadExampleProof}
-            className="px-4 py-2 text-sm bg-[#003399] text-white rounded-lg hover:bg-[#002266] transition font-medium"
-          >
-            {t('verify.testExample')}
-          </button>
-        </div>
+      {/* Main Content */}
+      <div className="container mx-auto px-6 py-12 max-w-4xl">
+        {/* Mode Tabs */}
+        <div className="bg-white border-2 border-gray-200 rounded-xl shadow-lg p-8 mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-1">{t('verify.title')}</h2>
+              <p className="text-sm text-gray-600">Choose your verification method</p>
+            </div>
+            <button
+              type="button"
+              onClick={loadExampleProof}
+              className="px-4 py-2 text-sm bg-white border-2 border-[#003399] text-[#003399] rounded-lg hover:bg-[#003399] hover:text-white transition-all shadow-sm hover:shadow-md font-semibold"
+            >
+              {t('verify.testExample')}
+            </button>
+          </div>
 
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => {
-              setMode('file');
-              // Trigger file input click after a small delay to ensure mode switch completes
-              setTimeout(() => {
-                document.getElementById('file-upload')?.click();
-              }, 100);
-            }}
-            className={`px-4 py-2 rounded-lg transition ${
-              mode === 'file'
-                ? 'bg-[#003399] text-white'
+          <div className="flex gap-3 mb-6">
+            <button
+              onClick={() => {
+                setMode('file');
+                // Trigger file input click after a small delay to ensure mode switch completes
+                setTimeout(() => {
+                  document.getElementById('file-upload')?.click();
+                }, 100);
+              }}
+              className={`flex-1 px-6 py-3 rounded-lg transition-all font-semibold shadow-sm ${
+                mode === 'file'
+                  ? 'bg-[#003399] text-white shadow-lg'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
