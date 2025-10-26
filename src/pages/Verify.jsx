@@ -2049,12 +2049,9 @@ export const Verify = () => {
                                     {(() => {
                                       const data = step.stepOnlyData || step.delivrable;
                                       
-                                      // Get the step key (e.g., "production", "export", etc.) to exclude it
-                                      const stepKeyToExclude = stepKey.toLowerCase();
-                                      
                                       return Object.entries(data).map(([key, value], idx) => {
-                                        // Skip internal fields starting with _ and the step name itself
-                                        if (key.startsWith('_') || key.toLowerCase() === stepKeyToExclude) return null;
+                                        // Skip internal fields starting with _
+                                        if (key.startsWith('_')) return null;
                                         
                                         // Handle different value types - format like Home
                                         if (typeof value === 'object' && value !== null) {
@@ -2386,23 +2383,26 @@ export const Verify = () => {
 
       {/* Workflow Continuation Section */}
       {workflowInfo && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Workflow Continuation</h2>
-            <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-              Step {workflowInfo.currentStep} / {workflowInfo.totalSteps}
-            </span>
-          </div>
-
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <p className="text-sm text-gray-600 mb-2">
-              <strong>Workflow:</strong> {workflowInfo.masterRag?.metadata?.name || 'Unknown'}
-            </p>
-            {workflowInfo.masterRag?.metadata?.description && (
-              <p className="text-sm text-gray-600">
-                <strong>Description:</strong> {workflowInfo.masterRag.metadata.description}
-              </p>
-            )}
+        <div className="bg-white bg-opacity-70 rounded-lg p-6 mt-8 border-2 border-[#003399]/20 shadow-lg">
+          {/* Header - Like workflow summary */}
+          <div className="bg-gradient-to-br from-[#003399]/5 to-blue-50 rounded-lg p-4 mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-[#003399] mb-2">
+                  {workflowInfo.masterRag?.metadata?.name || 'Workflow Continuation'}
+                </h2>
+                {workflowInfo.masterRag?.metadata?.description && (
+                  <p className="text-sm text-gray-700">
+                    {workflowInfo.masterRag.metadata.description}
+                  </p>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <span className="px-3 py-1 bg-[#003399] text-white text-sm font-medium rounded-full whitespace-nowrap">
+                  Step {workflowInfo.currentStep} / {workflowInfo.totalSteps}
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Previous Deliverables Info */}
@@ -2417,31 +2417,37 @@ export const Verify = () => {
 
           {/* Next Step Form or Completion Message */}
           {workflowInfo.isLastStep ? (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-              <div className="text-4xl mb-3"></div>
-              <h3 className="text-lg font-semibold text-green-900 mb-2">Workflow Complete!</h3>
-              <p className="text-sm text-green-700">
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-8 text-center shadow-md">
+              <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-green-900 mb-2">Workflow Complete!</h3>
+              <p className="text-base text-green-700">
                 This was the final step of the workflow. All steps have been completed.
               </p>
             </div>
           ) : (
             <>
               {loadingNextStep ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin text-2xl">...</div>
-                  <span className="ml-3 text-gray-600">Loading next step from IPFS...</span>
+                <div className="bg-gradient-to-br from-[#003399]/5 to-blue-50 rounded-xl p-8 text-center">
+                  <div className="animate-spin text-4xl text-[#003399] mb-4">⚙</div>
+                  <span className="text-lg text-gray-700 font-medium">Loading next step from IPFS...</span>
                 </div>
               ) : nextStepSchema ? (
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-4">
-                    Step {workflowInfo.currentStep}: {workflowInfo.nextStepRag?.metadata?.name || 'Next Step'}
-                  </h3>
-                  
-                  {workflowInfo.nextStepRag?.metadata?.description && (
-                    <p className="text-sm text-gray-600 mb-4">
-                      {workflowInfo.nextStepRag.metadata.description}
-                    </p>
-                  )}
+                  <div className="bg-white border-2 border-[#003399]/30 rounded-xl p-6 mb-6">
+                    <h3 className="text-xl font-bold text-[#003399] mb-2">
+                      Step {workflowInfo.currentStep}: {workflowInfo.nextStepRag?.metadata?.name || 'Next Step'}
+                    </h3>
+                    
+                    {workflowInfo.nextStepRag?.metadata?.description && (
+                      <p className="text-sm text-gray-600">
+                        {workflowInfo.nextStepRag.metadata.description}
+                      </p>
+                    )}
+                  </div>
 
                   <form onSubmit={submitNextStep}>
                     {/* Dynamic Form Fields */}
@@ -2452,8 +2458,8 @@ export const Verify = () => {
                     />
 
                     {/* Recipient Address */}
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3 mb-6">
-                      <label className="block text-sm font-medium text-gray-700">
+                    <div className="bg-gradient-to-br from-[#003399]/5 to-blue-50 border-2 border-[#003399]/30 rounded-xl p-4 space-y-3 mb-6">
+                      <label className="block text-sm font-bold text-[#003399]">
                         Recipient Address *
                       </label>
                       <input
@@ -2461,22 +2467,25 @@ export const Verify = () => {
                         value={recipientAddress}
                         onChange={(e) => setRecipientAddress(e.target.value)}
                         placeholder="5Exxx... or 0x..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#003399] focus:border-transparent"
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#003399] focus:border-[#003399] transition-all font-mono"
                         required
                       />
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-600 flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                         Enter the Substrate address of the next recipient in the workflow
                       </p>
                     </div>
 
                     {/* Wallet Check & Target Address Validation */}
                     {!selectedAccount ? (
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                      <div className="bg-gradient-to-r from-blue-50 to-[#003399]/10 border-2 border-[#003399]/30 rounded-xl p-4 mb-4">
                         <div className="flex items-center space-x-3">
-                          <svg className="w-5 h-5 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-6 h-6 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                           </svg>
-                          <div className="text-sm text-[#003399]">
+                          <div className="text-sm font-medium text-[#003399]">
                             Please connect your wallet to submit the next step
                           </div>
                         </div>
@@ -2496,19 +2505,19 @@ export const Verify = () => {
                       const isCorrectRecipient = !targetAddress || selectedAccount === targetAddress;
                       
                       return !isCorrectRecipient ? (
-                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+                        <div className="bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-300 rounded-xl p-4 mb-4 shadow-md">
                           <div className="flex items-start space-x-3">
-                            <svg className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-6 h-6 text-orange-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
                             <div className="text-sm text-orange-900">
-                              <div className="font-semibold mb-1">{t('verify.wrongWalletTitle')}</div>
-                              <div className="mb-2">{t('verify.wrongWalletDesc')}</div>
-                              <div className="text-xs font-mono bg-orange-100 p-2 rounded break-all">
-                                <span className="font-semibold">{t('verify.wrongWalletExpected')}</span> {targetAddress}
+                              <div className="font-bold text-base mb-2">{t('verify.wrongWalletTitle')}</div>
+                              <div className="mb-3">{t('verify.wrongWalletDesc')}</div>
+                              <div className="text-xs font-mono bg-white border border-orange-200 p-3 rounded-lg break-all mb-2">
+                                <span className="font-bold text-orange-700">{t('verify.wrongWalletExpected')}</span> {targetAddress}
                               </div>
-                              <div className="text-xs font-mono bg-orange-100 p-2 rounded mt-1 break-all">
-                                <span className="font-semibold">{t('verify.wrongWalletConnected')}</span> {selectedAccount}
+                              <div className="text-xs font-mono bg-white border border-orange-200 p-3 rounded-lg break-all">
+                                <span className="font-bold text-orange-700">{t('verify.wrongWalletConnected')}</span> {selectedAccount}
                               </div>
                             </div>
                           </div>
@@ -2517,7 +2526,7 @@ export const Verify = () => {
                     })()}
 
                     {/* Submit Button */}
-                    <div className="pt-4 border-t">
+                    <div className="pt-6 border-t-2 border-gray-200">
                       <button
                         type="submit"
                         disabled={submittingStep || !selectedAccount || (() => {
@@ -2532,7 +2541,7 @@ export const Verify = () => {
                           }
                           return targetAddress && selectedAccount !== targetAddress;
                         })()}
-                        className="w-full px-4 py-3 bg-[#003399] hover:bg-[#002266] text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full px-6 py-4 bg-[#003399] hover:bg-[#002266] text-white rounded-xl transition-all duration-300 font-bold text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
                       >
                         {submittingStep ? 'Submitting...' : 'Submit Next Step'}
                       </button>
