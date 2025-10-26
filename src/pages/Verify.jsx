@@ -2125,7 +2125,6 @@ export const Verify = () => {
                               </div>
                             </div>
                           </button>
-                        </div>
                       </div>
                     );
                   })}
