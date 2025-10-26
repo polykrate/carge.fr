@@ -531,7 +531,7 @@ export const Workflows = () => {
             <p className="text-sm text-gray-600 mb-3">
               Enter tags separated by spaces (AND logic - all tags must match)
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
                 value={searchTags}
@@ -547,7 +547,7 @@ export const Workflows = () => {
               <button
                 onClick={searchByTags}
                 disabled={searching}
-                className="px-6 py-3 bg-[#003399] text-white rounded-lg hover:bg-[#002266] transition-all font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-6 py-3 bg-[#003399] text-white rounded-lg hover:bg-[#002266] transition-all font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap flex-shrink-0"
               >
                 {searching ? (
                   <>
