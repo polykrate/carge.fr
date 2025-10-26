@@ -1472,6 +1472,41 @@ export const Verify = () => {
         </div>
       </section>
 
+      {/* Key Benefits */}
+      <div className="bg-gray-50 py-8 border-b border-gray-200">
+        <div className="container mx-auto px-6 max-w-6xl">
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-md">
+              <div className="w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">{t('verify.step1Title')}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">{t('verify.step1Desc')}</p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-md">
+              <div className="w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">{t('verify.step2Title')}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">{t('verify.step2Desc')}</p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-md">
+              <div className="w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">{t('verify.step3Title')}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">{t('verify.step3Desc')}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Main Content */}
       <div className="container mx-auto px-6 py-12 max-w-4xl">
         {/* Mode Tabs */}
