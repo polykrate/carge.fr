@@ -29,6 +29,12 @@ export const Workflows = () => {
     return `https://polkadot.js.org/apps/?rpc=${encodeURIComponent(wsUrl)}#/explorer/query/${blockNumber}`;
   };
   
+  // Pinned workflows (always displayed)
+  const PINNED_WORKFLOWS = [
+    'spirits-premium-7steps-fixed-v1',
+    'copyright-v3'
+  ];
+  
   // State
   const [allRags, setAllRags] = useState([]); // All RAGs from blockchain (for step resolution)
   const [displayRags, setDisplayRags] = useState([]); // Only RAG masters (for display)
@@ -41,6 +47,8 @@ export const Workflows = () => {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
   const [recipientAddress, setRecipientAddress] = useState('');
+  const [searchTags, setSearchTags] = useState(''); // Tags search input
+  const [searching, setSearching] = useState(false);
   
   // Ref for form container
   const formContainerRef = useRef(null);
@@ -111,29 +119,82 @@ export const Workflows = () => {
       setLoading(true);
       setError(null);
       
-      console.log('Loading RAGs from blockchain...');
+      console.log('Loading pinned RAGs from blockchain...');
       const ragClient = new RagClient(substrateClient);
       const loadedRags = await ragClient.getAllRags();
       
       // Store ALL RAGs (needed for step resolution)
       setAllRags(loadedRags);
       
-      // Filter only RAG masters (workflows with steps) for display
+      // Filter only RAG masters (workflows with steps)
       const ragMasters = loadedRags.filter(rag => {
-        const hasSteps = rag.metadata?.steps && rag.metadata.steps.length > 0;
-        if (!hasSteps) {
-          console.log(`Filtering out RAG without steps: ${rag.metadata?.name || 'Unnamed'}`);
-        }
-        return hasSteps;
+        return rag.metadata?.steps && rag.metadata.steps.length > 0;
       });
       
-      console.log(`Loaded ${ragMasters.length} RAG master(s) with steps (filtered from ${loadedRags.length} total)`);
-      setDisplayRags(ragMasters);
+      // Only display pinned workflows
+      const pinnedRags = ragMasters.filter(rag => {
+        return PINNED_WORKFLOWS.includes(rag.metadata?.name);
+      });
+      
+      console.log(`Loaded ${pinnedRags.length} pinned RAG master(s) (from ${ragMasters.length} total masters, ${loadedRags.length} total RAGs)`);
+      setDisplayRags(pinnedRags);
     } catch (err) {
       console.error('Failed to load RAGs:', err);
       setError('Failed to load workflows from blockchain');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const searchByTags = async () => {
+    try {
+      setSearching(true);
+      setError(null);
+      
+      // Parse tags from input (split by space, trim, filter empty)
+      const tags = searchTags
+        .split(' ')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+      
+      if (tags.length === 0) {
+        // If no tags, show pinned workflows
+        console.log('No tags provided, showing pinned workflows');
+        await loadRags();
+        return;
+      }
+      
+      console.log(`Searching RAGs with tags (AND logic): ${tags.join(', ')}`);
+      const ragClient = new RagClient(substrateClient);
+      
+      // Use the searchRagsByTags method from RagClient
+      const foundRags = await ragClient.searchRagsByTags(tags);
+      
+      console.log(`Found ${foundRags.length} RAG(s) matching all tags`);
+      
+      // Filter only RAG masters (workflows with steps)
+      const ragMasters = foundRags.filter(rag => {
+        return rag.metadata?.steps && rag.metadata.steps.length > 0;
+      });
+      
+      console.log(`Filtered to ${ragMasters.length} RAG master(s) with steps`);
+      setDisplayRags(ragMasters);
+      
+      // Update allRags if we found new ones
+      if (foundRags.length > 0) {
+        // Merge with existing allRags (avoid duplicates)
+        const existingHashes = new Set(allRags.map(r => r.hash));
+        const newRags = foundRags.filter(r => !existingHashes.has(r.hash));
+        if (newRags.length > 0) {
+          console.log(`Adding ${newRags.length} new RAG(s) to allRags`);
+          setAllRags([...allRags, ...newRags]);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to search RAGs:', err);
+      setError(`Failed to search workflows: ${err.message}`);
+    } finally {
+      setSearching(false);
     }
   };
 
@@ -457,6 +518,60 @@ export const Workflows = () => {
               </svg>
               {t('workflows.refresh')}
             </button>
+          </div>
+
+          {/* Tags Search */}
+          <div className="bg-gradient-to-br from-blue-50 to-white border-2 border-blue-200 rounded-xl p-6 mb-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <svg className="w-5 h-5 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="font-bold text-gray-900">Search by Tags</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-3">
+              Enter tags separated by spaces (AND logic - all tags must match)
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={searchTags}
+                onChange={(e) => setSearchTags(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    searchByTags();
+                  }
+                }}
+                placeholder="e.g., whisky scotland premium"
+                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#003399] focus:border-[#003399] transition-all"
+              />
+              <button
+                onClick={searchByTags}
+                disabled={searching}
+                className="px-6 py-3 bg-[#003399] text-white rounded-lg hover:bg-[#002266] transition-all font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {searching ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Searching...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Search
+                  </>
+                )}
+              </button>
+            </div>
+            <div className="mt-3 flex items-start gap-2 text-xs text-gray-500">
+              <svg className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>
+                <strong>Pinned workflows:</strong> {PINNED_WORKFLOWS.join(', ')} are always available. Clear search to return to pinned workflows.
+              </span>
+            </div>
           </div>
 
           {displayRags.length === 0 ? (
