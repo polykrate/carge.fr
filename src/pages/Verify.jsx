@@ -1891,8 +1891,13 @@ export const Verify = () => {
                   </p>
                 </div>
                 
-                {/* Vertical Steps List - Mobile Optimized */}
-                <div className="space-y-3">
+                {/* Vertical Timeline */}
+                <div className="relative">
+                  {/* Vertical Line */}
+                  <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#003399] via-blue-400 to-[#003399]"></div>
+
+                  {/* Timeline Steps */}
+                  <div className="space-y-8">
                   {workflowHistory.history.map((step, i) => {
                     // Extract step identity and function
                     const stepKey = Object.keys(proofData?.livrable || {})[i] || step.stepName;
@@ -1902,224 +1907,258 @@ export const Verify = () => {
                     const isExpanded = expandedSteps[step.stepIndex];
                     
                     return (
-                      <div 
-                        key={step.stepIndex} 
-                        className={`rounded-lg overflow-hidden border-2 transition-all ${
-                          step.chainOfTrustValid === false 
-                            ? 'border-red-500 shadow-lg' 
-                            : step.blockchainVerified
-                            ? 'border-green-200 hover:border-green-300'
-                            : 'border-red-200'
-                        }`}
-                      >
-                        {/* Step Card Header - Mobile Optimized Layout */}
+                      <div key={step.stepIndex} className="relative flex items-start gap-6">
+                        {/* Circle Badge - Like Home */}
                         <button
                           onClick={() => setExpandedSteps(prev => ({
                             ...prev,
                             [step.stepIndex]: !prev[step.stepIndex]
                           }))}
-                          className={`w-full p-4 hover:bg-gray-50 transition text-left ${
-                            step.chainOfTrustValid === false 
-                              ? 'bg-red-50' 
-                              : step.blockchainVerified 
-                                ? 'bg-white' 
-                                : 'bg-red-50'
+                          className={`relative z-10 flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl transition-all duration-300 shadow-lg ${
+                            step.chainOfTrustValid === false
+                              ? 'bg-red-500 text-white ring-4 ring-red-500/20 scale-110'
+                              : !step.blockchainVerified
+                              ? 'bg-red-500 text-white ring-4 ring-red-500/20'
+                              : isExpanded
+                              ? 'bg-[#003399] text-white ring-4 ring-[#003399]/20 scale-110'
+                              : 'bg-green-500 text-white border-2 border-gray-300 hover:border-[#003399] hover:scale-105'
                           }`}
                         >
-                          <div className="flex items-start gap-3">
-                            {/* Status Icon */}
-                            <div className="flex-shrink-0">
-                              {step.blockchainVerified ? (
-                                <div className="relative">
-                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                    step.chainOfTrustValid === false 
-                                      ? 'bg-red-500 ring-2 ring-red-600' 
-                                      : 'bg-green-500'
-                                  }`}>
-                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                  </div>
-                                  {step.chainOfTrustValid === false && (
-                                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold ring-2 ring-white">!</span>
-                                  )}
-                                </div>
-                              ) : (
-                                <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
-                                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                  </svg>
-                                </div>
-                              )}
-                            </div>
-                            
-                            {/* Step Info - Full Width on Mobile */}
-                            <div className="flex-1 min-w-0">
-                              {/* Header: Step Number + Timestamp */}
-                              <div className="flex items-center justify-between gap-2 mb-2">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-xs font-bold text-gray-500">STEP {step.stepIndex + 1}</span>
-                                  {step.chainOfTrustValid === false && (
-                                    <span className="px-2 py-0.5 bg-red-600 text-white text-xs font-bold rounded flex items-center gap-1">
-                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01" />
-                                      </svg>
-                                      BROKEN
-                                    </span>
-                                  )}
-                                  {step.schemaValidation?.valid === true && (
-                                    <span className="px-2 py-0.5 bg-purple-100 text-purple-800 text-xs font-medium rounded flex items-center gap-1">
-                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                      </svg>
-                                      {t('verify.schemaValid')}
-                                    </span>
-                                  )}
-                                  {step.schemaValidation?.valid === false && (
-                                    <span className="px-2 py-0.5 bg-orange-100 text-orange-800 text-xs font-bold rounded flex items-center gap-1">
-                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01" />
-                                      </svg>
-                                      {t('verify.schemaInvalid')}
-                                    </span>
-                                  )}
-                                </div>
-                                
-                                {/* Timestamp - Right Side */}
-                                {step.blockchainData?.createdAt && blockTimestamps[step.blockchainData.createdAt] && (
-                                  <div className="text-xs font-medium text-gray-700 flex-shrink-0">
-                                    {formatTimestamp(blockTimestamps[step.blockchainData.createdAt])}
-                                  </div>
-                                )}
-                              </div>
-                              
-                              {/* Function Name - Full Width with truncation */}
-                              <div className="mb-2">
-                                <span 
-                                  className="text-base font-bold text-gray-900 block truncate" 
-                                  title={stepFunction}
-                                >
-                                  {truncateText(stepFunction, 50)}
-                                </span>
-                              </div>
-                              
-                              {/* Participant Identity - Full Width with truncation */}
-                              <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">
-                                <svg className="w-4 h-4 flex-shrink-0 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                                <span 
-                                  className="font-medium truncate" 
-                                  title={stepIdentity}
-                                >
-                                  {truncateText(stepIdentity, 60)}
-                                </span>
-                              </div>
-                              
-                              {/* Blockchain Info - Compact */}
-                              {step.blockchainData && (
-                                <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
-                                  <span className="inline-flex items-center gap-1">
-                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-                                    </svg>
-                                    Block #{step.blockchainData.createdAt}
-                                  </span>
-                                  <span className="inline-flex items-center gap-1 truncate max-w-[150px] sm:max-w-none">
-                                    <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                                    </svg>
-                                    {step.blockchainData.creator.slice(0, 8)}...
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          
+                          {step.stepIndex + 1}
                         </button>
 
-                        {/* Expanded Step Details */}
-                        {isExpanded && (
-                          <div className="px-4 pb-4 bg-gray-50 border-t space-y-4">
-                            {/* Chain of Trust Warning */}
-                            {step.chainOfTrustValid === false && (
-                              <div className="bg-red-100 border-l-4 border-red-600 p-3 rounded">
-                                <div className="flex items-start gap-2">
-                                  <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                  </svg>
-                                  <div className="flex-1">
-                                    <h4 className="text-red-900 font-bold text-sm mb-1">Chain of Trust Broken</h4>
-                                    <p className="text-red-800 text-xs">
-                                      The creator of this step does NOT match the target address of the previous step.
-                                    </p>
+                        {/* Card Content - Like Home */}
+                        <div className="flex-1 pb-4 min-w-0">
+                          <button
+                            onClick={() => setExpandedSteps(prev => ({
+                              ...prev,
+                              [step.stepIndex]: !prev[step.stepIndex]
+                            }))}
+                            className={`w-full text-left bg-white rounded-xl border-2 transition-all duration-300 ${
+                              step.chainOfTrustValid === false
+                                ? 'border-red-500 shadow-xl'
+                                : !step.blockchainVerified
+                                ? 'border-red-300 shadow-lg'
+                                : isExpanded
+                                ? 'border-[#003399] shadow-xl'
+                                : 'border-gray-200 shadow-md hover:border-[#003399]/50 hover:shadow-lg'
+                            }`}
+                          >
+                            {/* Card Header */}
+                            <div className="p-4 sm:p-6">
+                              <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+                                  {/* Status Icon */}
+                                  <div className="flex-shrink-0">
+                                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center transition-colors duration-300 ${
+                                      step.chainOfTrustValid === false
+                                        ? 'bg-red-500'
+                                        : !step.blockchainVerified
+                                        ? 'bg-red-500'
+                                        : isExpanded ? 'bg-[#003399]' : 'bg-gray-100'
+                                    }`}>
+                                      <svg className={`w-5 h-5 sm:w-6 sm:h-6 ${
+                                        step.chainOfTrustValid === false || !step.blockchainVerified
+                                          ? 'text-white'
+                                          : isExpanded ? 'text-white' : 'text-gray-600'
+                                      }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                      </svg>
+                                    </div>
+                                  </div>
+
+                                  {/* Title */}
+                                  <div className="flex-1 min-w-0 pt-1">
+                                    <h3 className={`text-base sm:text-xl font-bold transition-colors duration-300 break-words ${
+                                      step.chainOfTrustValid === false || !step.blockchainVerified
+                                        ? 'text-red-600'
+                                        : isExpanded ? 'text-[#003399]' : 'text-gray-900'
+                                    }`}>
+                                      {stepFunction}
+                                    </h3>
+                                    <div className="text-sm text-gray-600 mt-0.5">
+                                      {stepIdentity}
+                                    </div>
+                                    {/* Status badges - small and discrete */}
+                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                      {step.chainOfTrustValid === false && (
+                                        <span className="px-2 py-0.5 bg-red-100 text-red-800 text-xs font-medium rounded">
+                                          Chain Broken
+                                        </span>
+                                      )}
+                                      {step.schemaValidation?.valid === true && (
+                                        <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-medium rounded">
+                                          {t('verify.schemaValid')}
+                                        </span>
+                                      )}
+                                      {step.schemaValidation?.valid === false && (
+                                        <span className="px-2 py-0.5 bg-orange-100 text-orange-800 text-xs font-medium rounded">
+                                          {t('verify.schemaInvalid')}
+                                        </span>
+                                      )}
+                                      {step.blockchainData?.createdAt && blockTimestamps[step.blockchainData.createdAt] && (
+                                        <span className="text-xs text-gray-500">
+                                          {formatTimestamp(blockTimestamps[step.blockchainData.createdAt])}
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            )}
 
-                            {/* Step Deliverable */}
-                            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
-                              <div className="flex items-center gap-2 mb-3">
-                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                {/* Expand Icon */}
+                                <svg
+                                  className={`w-5 h-5 sm:w-6 sm:h-6 text-gray-400 transition-transform duration-300 flex-shrink-0 ${
+                                    isExpanded ? 'rotate-180' : ''
+                                  }`}
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                                 </svg>
-                                <h4 className="font-semibold text-gray-900">Step Data</h4>
                               </div>
-                              <DeliverableDisplay data={step.stepOnlyData || step.delivrable} />
                             </div>
 
-                            {/* Technical Details - Collapsible */}
-                            <details className="pt-2 border-t">
-                              <summary className="cursor-pointer text-sm text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2 py-2">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                                </svg>
-                                Technical Details
-                              </summary>
-                              <div className="mt-3 space-y-3 pl-6 text-xs">
-                                <div>
-                                  <span className="text-gray-500 font-medium">Content Hash:</span>
-                                  <p className="font-mono text-gray-700 break-all mt-0.5 bg-gray-100 p-2 rounded">{step.contentHash}</p>
-                                </div>
-                                {step.blockchainData && (
-                                  <>
-                                    <div>
-                                      <span className="text-gray-500 font-medium">Full Creator Address:</span>
-                                      <p className="font-mono text-gray-700 break-all mt-0.5 bg-gray-100 p-2 rounded">{step.blockchainData.creator}</p>
+                            {/* Expandable Description - Like Home */}
+                            <div
+                              className={`overflow-hidden transition-all duration-300 ${
+                                isExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
+                              }`}
+                            >
+                              <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+                                {/* Chain of Trust Warning */}
+                                {step.chainOfTrustValid === false && (
+                                  <div className="bg-red-100 border-l-4 border-red-600 p-3 rounded mb-4">
+                                    <div className="flex items-start gap-2">
+                                      <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                      </svg>
+                                      <div className="flex-1">
+                                        <h4 className="text-red-900 font-bold text-sm mb-1">Chain of Trust Broken</h4>
+                                        <p className="text-red-800 text-xs">
+                                          The creator of this step does NOT match the target address of the previous step.
+                                        </p>
+                                      </div>
                                     </div>
-                                    <div>
-                                      <span className="text-gray-500 font-medium">Signature Status:</span>
-                                      <span
-                                        className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
-                                          step.blockchainData.signatureValid
-                                            ? 'bg-green-200 text-green-900'
-                                            : 'bg-red-200 text-red-900'
-                                        }`}
-                                      >
-                                        {step.blockchainData.signatureValid ? '✓ Valid' : '✗ Invalid'}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span className="text-gray-500 font-medium">Block Number:</span>
-                                      <a 
-                                        href={getBlockExplorerLink(step.blockchainData.createdAt)} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="ml-2 text-blue-600 hover:underline font-mono"
-                                      >
-                                        #{step.blockchainData.createdAt} →
-                                      </a>
-                                    </div>
-                                  </>
+                                  </div>
                                 )}
+
+                                {/* Step Deliverable - Like Home style */}
+                                <div className="bg-gradient-to-br from-[#003399]/5 to-blue-50 rounded-lg p-3 sm:p-4">
+                                  <div className="text-sm sm:text-base text-gray-700 leading-relaxed font-mono">
+                                    {(() => {
+                                      const data = step.stepOnlyData || step.delivrable;
+                                      
+                                      // Get the step key (e.g., "production", "export", etc.) to exclude it
+                                      const stepKeyToExclude = stepKey.toLowerCase();
+                                      
+                                      return Object.entries(data).map(([key, value], idx) => {
+                                        // Skip internal fields starting with _ and the step name itself
+                                        if (key.startsWith('_') || key.toLowerCase() === stepKeyToExclude) return null;
+                                        
+                                        // Handle different value types - format like Home
+                                        if (typeof value === 'object' && value !== null) {
+                                          // For objects, flatten and display each property
+                                          return Object.entries(value).map(([subKey, subValue], subIdx) => {
+                                            if (subKey.startsWith('_')) return null;
+                                            return (
+                                              <div key={`${idx}-${subIdx}`} className="mb-1.5 last:mb-0">
+                                                <span className="font-semibold text-[#003399]">{subKey}:</span>
+                                                <span className="ml-1">{String(subValue)}</span>
+                                              </div>
+                                            );
+                                          });
+                                        } else {
+                                          // For simple values, check if it contains newlines (multi-line format)
+                                          const valueStr = String(value);
+                                          if (valueStr.includes('\n')) {
+                                            // Split by newlines and display each line
+                                            return valueStr.split('\n').map((line, lineIdx) => {
+                                              if (!line.trim()) return null;
+                                              return (
+                                                <div key={`${idx}-${lineIdx}`} className="mb-1.5 last:mb-0">
+                                                  {line.includes(':') ? (
+                                                    <>
+                                                      <span className="font-semibold text-[#003399]">{line.split(':')[0]}:</span>
+                                                      <span className="ml-1">{line.split(':').slice(1).join(':')}</span>
+                                                    </>
+                                                  ) : (
+                                                    line
+                                                  )}
+                                                </div>
+                                              );
+                                            });
+                                          } else {
+                                            return (
+                                              <div key={idx} className="mb-1.5 last:mb-0">
+                                                <span className="font-semibold text-[#003399]">{key}:</span>
+                                                <span className="ml-1">{valueStr}</span>
+                                              </div>
+                                            );
+                                          }
+                                        }
+                                      });
+                                    })()}
+                                  </div>
+                                </div>
+
+                                {/* Technical Details - Collapsible */}
+                                <details 
+                                  className="mt-4 pt-2 border-t"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <summary className="cursor-pointer text-sm text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2 py-2">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                    </svg>
+                                    Technical Details
+                                  </summary>
+                                  <div className="mt-3 space-y-3 pl-6 text-xs">
+                                    <div>
+                                      <span className="text-gray-500 font-medium">Content Hash:</span>
+                                      <p className="font-mono text-gray-700 break-all mt-0.5 bg-gray-100 p-2 rounded">{step.contentHash}</p>
+                                    </div>
+                                    {step.blockchainData && (
+                                      <>
+                                        <div>
+                                          <span className="text-gray-500 font-medium">Full Creator Address:</span>
+                                          <p className="font-mono text-gray-700 break-all mt-0.5 bg-gray-100 p-2 rounded">{step.blockchainData.creator}</p>
+                                        </div>
+                                        <div>
+                                          <span className="text-gray-500 font-medium">Signature Status:</span>
+                                          <span
+                                            className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
+                                              step.blockchainData.signatureValid
+                                                ? 'bg-green-200 text-green-900'
+                                                : 'bg-red-200 text-red-900'
+                                            }`}
+                                          >
+                                            {step.blockchainData.signatureValid ? '✓ Valid' : '✗ Invalid'}
+                                          </span>
+                                        </div>
+                                        <div>
+                                          <span className="text-gray-500 font-medium">Block Number:</span>
+                                          <a 
+                                            href={getBlockExplorerLink(step.blockchainData.createdAt)} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="ml-2 text-blue-600 hover:underline font-mono"
+                                          >
+                                            #{step.blockchainData.createdAt} →
+                                          </a>
+                                        </div>
+                                      </>
+                                    )}
+                                  </div>
+                                </details>
                               </div>
-                            </details>
-                          </div>
-                        )}
+                            </div>
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
+                  </div>
                 </div>
               </div>
             )}
