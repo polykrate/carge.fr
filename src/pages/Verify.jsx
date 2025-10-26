@@ -1893,8 +1893,8 @@ export const Verify = () => {
                 
                 {/* Vertical Timeline */}
                 <div className="relative">
-                  {/* Vertical Line */}
-                  <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#003399] via-blue-400 to-[#003399]"></div>
+                  {/* Vertical Line - Responsive positioning */}
+                  <div className="absolute left-6 sm:left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#003399] via-blue-400 to-[#003399]"></div>
 
                   {/* Timeline Steps */}
                   <div className="space-y-8">
@@ -1907,21 +1907,21 @@ export const Verify = () => {
                     const isExpanded = expandedSteps[step.stepIndex];
                     
                     return (
-                      <div key={step.stepIndex} className="relative flex items-start gap-6">
-                        {/* Circle Badge - Like Home */}
+                      <div key={step.stepIndex} className="relative flex items-start gap-3 sm:gap-6">
+                        {/* Circle Badge - Responsive size */}
                         <button
                           onClick={() => setExpandedSteps(prev => ({
                             ...prev,
                             [step.stepIndex]: !prev[step.stepIndex]
                           }))}
-                          className={`relative z-10 flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl transition-all duration-300 shadow-lg ${
+                          className={`relative z-10 flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center font-bold text-base sm:text-xl transition-all duration-300 shadow-lg ${
                             step.chainOfTrustValid === false
                               ? 'bg-red-500 text-white ring-4 ring-red-500/20 scale-110'
                               : !step.blockchainVerified
                               ? 'bg-red-500 text-white ring-4 ring-red-500/20'
                               : isExpanded
-                              ? 'bg-[#003399] text-white ring-4 ring-[#003399]/20 scale-110'
-                              : 'bg-green-500 text-white border-2 border-gray-300 hover:border-[#003399] hover:scale-105'
+                              ? 'bg-[#003399] text-white ring-4 ring-[#003399]/20 sm:scale-110'
+                              : 'bg-[#003399] text-white border-2 border-[#003399]/30 hover:border-[#003399] hover:scale-105'
                           }`}
                         >
                           {step.stepIndex + 1}
@@ -1945,22 +1945,22 @@ export const Verify = () => {
                             }`}
                           >
                             {/* Card Header */}
-                            <div className="p-4 sm:p-6">
+                            <div className="p-3 sm:p-6">
                               <div className="flex items-center justify-between gap-3">
                                 <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
                                   {/* Status Icon */}
                                   <div className="flex-shrink-0">
-                                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center transition-colors duration-300 ${
+                                    <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center transition-colors duration-300 ${
                                       step.chainOfTrustValid === false
                                         ? 'bg-red-500'
                                         : !step.blockchainVerified
                                         ? 'bg-red-500'
-                                        : isExpanded ? 'bg-[#003399]' : 'bg-gray-100'
+                                        : isExpanded ? 'bg-[#003399]' : 'bg-[#003399]/10'
                                     }`}>
-                                      <svg className={`w-5 h-5 sm:w-6 sm:h-6 ${
+                                      <svg className={`w-4 h-4 sm:w-6 sm:h-6 ${
                                         step.chainOfTrustValid === false || !step.blockchainVerified
                                           ? 'text-white'
-                                          : isExpanded ? 'text-white' : 'text-gray-600'
+                                          : isExpanded ? 'text-white' : 'text-[#003399]'
                                       }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                       </svg>
@@ -1969,14 +1969,14 @@ export const Verify = () => {
 
                                   {/* Title */}
                                   <div className="flex-1 min-w-0 pt-1">
-                                    <h3 className={`text-base sm:text-xl font-bold transition-colors duration-300 break-words ${
+                                    <h3 className={`text-sm sm:text-xl font-bold transition-colors duration-300 break-words ${
                                       step.chainOfTrustValid === false || !step.blockchainVerified
                                         ? 'text-red-600'
                                         : isExpanded ? 'text-[#003399]' : 'text-gray-900'
                                     }`}>
                                       {stepFunction}
                                     </h3>
-                                    <div className="text-sm text-gray-600 mt-0.5">
+                                    <div className="text-xs sm:text-sm text-gray-600 mt-0.5">
                                       {stepIdentity}
                                     </div>
                                     {/* Status badges - small and discrete */}
@@ -2025,7 +2025,7 @@ export const Verify = () => {
                                 isExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
                               }`}
                             >
-                              <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+                              <div className="px-3 sm:px-6 pb-3 sm:pb-6">
                                 {/* Chain of Trust Warning */}
                                 {step.chainOfTrustValid === false && (
                                   <div className="bg-red-100 border-l-4 border-red-600 p-3 rounded mb-4">
@@ -2044,8 +2044,8 @@ export const Verify = () => {
                                 )}
 
                                 {/* Step Deliverable - Like Home style */}
-                                <div className="bg-gradient-to-br from-[#003399]/5 to-blue-50 rounded-lg p-3 sm:p-4">
-                                  <div className="text-sm sm:text-base text-gray-700 leading-relaxed font-mono">
+                                <div className="bg-gradient-to-br from-[#003399]/5 to-blue-50 rounded-lg p-2.5 sm:p-4">
+                                  <div className="text-xs sm:text-base text-gray-700 leading-relaxed font-mono">
                                     {(() => {
                                       const data = step.stepOnlyData || step.delivrable;
                                       
