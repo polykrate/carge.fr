@@ -353,15 +353,15 @@ export class RagClient {
       api = await ApiPromise.create({ provider: wsProvider });
       console.log('✅ API connected for runtime call');
       
-      // Convert tags to bytes (UTF-8 encoding)
-      const { stringToU8a, u8aToHex } = await import('@polkadot/util');
-      const tagBytes = tags.map(tag => stringToU8a(tag));
-      
-      // Call the runtime API
-      console.log('Calling ragApi.findByTags...');
-      const searchResults = await api.call.ragApi.findByTags(tagBytes);
+      // Prepare tags for runtime API call
+      // The runtime expects Vec<Bytes>, so we need to pass strings and let Polkadot.js encode them
+      console.log('Calling ragApi.findByTags with tags:', tags);
+      const searchResults = await api.call.ragApi.findByTags(tags);
       
       console.log('Raw search results:', searchResults);
+      
+      // Import utilities for hash conversion
+      const { u8aToHex } = await import('@polkadot/util');
       
       // Convert BTreeMap to entries array
       let resultsEntries = [];
