@@ -203,191 +203,282 @@ export const QuickSign = () => {
   };
 
   return (
-    <div className="container mx-auto px-6 py-12 max-w-4xl">
-      <h1 className="text-4xl font-light mb-4">{t('quickSign.title')}</h1>
-      <p className="text-gray-600 mb-8">
-        {t('quickSign.description')}
-      </p>
-
-      {/* How Identity Linking Works */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-        <h2 className="text-xl font-semibold text-[#003399] mb-6">{t('quickSign.howItWorksTitle')}</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">{t('quickSign.step1Title')}</h3>
-            <p className="text-sm text-gray-700 text-justify">{t('quickSign.step1Desc')}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">{t('quickSign.step2Title')}</h3>
-            <p className="text-sm text-gray-700 text-justify">{t('quickSign.step2Desc')}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">{t('quickSign.step3Title')}</h3>
-            <p className="text-sm text-gray-700 text-justify">{t('quickSign.step3Desc')}</p>
-          </div>
+    <>
+      {/* Hero Section */}
+      <section className="relative py-16 md:py-24 bg-gradient-to-br from-gray-50 via-white to-blue-50 overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-20 right-10 w-72 h-72 bg-[#003399]/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 left-10 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl"></div>
         </div>
-      </div>
-
-      {/* File Upload */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-        <h2 className="text-xl font-medium mb-4">{t('quickSign.selectFile')}</h2>
-
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition">
-          <input
-            type="file"
-            onChange={handleFileSelect}
-            className="hidden"
-            id="file-upload"
-            disabled={signing}
-          />
-          <label htmlFor="file-upload" className="cursor-pointer">
-            <svg className="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        
+        <div className="container mx-auto px-6 text-center max-w-6xl relative z-10">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#003399] text-white rounded-full text-sm font-medium mb-6 shadow-lg">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
-            <p className="text-gray-700 font-medium mb-2">{t('verify.dragDrop')}</p>
-            <p className="text-sm text-gray-500">{t('quickSign.anyFileType')}</p>
-          </label>
-        </div>
+            Quick Signature
+          </div>
 
-        {/* File Info */}
-        {fileName && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {/* Main Title */}
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight bg-gradient-to-r from-gray-900 via-[#003399] to-gray-900 bg-clip-text text-transparent">
+            {t('quickSign.title')}
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed max-w-3xl mx-auto">
+            {t('quickSign.description')}
+          </p>
+
+          {/* Key Benefits */}
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-lg">
+              <div className="w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center mx-auto mb-4">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">{t('quickSign.step1Title')}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">{t('quickSign.step1Desc')}</p>
+            </div>
+            <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-lg">
+              <div className="w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center mx-auto mb-4">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">{t('quickSign.step2Title')}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">{t('quickSign.step2Desc')}</p>
+            </div>
+            <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl p-6 hover:border-[#003399] transition-all hover:shadow-lg">
+              <div className="w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center mx-auto mb-4">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">{t('quickSign.step3Title')}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">{t('quickSign.step3Desc')}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-6 py-12 max-w-4xl">
+
+        {/* File Upload */}
+        <div className="bg-white border-2 border-gray-200 rounded-xl shadow-lg p-8 mb-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-gradient-to-br from-[#003399] to-blue-700 rounded-lg flex items-center justify-center">
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">{t('quickSign.selectFile')}</h2>
+              <p className="text-sm text-gray-600">Upload any file to sign</p>
+            </div>
+          </div>
+
+          <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-[#003399] hover:bg-gray-50 transition-all">
+            <input
+              type="file"
+              onChange={handleFileSelect}
+              className="hidden"
+              id="file-upload"
+              disabled={signing}
+            />
+            <label htmlFor="file-upload" className="cursor-pointer">
+              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <div>
-                  <div className="font-medium text-sm">{fileName}</div>
-                  <div className="text-xs text-gray-500 font-mono mt-1">
-                    Hash: {fileHash.substring(0, 20)}...{fileHash.substring(fileHash.length - 10)}
+              </div>
+              <p className="text-lg font-semibold text-gray-900 mb-2">{t('verify.dragDrop')}</p>
+              <p className="text-sm text-gray-500">{t('quickSign.anyFileType')}</p>
+            </label>
+          </div>
+
+          {/* File Info */}
+          {fileName && (
+            <div className="mt-6 p-6 bg-gradient-to-br from-blue-50 to-white rounded-xl border-2 border-blue-200">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-4 flex-1">
+                  <div className="w-12 h-12 bg-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-bold text-gray-900 mb-1">{fileName}</div>
+                    <div className="text-xs text-gray-600 font-mono bg-white px-3 py-2 rounded-lg break-all border border-gray-200">
+                      <span className="font-semibold">Hash:</span> {fileHash.substring(0, 20)}...{fileHash.substring(fileHash.length - 10)}
+                    </div>
                   </div>
                 </div>
+                <button
+                  onClick={resetForm}
+                  className="ml-4 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-white rounded-lg transition border border-gray-300 hover:border-gray-400"
+                  disabled={signing}
+                >
+                  {t('quickSign.change')}
+                </button>
               </div>
-              <button
-                onClick={resetForm}
-                className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 transition"
-                disabled={signing}
-              >
-                {t('quickSign.change')}
-              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Wallet Check */}
+        {!selectedAccount && fileName && (
+          <div className="bg-orange-50 border-2 border-orange-200 rounded-xl p-5 mb-6">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="font-bold text-orange-900 mb-1">Wallet Required</h4>
+                <p className="text-sm text-orange-800">{t('quickSign.connectWallet')}</p>
+              </div>
             </div>
           </div>
         )}
-      </div>
 
-      {/* Wallet Check */}
-      {!selectedAccount && fileName && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center space-x-3">
-            <svg className="w-5 h-5 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <div className="text-sm text-[#003399]">
-              {t('quickSign.connectWallet')}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Sign Button */}
-      {fileName && selectedAccount && !result && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-          <button
-            onClick={handleSign}
-            disabled={signing}
-            className="w-full px-6 py-4 bg-[#003399] hover:bg-[#002266] text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {signing ? t('quickSign.signing') : t('quickSign.signButton')}
-          </button>
-          <p className="text-xs text-gray-500 text-center mt-3">
-            {t('quickSign.signDesc')}
-          </p>
-        </div>
-      )}
-
-      {/* Signing Status */}
-      {signing && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-          <div className="flex items-center space-x-3">
-            <svg className="animate-spin h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <div>
-              <div className="font-medium text-blue-900">{t('quickSign.signing')}</div>
-              <div className="text-sm text-blue-700">{t('quickSign.confirmWallet')}</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Error */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
-          <div className="flex items-center space-x-3">
-            <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <div>
-              <div className="font-medium text-red-900">Signature Failed</div>
-              <div className="text-sm text-red-700">{error}</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Success Result */}
-      {result && result.success && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-          <div className="flex items-center space-x-3 mb-4">
-            <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <div>
-              <div className="font-medium text-lg text-green-900">File Signed Successfully!</div>
-              <div className="text-sm text-green-700">Crypto trail created on blockchain</div>
-            </div>
-          </div>
-
-          <div className="mt-4 bg-white rounded-lg p-4">
-            <h3 className="font-medium mb-3">Signature Details</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex">
-                <span className="text-gray-500 w-32">File:</span>
-                <span className="font-medium break-all">{result.fileName}</span>
-              </div>
-              <div className="flex">
-                <span className="text-gray-500 w-32">Content Hash:</span>
-                <span className="font-mono text-xs break-all">{result.contentHash}</span>
-              </div>
-              <div className="flex">
-                <span className="text-gray-500 w-32">Wrapped Hash:</span>
-                <span className="font-mono text-xs break-all">{result.wrappedMessageHash}</span>
-              </div>
-              <div className="flex">
-                <span className="text-gray-500 w-32">Signer:</span>
-                <span className="font-mono text-xs break-all">{result.signer}</span>
-              </div>
-              <div className="flex">
-                <span className="text-gray-500 w-32">Block Hash:</span>
-                <span className="font-mono text-xs break-all">{result.blockHash}</span>
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 mt-3">
-              The wrapped hash is what was actually signed (SHA256 of &lt;Bytes&gt;contentHash&lt;/Bytes&gt;)
+        {/* Sign Button */}
+        {fileName && selectedAccount && !result && (
+          <div className="bg-white border-2 border-gray-200 rounded-xl shadow-lg p-6 mb-6">
+            <button
+              onClick={handleSign}
+              disabled={signing}
+              className="w-full px-6 py-4 bg-gradient-to-r from-[#003399] to-blue-700 hover:from-[#002266] hover:to-blue-800 text-white rounded-xl transition-all font-bold text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 group"
+            >
+              {signing ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  {t('quickSign.signing')}
+                </>
+              ) : (
+                <>
+                  <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  {t('quickSign.signButton')}
+                </>
+              )}
+            </button>
+            <p className="text-xs text-gray-500 text-center mt-3 flex items-center justify-center gap-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              {t('quickSign.signDesc')}
             </p>
           </div>
+        )}
 
-          <button
-            onClick={resetForm}
-            className="w-full mt-4 px-4 py-2 bg-[#003399] hover:bg-[#002266] text-white rounded-lg transition font-medium"
-          >
-            Sign Another File
-          </button>
-        </div>
-      )}
-    </div>
+        {/* Signing Status */}
+        {signing && (
+          <div className="bg-gradient-to-br from-blue-50 to-white border-2 border-blue-200 rounded-xl p-6 mb-6 shadow-lg">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="animate-spin h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="font-bold text-blue-900 text-lg mb-1">{t('quickSign.signing')}</div>
+                <div className="text-sm text-blue-700">{t('quickSign.confirmWallet')}</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-6 mb-6 shadow-lg">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="h-7 w-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="font-bold text-red-900 text-lg mb-1">Signature Failed</div>
+                <div className="text-sm text-red-700">{error}</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Success Result */}
+        {result && result.success && (
+          <div className="bg-gradient-to-br from-green-50 to-white border-2 border-green-200 rounded-xl p-8 shadow-xl">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="w-14 h-14 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
+                <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="font-bold text-2xl text-green-900 mb-1">File Signed Successfully!</div>
+                <div className="text-sm text-green-700">Crypto trail created on blockchain</div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 border-2 border-gray-200 shadow-sm">
+              <h3 className="font-bold text-lg text-gray-900 mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Signature Details
+              </h3>
+              <div className="space-y-4">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">File</span>
+                  <div className="font-bold text-gray-900 mt-1 break-all">{result.fileName}</div>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Content Hash</span>
+                  <div className="font-mono text-xs text-gray-700 mt-1 break-all">{result.contentHash}</div>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Wrapped Hash</span>
+                  <div className="font-mono text-xs text-gray-700 mt-1 break-all">{result.wrappedMessageHash}</div>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Signer</span>
+                  <div className="font-mono text-xs text-gray-700 mt-1 break-all">{result.signer}</div>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Block Hash</span>
+                  <div className="font-mono text-xs text-gray-700 mt-1 break-all">{result.blockHash}</div>
+                </div>
+              </div>
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-xs text-blue-900 flex items-start gap-2">
+                  <svg className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>The wrapped hash is what was actually signed (SHA256 of &lt;Bytes&gt;contentHash&lt;/Bytes&gt;)</span>
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={resetForm}
+              className="w-full mt-6 px-6 py-4 bg-gradient-to-r from-[#003399] to-blue-700 hover:from-[#002266] hover:to-blue-800 text-white rounded-xl transition-all font-bold text-lg shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Sign Another File
+            </button>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 
