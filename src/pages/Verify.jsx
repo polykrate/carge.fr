@@ -1994,11 +1994,7 @@ export const Verify = () => {
                             </div>
 
                             {/* Expandable Description - Like Home */}
-                            <div
-                              className={`overflow-hidden transition-all duration-300 ${
-                                isExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
-                              }`}
-                            >
+                            {isExpanded && (
                               <div className="px-3 sm:px-6 pb-3 sm:pb-6">
                                 {/* Chain of Trust Warning */}
                                 {step.chainOfTrustValid === false && (
@@ -2084,7 +2080,7 @@ export const Verify = () => {
                                     </svg>
                                     Technical Details
                                   </summary>
-                                  <div className="mt-3 space-y-3 pl-2 sm:pl-6 text-xs max-h-[400px] overflow-y-auto pr-2">
+                                  <div className="mt-3 space-y-3 pl-2 sm:pl-6 text-xs pr-2">
                                     <div>
                                       <span className="text-gray-500 font-medium block mb-1">Content Hash:</span>
                                       <p className="font-mono text-gray-700 break-all mt-0.5 bg-gray-100 p-2 rounded text-xs whitespace-pre-wrap overflow-wrap-anywhere">{step.contentHash}</p>
@@ -2123,7 +2119,7 @@ export const Verify = () => {
                                   </div>
                                 </details>
                               </div>
-                            </div>
+                            )}
                           </button>
                       </div>
                     );
