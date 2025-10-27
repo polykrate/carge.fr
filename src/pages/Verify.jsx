@@ -1766,121 +1766,130 @@ export const Verify = () => {
             {workflowHistory && !verifyingChainOfTrust && (
               <div className="mt-6 space-y-4">
                 {/* Compact Workflow Summary */}
-                <div className="bg-white bg-opacity-70 rounded-lg p-4 border border-gray-200">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 text-lg mb-2">
-                        {workflowHistory.masterWorkflowName}
-                      </h3>
-                      <div className="flex items-center gap-3 text-xs sm:text-sm text-gray-600 flex-wrap">
-                        <span className="flex items-center gap-1 whitespace-nowrap">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                          </svg>
-                          {workflowHistory.totalSteps} steps
-                        </span>
-                        <span className="flex items-center gap-1 whitespace-nowrap">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
-                          {(() => {
-                            const uniqueParticipants = new Set(
-                              workflowHistory.history
-                                .filter(step => step.blockchainData?.creator)
-                                .map(step => step.blockchainData.creator)
-                            );
-                            return uniqueParticipants.size;
-                          })()} participants
-                        </span>
-                        {(() => {
-                          // Calculate duration between first and last step
+                <div className="bg-white bg-opacity-70 rounded-lg p-4 sm:p-6 border border-gray-200">
+                  {/* Title and Status Badge */}
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <h3 className="font-semibold text-gray-900 text-lg">
+                      {workflowHistory.masterWorkflowName}
+                    </h3>
+                    {workflowHistory.allStepsVerified && workflowHistory.chainOfTrustValid === true && workflowHistory.allSchemasValid !== false && chronologicalOrderValid !== false ? (
+                      <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full whitespace-nowrap flex items-center gap-1.5">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        VERIFIED
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full whitespace-nowrap flex items-center gap-1.5">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        ISSUES FOUND
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Key Metrics */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Steps</div>
+                        <div className="font-semibold text-gray-900">{workflowHistory.totalSteps}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Participants</div>
+                        <div className="font-semibold text-gray-900">{(() => {
+                          const uniqueParticipants = new Set(
+                            workflowHistory.history
+                              .filter(step => step.blockchainData?.creator)
+                              .map(step => step.blockchainData.creator)
+                          );
+                          return uniqueParticipants.size;
+                        })()}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Duration</div>
+                        <div className="font-semibold text-gray-900">{(() => {
                           const firstBlock = workflowHistory.history[0]?.blockchainData?.createdAt;
                           const lastBlock = workflowHistory.history[workflowHistory.history.length - 1]?.blockchainData?.createdAt;
                           
                           if (firstBlock && lastBlock && blockTimestamps[firstBlock] && blockTimestamps[lastBlock]) {
                             const duration = formatDuration(blockTimestamps[firstBlock], blockTimestamps[lastBlock]);
-                            
-                            if (duration) {
-                              return (
-                                <span className="flex items-center gap-1 whitespace-nowrap">
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                  </svg>
-                                  {duration}
-                                </span>
-                              );
-                            }
+                            return duration || '—';
                           }
-                          return null;
-                        })()}
+                          return '—';
+                        })()}</div>
                       </div>
                     </div>
-                    <div className="flex flex-row sm:flex-col gap-2 flex-wrap">
-                      {workflowHistory.allStepsVerified ? (
-                        <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full whitespace-nowrap flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          All Verified
-                        </span>
-                      ) : (
-                        <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full whitespace-nowrap flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                          </svg>
-                          Partial
-                        </span>
-                      )}
-                      {workflowHistory.chainOfTrustValid === true && (
-                        <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full whitespace-nowrap flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.586-2A2 2 0 0119 9H5a2 2 0 01-1.414-3.414l2-2a2 2 0 012.828 0l2 2a2 2 0 010 2.828l-2 2z" />
-                          </svg>
-                          Chain Valid
-                        </span>
-                      )}
-                      {workflowHistory.chainOfTrustValid === false && (
-                        <span className="px-3 py-1 bg-orange-100 text-orange-800 text-xs font-bold rounded-full whitespace-nowrap flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                          </svg>
-                          Chain Broken
-                        </span>
-                      )}
-                      {workflowHistory.allSchemasValid === true && (
-                        <span className="px-3 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full whitespace-nowrap flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          {t('verify.schemasValid')}
-                        </span>
-                      )}
-                      {workflowHistory.allSchemasValid === false && (
-                        <span className="px-3 py-1 bg-orange-100 text-orange-800 text-xs font-bold rounded-full whitespace-nowrap flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                          </svg>
-                          {t('verify.schemasInvalid')}
-                        </span>
-                      )}
-                      {chronologicalOrderValid === false && (
-                        <span className="px-3 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full whitespace-nowrap flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          Time Order Invalid
-                        </span>
-                      )}
+                    <div className="flex items-center gap-2">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        workflowHistory.history.filter(h => h.blockchainVerified).length === workflowHistory.history.length
+                          ? 'bg-green-50'
+                          : 'bg-yellow-50'
+                      }`}>
+                        <svg className={`w-4 h-4 ${
+                          workflowHistory.history.filter(h => h.blockchainVerified).length === workflowHistory.history.length
+                            ? 'text-green-600'
+                            : 'text-yellow-600'
+                        }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Verified</div>
+                        <div className="font-semibold text-gray-900">{workflowHistory.history.filter(h => h.blockchainVerified).length}/{workflowHistory.history.length}</div>
+                      </div>
                     </div>
                   </div>
-                  
-                  {/* Info text */}
-                  <p className="text-xs text-gray-500 mt-3 flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Click on any step below to view details · {workflowHistory.history.filter(h => h.blockchainVerified).length}/{workflowHistory.history.length} verified
-                  </p>
+
+                  {/* Validation Checks - Only show if there are issues */}
+                  {(workflowHistory.chainOfTrustValid === false || workflowHistory.allSchemasValid === false || chronologicalOrderValid === false) && (
+                    <div className="border-t pt-3 space-y-2">
+                      {workflowHistory.chainOfTrustValid === false && (
+                        <div className="flex items-center gap-2 text-xs text-red-700">
+                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01" />
+                          </svg>
+                          <span className="font-medium">Chain of trust broken - unauthorized participant detected</span>
+                        </div>
+                      )}
+                      {workflowHistory.allSchemasValid === false && (
+                        <div className="flex items-center gap-2 text-xs text-orange-700">
+                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01" />
+                          </svg>
+                          <span className="font-medium">Some deliverables have data validation errors</span>
+                        </div>
+                      )}
+                      {chronologicalOrderValid === false && (
+                        <div className="flex items-center gap-2 text-xs text-red-700">
+                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="font-medium">Steps are not in chronological order</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 
                 {/* Timeline Steps */}
