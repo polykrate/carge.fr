@@ -1792,14 +1792,27 @@ export const Verify = () => {
                             return uniqueParticipants.size;
                           })()} participants
                         </span>
-                        {workflowHistory.history[0]?.blockchainData && workflowHistory.history[workflowHistory.history.length - 1]?.blockchainData && (
-                          <span className="flex items-center gap-1 whitespace-nowrap">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Block #{workflowHistory.history[0].blockchainData.createdAt} → #{workflowHistory.history[workflowHistory.history.length - 1].blockchainData.createdAt}
-                          </span>
-                        )}
+                        {(() => {
+                          // Calculate duration between first and last step
+                          const firstBlock = workflowHistory.history[0]?.blockchainData?.createdAt;
+                          const lastBlock = workflowHistory.history[workflowHistory.history.length - 1]?.blockchainData?.createdAt;
+                          
+                          if (firstBlock && lastBlock && blockTimestamps[firstBlock] && blockTimestamps[lastBlock]) {
+                            const duration = formatDuration(blockTimestamps[firstBlock], blockTimestamps[lastBlock]);
+                            
+                            if (duration) {
+                              return (
+                                <span className="flex items-center gap-1 whitespace-nowrap">
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  {duration}
+                                </span>
+                              );
+                            }
+                          }
+                          return null;
+                        })()}
                       </div>
                     </div>
                     <div className="flex flex-row sm:flex-col gap-2 flex-wrap">
@@ -1858,27 +1871,6 @@ export const Verify = () => {
                           Time Order Invalid
                         </span>
                       )}
-                      {chronologicalOrderValid === true && workflowHistory.history && workflowHistory.history.length > 1 && (() => {
-                        // Calculate duration between first and last step
-                        const firstBlock = workflowHistory.history[0]?.blockchainData?.createdAt;
-                        const lastBlock = workflowHistory.history[workflowHistory.history.length - 1]?.blockchainData?.createdAt;
-                        
-                        if (firstBlock && lastBlock && blockTimestamps[firstBlock] && blockTimestamps[lastBlock]) {
-                          const duration = formatDuration(blockTimestamps[firstBlock], blockTimestamps[lastBlock]);
-                          
-                          if (duration) {
-                            return (
-                              <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full whitespace-nowrap flex items-center gap-1">
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Duration: {duration}
-                              </span>
-                            );
-                          }
-                        }
-                        return null;
-                      })()}
                     </div>
                   </div>
                   
