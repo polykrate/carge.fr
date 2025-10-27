@@ -2084,21 +2084,21 @@ export const Verify = () => {
                                     </svg>
                                     Technical Details
                                   </summary>
-                                  <div className="mt-3 space-y-3 pl-6 text-xs">
+                                  <div className="mt-3 space-y-3 pl-2 sm:pl-6 text-xs max-h-[400px] overflow-y-auto pr-2">
                                     <div>
-                                      <span className="text-gray-500 font-medium">Content Hash:</span>
-                                      <p className="font-mono text-gray-700 break-all mt-0.5 bg-gray-100 p-2 rounded">{step.contentHash}</p>
+                                      <span className="text-gray-500 font-medium block mb-1">Content Hash:</span>
+                                      <p className="font-mono text-gray-700 break-all mt-0.5 bg-gray-100 p-2 rounded text-xs whitespace-pre-wrap overflow-wrap-anywhere">{step.contentHash}</p>
                                     </div>
                                     {step.blockchainData && (
                                       <>
                                         <div>
-                                          <span className="text-gray-500 font-medium">Full Creator Address:</span>
-                                          <p className="font-mono text-gray-700 break-all mt-0.5 bg-gray-100 p-2 rounded">{step.blockchainData.creator}</p>
+                                          <span className="text-gray-500 font-medium block mb-1">Full Creator Address:</span>
+                                          <p className="font-mono text-gray-700 break-all mt-0.5 bg-gray-100 p-2 rounded text-xs whitespace-pre-wrap overflow-wrap-anywhere">{step.blockchainData.creator}</p>
                                         </div>
                                         <div>
-                                          <span className="text-gray-500 font-medium">Signature Status:</span>
+                                          <span className="text-gray-500 font-medium block mb-1">Signature Status:</span>
                                           <span
-                                            className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
+                                            className={`inline-block px-2 py-1 rounded text-xs font-medium ${
                                               step.blockchainData.signatureValid
                                                 ? 'bg-green-200 text-green-900'
                                                 : 'bg-red-200 text-red-900'
@@ -2108,12 +2108,12 @@ export const Verify = () => {
                                           </span>
                                         </div>
                                         <div>
-                                          <span className="text-gray-500 font-medium">Block Number:</span>
+                                          <span className="text-gray-500 font-medium block mb-1">Block Number:</span>
                                           <a 
                                             href={getBlockExplorerLink(step.blockchainData.createdAt)} 
                                             target="_blank" 
                                             rel="noopener noreferrer"
-                                            className="ml-2 text-blue-600 hover:underline font-mono"
+                                            className="inline-block text-blue-600 hover:underline font-mono text-xs"
                                           >
                                             #{step.blockchainData.createdAt} →
                                           </a>
