@@ -78,6 +78,9 @@ const resources = {
     successSubtitle: 'Your workflow is now live on the blockchain',
     masterHashLabel: 'Master Workflow Hash:',
     useHashHint: 'Use this hash to execute workflows from the Workflows page',
+    executeWorkflow: 'Execute Workflow',
+    copyHash: 'Copy Hash',
+    hashCopied: 'Hash copied to clipboard!',
   },
       
       // Home page
@@ -530,6 +533,9 @@ const resources = {
         successSubtitle: 'Votre workflow est maintenant en ligne sur la blockchain',
         masterHashLabel: 'Hash du Workflow Principal :',
         useHashHint: 'Utilisez ce hash pour exécuter des workflows depuis la page Workflows',
+        executeWorkflow: 'Exécuter le Workflow',
+        copyHash: 'Copier le Hash',
+        hashCopied: 'Hash copié dans le presse-papiers !',
       },
       
       // Page d'accueil

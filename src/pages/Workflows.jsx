@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { RagClient } from '../lib/core/rag-client.js';
 import { CidConverter } from '../lib/core/cid-converter.js';
@@ -16,6 +17,7 @@ import {
 export const Workflows = () => {
   const { t } = useTranslation();
   const { substrateClient, ipfsClient, selectedAccount } = useApp();
+  const location = useLocation();
   
   // Generate Polkadot.js Apps explorer link for a block number
   const getBlockExplorerLink = (blockNumber) => {
@@ -107,6 +109,27 @@ export const Workflows = () => {
     loadRags();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Auto-select workflow if prefilledHash is provided from AI deployment
+  useEffect(() => {
+    const prefilledHash = location.state?.prefilledHash;
+    if (prefilledHash && allRags.length > 0 && !selectedRag) {
+      console.log('Prefilled hash detected:', prefilledHash);
+      const matchingRag = allRags.find(rag => rag.hash === prefilledHash);
+      if (matchingRag) {
+        console.log('Auto-selecting workflow:', matchingRag.metadata.name);
+        selectRag(matchingRag);
+        // Scroll to form section
+        setTimeout(() => {
+          const formSection = document.getElementById('workflow-form-section');
+          if (formSection) {
+            formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 300);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state, allRags, selectedRag]);
 
   // Generate form when schema is loaded
   useEffect(() => {
@@ -908,7 +931,7 @@ export const Workflows = () => {
 
         {/* Form Generation */}
         {selectedRag && (
-          <div className="bg-white border-2 border-gray-200 rounded-xl shadow-lg p-8">
+          <div id="workflow-form-section" className="bg-white border-2 border-gray-200 rounded-xl shadow-lg p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-gradient-to-br from-[#003399] to-blue-700 rounded-lg flex items-center justify-center">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
