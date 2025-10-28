@@ -270,11 +270,11 @@ export const Home = () => {
                         {/* Expandable Description */}
                         <div
                           className={`overflow-hidden transition-all duration-300 ${
-                            isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                            isExpanded ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
                           }`}
                         >
                           <div className="px-4 sm:px-6 pb-4 sm:pb-6">
-                            <div className="bg-gradient-to-br from-[#003399]/5 to-blue-50 rounded-lg p-3 sm:p-4">
+                            <div className="bg-gradient-to-br from-[#003399]/5 to-blue-50 rounded-lg p-3 sm:p-4 max-h-[500px] overflow-y-auto">
                               <div className="text-sm sm:text-base text-gray-700 leading-relaxed font-mono">
                                 {data.desc.split('\n').map((line, idx) => (
                                   <div key={idx} className="mb-1.5 last:mb-0">
