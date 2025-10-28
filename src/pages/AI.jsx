@@ -107,14 +107,18 @@ export const Agent = () => {
   
   const step1Ref = useRef(null);
 
-  // Scroll to Step 1 if hash is present (only when explicitly requested)
+  // Handle scroll behavior on page load
   useEffect(() => {
     if (window.location.hash === '#step1' && step1Ref.current) {
+      // Scroll to Step 1 only if hash is present
       setTimeout(() => {
         scrollToElement(step1Ref);
         // Clear hash after scrolling
         window.history.replaceState(null, '', window.location.pathname);
       }, 100);
+    } else {
+      // Always scroll to top when arriving without hash
+      window.scrollTo(0, 0);
     }
   }, []);
   
