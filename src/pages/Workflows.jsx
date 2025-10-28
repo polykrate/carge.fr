@@ -326,6 +326,7 @@ export const Workflows = () => {
       
       console.log(`Filtered to ${ragMasters.length} RAG master(s) with steps`);
       setDisplayRags(ragMasters);
+      setCurrentPage(1); // Reset to first page on search
       
       // Update allRags if we found new ones
       if (foundRags.length > 0) {
