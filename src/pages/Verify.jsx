@@ -220,6 +220,22 @@ export const Verify = () => {
   const formContainerRef = useRef(null);
   const workflowSectionRef = useRef(null);
   const workflowContinuationRef = useRef(null);
+  const qrScannerRef = useRef(null);
+  
+  // Handle #qr hash to auto-activate QR scanner
+  useEffect(() => {
+    if (window.location.hash === '#qr') {
+      setMode('qr');
+      // Scroll to QR scanner after a short delay
+      setTimeout(() => {
+        if (qrScannerRef.current) {
+          scrollToElement(qrScannerRef);
+        }
+      }, 300);
+      // Clear hash after activation
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, []);
   
   // Auto-fill recipient address with connected wallet address
   useEffect(() => {
@@ -1771,13 +1787,15 @@ export const Verify = () => {
 
         {/* QR Code Scan Mode */}
         {mode === 'qr' && (
-          <QRCodeScanner
-            onScan={handleQRScan}
-            scanning={scanning}
-            setScanning={setScanning}
-            verifying={verifying}
-            autoStart={true}
-          />
+          <div ref={qrScannerRef}>
+            <QRCodeScanner
+              onScan={handleQRScan}
+              scanning={scanning}
+              setScanning={setScanning}
+              verifying={verifying}
+              autoStart={true}
+            />
+          </div>
         )}
       </div>
 
