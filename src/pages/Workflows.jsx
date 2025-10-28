@@ -54,9 +54,12 @@ export const Workflows = () => {
   const [searching, setSearching] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false); // Show/hide explanations
   const [favorites, setFavorites] = useState([]); // User's favorite workflow hashes
+  const [currentPage, setCurrentPage] = useState(1); // Pagination
+  const WORKFLOWS_PER_PAGE = 9; // 3x3 grid
   
-  // Ref for form container
+  // Refs
   const formContainerRef = useRef(null);
+  const workflowDetailsRef = useRef(null);
   
   // Auto-fill recipient address with connected wallet address
   useEffect(() => {
@@ -279,6 +282,7 @@ export const Workflows = () => {
       });
       
       setDisplayRags(ragMasters);
+      setCurrentPage(1); // Reset to first page on load
       
       console.log(`✅ Loaded ${ragMasters.length} workflows (${PINNED_WORKFLOWS.length} pinned + ${userFavorites.length} favorites) with ${stepHashes.size} step RAGs (${loadedRags.length} total RAGs)`);
     } catch (err) {
@@ -360,6 +364,13 @@ export const Workflows = () => {
       setSelectedRag(ragWithSS58);
       setIsDetailsExpanded(false); // Reset details accordion when selecting new workflow
       console.log('Selected RAG:', rag.metadata.name);
+      
+      // Scroll to workflow details section
+      setTimeout(() => {
+        if (workflowDetailsRef.current) {
+          workflowDetailsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
       
       // Pre-load master workflow CIDs in background (non-blocking)
       preloadWorkflowCids(rag);
@@ -801,8 +812,18 @@ export const Workflows = () => {
               </button>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayRags.map((rag) => {
+            <>
+              {/* Pagination Info */}
+              {displayRags.length > WORKFLOWS_PER_PAGE && (
+                <div className="mb-4 text-sm text-gray-600">
+                  Showing {((currentPage - 1) * WORKFLOWS_PER_PAGE) + 1} - {Math.min(currentPage * WORKFLOWS_PER_PAGE, displayRags.length)} of {displayRags.length} workflows
+                </div>
+              )}
+              
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayRags
+                  .slice((currentPage - 1) * WORKFLOWS_PER_PAGE, currentPage * WORKFLOWS_PER_PAGE)
+                  .map((rag) => {
                 const isFav = isFavorite(selectedAccount, rag.hash);
                 
                 return (
@@ -884,13 +905,54 @@ export const Workflows = () => {
                   </button>
                 </div>
               );
-              })}
-            </div>
+                  })}
+              </div>
+
+              {/* Pagination Controls */}
+              {displayRags.length > WORKFLOWS_PER_PAGE && (
+                <div className="mt-8 flex justify-center items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:border-[#003399] hover:bg-blue-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-300 disabled:hover:bg-white"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  
+                  {Array.from({ length: Math.ceil(displayRags.length / WORKFLOWS_PER_PAGE) }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                        currentPage === page
+                          ? 'bg-[#003399] text-white shadow-lg'
+                          : 'border-2 border-gray-300 hover:border-[#003399] hover:bg-blue-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  
+                  <button
+                    onClick={() => setCurrentPage(Math.min(Math.ceil(displayRags.length / WORKFLOWS_PER_PAGE), currentPage + 1))}
+                    disabled={currentPage === Math.ceil(displayRags.length / WORKFLOWS_PER_PAGE)}
+                    className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:border-[#003399] hover:bg-blue-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-300 disabled:hover:bg-white"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
 
       {/* RAG Details */}
       {selectedRag && (
+        <div ref={workflowDetailsRef}>
         <div className="bg-gradient-to-br from-white to-blue-50 border-2 border-[#003399] rounded-xl shadow-lg p-6 mb-6 animate-fadeIn">
           <div className="space-y-4">
             {/* Name & Description with Visual Enhancement */}
