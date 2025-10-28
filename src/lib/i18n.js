@@ -74,13 +74,9 @@ const resources = {
     deployingBtn: 'Deploying to Blockchain...',
     walletWarning: '⚠️ Please connect your wallet to deploy',
     deploymentLogTitle: 'Deployment Log',
-    successTitle: '🎉 Workflow Deployed!',
+    successTitle: 'Workflow Deployed!',
     successSubtitle: 'Your workflow is now live on the blockchain',
-    masterHashLabel: 'Master Workflow Hash:',
-    useHashHint: 'Use this hash to execute workflows from the Workflows page',
     executeWorkflow: 'Execute Workflow',
-    copyHash: 'Copy Hash',
-    hashCopied: 'Hash copied to clipboard!',
   },
       
       // Home page
@@ -529,13 +525,9 @@ const resources = {
         deployingBtn: 'Déploiement sur la Blockchain...',
         walletWarning: '⚠️ Veuillez connecter votre portefeuille pour déployer',
         deploymentLogTitle: 'Journal de Déploiement',
-        successTitle: '🎉 Workflow Déployé !',
+        successTitle: 'Workflow Déployé !',
         successSubtitle: 'Votre workflow est maintenant en ligne sur la blockchain',
-        masterHashLabel: 'Hash du Workflow Principal :',
-        useHashHint: 'Utilisez ce hash pour exécuter des workflows depuis la page Workflows',
         executeWorkflow: 'Exécuter le Workflow',
-        copyHash: 'Copier le Hash',
-        hashCopied: 'Hash copié dans le presse-papiers !',
       },
       
       // Page d'accueil

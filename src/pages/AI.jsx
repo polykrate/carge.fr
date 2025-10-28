@@ -823,67 +823,36 @@ export const Agent = () => {
 
         {/* Success Result */}
         {deployedMasterHash && (
-          <div className="bg-green-50 border-2 border-green-200 rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-shadow">
-            {/* Success Header */}
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 bg-green-500 rounded-xl flex items-center justify-center shadow-lg">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h2 className="text-3xl font-bold text-green-900 mb-1">{t('ai.successTitle')}</h2>
-                <p className="text-green-700">{t('ai.successSubtitle')}</p>
-              </div>
-            </div>
-            
-            {/* Master Hash Display */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-green-100 mb-6">
-              <div className="flex items-center gap-2 mb-3">
-                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <div className="font-semibold text-gray-900">{t('ai.masterHashLabel')}</div>
-              </div>
-              <div className="font-mono text-sm bg-gray-100 border border-gray-200 rounded-lg p-4 break-all text-gray-800 hover:bg-gray-50 transition-colors">
-                {deployedMasterHash}
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link
-                to="/workflows"
-                state={{ prefilledHash: deployedMasterHash }}
-                className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-purple-600 to-[#003399] text-white rounded-xl hover:from-purple-700 hover:to-[#002266] transition-all duration-300 font-semibold shadow-lg hover:shadow-xl hover:scale-105 group"
-              >
-                <svg className="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                {t('ai.executeWorkflow')}
-              </Link>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(deployedMasterHash);
-                  showSuccess(t('ai.hashCopied'));
-                }}
-                className="flex items-center justify-center gap-2 px-6 py-4 bg-white border-2 border-green-500 text-green-700 rounded-xl hover:bg-green-50 transition-all duration-300 font-semibold shadow-md hover:shadow-lg hover:scale-105 group"
-              >
-                <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                {t('ai.copyHash')}
-              </button>
-            </div>
-
-            {/* Info Text */}
-            <div className="mt-6 flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <div className="bg-green-50 border-2 border-green-200 rounded-2xl shadow-xl p-8">
+            {/* Success Header with big checkmark like Verify */}
+            <div className="flex items-start space-x-4 mb-8">
+              <svg className="h-12 w-12 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <p className="text-sm text-blue-900 leading-relaxed">
-                {t('ai.useHashHint')}
-              </p>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h2 className="text-2xl font-bold text-gray-900">{t('ai.successTitle')}</h2>
+                  <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full whitespace-nowrap flex items-center gap-1.5">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    DEPLOYED
+                  </span>
+                </div>
+                <p className="text-gray-600 mb-6">{t('ai.successSubtitle')}</p>
+
+                {/* Execute Button */}
+                <Link
+                  to="/workflows"
+                  state={{ prefilledHash: deployedMasterHash }}
+                  className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-[#003399] text-white rounded-xl hover:from-purple-700 hover:to-[#002266] transition-all duration-300 font-semibold shadow-lg hover:shadow-xl hover:scale-105 group"
+                >
+                  <svg className="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  {t('ai.executeWorkflow')}
+                </Link>
+              </div>
             </div>
           </div>
         )}
