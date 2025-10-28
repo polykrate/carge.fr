@@ -1845,9 +1845,9 @@ export const Verify = () => {
 
             {/* Workflow Summary + Vertical Steps Timeline (mobile-optimized) */}
             {workflowHistory && !verifyingChainOfTrust && (
-              <div ref={workflowSectionRef} className="mt-6 space-y-4">
+              <div className="mt-6 space-y-4">
                 {/* Compact Workflow Summary */}
-                <div className="bg-white bg-opacity-70 rounded-lg p-4 sm:p-6 border border-gray-200">
+                <div ref={workflowSectionRef} className="bg-white bg-opacity-70 rounded-lg p-4 sm:p-6 border border-gray-200">
                   {/* Title and Status Badge */}
                   <div className="flex items-start justify-between gap-3 mb-4">
                     <h3 className="font-semibold text-gray-900 text-lg">
