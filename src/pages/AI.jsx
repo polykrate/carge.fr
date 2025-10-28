@@ -5,6 +5,7 @@ import { RagClient } from '../lib/core/rag-client.js';
 import { CidConverter } from '../lib/core/cid-converter.js';
 import { showSuccess, showError } from '../lib/toast';
 import { logger } from '../lib/logger';
+import { scrollToElement } from '../utils/scroll';
 
 const AI_INSTRUCTIONS = `I need help creating a blockchain workflow for supply chain traceability.
 
@@ -110,7 +111,7 @@ export const Agent = () => {
   useEffect(() => {
     if (window.location.hash === '#step1' && step1Ref.current) {
       setTimeout(() => {
-        step1Ref.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        scrollToElement(step1Ref);
       }, 100);
     }
   }, []);

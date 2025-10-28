@@ -1,6 +1,7 @@
-  import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { scrollToElement } from '../utils/scroll';
 
 export const Home = () => {
   const { t } = useTranslation();
@@ -9,7 +10,7 @@ export const Home = () => {
   const workflowSectionRef = useRef(null);
 
   const scrollToWorkflow = () => {
-    workflowSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    scrollToElement(workflowSectionRef);
   };
   
   return (

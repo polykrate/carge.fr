@@ -7,6 +7,7 @@ import { RagClient } from '../lib/core/rag-client.js';
 import { FormGenerator } from '../lib/core/form-generator.js';
 import { DeliverableDisplay } from '../components/DeliverableDisplay';
 import { showError, showSuccess, showLoading, dismiss, update, toastTx } from '../lib/toast';
+import { scrollToElement } from '../utils/scroll';
 import {
   waitForPolkadot,
   connectToApi,
@@ -430,7 +431,7 @@ export const Verify = () => {
   useEffect(() => {
     if (workflowHistory && !verifyingChainOfTrust && workflowSectionRef.current) {
       setTimeout(() => {
-        workflowSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        scrollToElement(workflowSectionRef);
       }, 500);
     }
   }, [workflowHistory, verifyingChainOfTrust]);
@@ -594,7 +595,7 @@ export const Verify = () => {
       FormGenerator.generateForm(nextStepSchema, 'next-step-form-fields');
       // Auto-scroll to workflow continuation section after form is rendered
       setTimeout(() => {
-        workflowContinuationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        scrollToElement(workflowContinuationRef);
       }, 300);
     }
   }, [nextStepSchema]);
