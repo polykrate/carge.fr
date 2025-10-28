@@ -22,13 +22,16 @@ Carge is built for everyone—not just institutions. Web3 should be accessible t
 
 **Carge is a decentralized PKI for workflow execution built on Substrate.**
 
-It combines three innovations:
+It combines four innovations:
 
-1. **Decentralized PKI** (`pallet-pki`): Each participant has a cryptographic identity anchored on-chain with X25519 exchange keys and libp2p peer IDs for encrypted cid transmissions
-2. **Multi-actor workflows** (`pallet-crypto-trail`): Send and receive encrypted deliverables on-chain between participants. Each step's output is encrypted, transmitted via IPFS, and only decryptable by the designated recipient—no external channels needed
-3. **RAG workflow storage** (`pallet-rag`): Multi-step workflow schemas stored as IPFS CIDs on-chain with tag-based search
+1. **AI-Powered Workflow Builder**: Natural language workflow creation with intelligent validation and blockchain deployment optimization
+2. **Decentralized PKI** (`pallet-pki`): Each participant has a cryptographic identity anchored on-chain with X25519 exchange keys and libp2p peer IDs for encrypted cid transmissions
+3. **Multi-actor workflows** (`pallet-crypto-trail`): Send and receive encrypted deliverables on-chain between participants. Each step's output is encrypted, transmitted via IPFS, and only decryptable by the designated recipient—no external channels needed
+4. **RAG workflow storage** (`pallet-rag`): Multi-step workflow schemas stored as IPFS CIDs on-chain with tag-based search
 
 **Primary use case**: Supply chain transparency to enhance product value. Each step (manufacturing, transport, retail) is cryptographically signed, creating verifiable proof of authenticity that consumers can trust.
+
+**Unique feature**: AI agents (Claude, ChatGPT, etc.) can interview users about their supply chain needs and automatically generate deployment-ready blockchain workflows, handling all cryptographic complexity and IPFS storage transparently.
 
 ---
 
@@ -163,16 +166,25 @@ pub struct RagMetadata<T: Config> {
 
 **Frontend (React dApp)**:
 - Live at [carge.fr](https://carge.fr)
+- **AI Workflow Builder**: Natural language workflow creation with intelligent prompts
+- **Batch deployment**: Single signature for multi-step workflows (parallel IPFS uploads)
 - Polkadot.js integration for wallet connection
 - SubWallet, Talisman, Polkadot.js extension support
 - QR code scanning for mobile verification
 - Real-time blockchain verification (<2s)
+- Favorites system with local persistence for workflow management
 
-**AI Integration (MCP)**:
-- Model Context Protocol server for AI agents
-- AI agents can deploy workflows directly to blockchain
-- Autonomous workflow creation and management
-- Compatible MCP like Claude, Mistral or others
+**AI Integration (Dual Mode)**:
+1. **Browser-based AI Builder** (New):
+   - Copy/paste workflow requirements to ChatGPT/Claude
+   - AI generates validated JSON conforming to blockchain limits
+   - Iterative corrections with clear error messages
+   - One-click deployment with automatic IPFS broadcasting
+   
+2. **MCP Server** (Advanced):
+   - Model Context Protocol server for autonomous AI agents
+   - Direct blockchain integration without human intervention
+   - Compatible with Claude, Mistral, and other MCP clients
 
 ---
 
@@ -204,6 +216,10 @@ Building a full-stack parachain candidate (3 custom Substrate pallets + dApp + M
 
 6. **Chain of custody verification**: Ensuring authenticity by verifying that each step's creator matches the previous step's designated recipient, the steps are in chronological order, reconstructing the on-chain workflow hash to validate each step, ensuring data format matches the schema and the person in front of you is the last designated recipient
 
+7. **AI-assisted workflow generation**: Designing intelligent prompts that guide AI models to generate valid blockchain workflows while respecting strict limits (name length, tag count, step count). The challenge was creating a prompt structure that enables iterative corrections without regenerating the entire workflow from scratch.
+
+8. **Batch deployment optimization**: Implementing parallel IPFS uploads followed by batched blockchain transactions (`api.tx.utility.batchAll`) to reduce from 8+ wallet signatures to a single signature for an 8-step workflow. This required local hash calculation to match blockchain logic before submission.
+
 ---
 
 ## 🏆 Accomplishments that I'm proud of
@@ -214,11 +230,13 @@ Returning to coding after 12 years in the military was daunting. Learning Rust a
 
 **Key technical achievements**:
 - ✅ **3 production pallets** with benchmarking, tests, and runtime integration
+- ✅ **AI Workflow Builder** - Natural language to blockchain in <5 minutes
+- ✅ **Single-signature batch deployment** - 8+ transactions bundled into one
 - ✅ **99% storage reduction** vs pure on-chain (IPFS hybrid)
 - ✅ **<2s proof verification** (5-10x faster than initial version)
 - ✅ **Zero-install verification** (browser-based IPFS node)
 - ✅ **Complete on-chain coordination** - Send/receive encrypted deliverables between actors without external channels (no email, no file sharing)
-- ✅ **MCP AI integration** (autonomous workflow deployment)
+- ✅ **Dual AI integration** (browser-based + MCP for autonomous agents)
 
 ### **Live production deployment**
 
@@ -243,6 +261,8 @@ Returning to coding after 12 years in the military was daunting. Learning Rust a
 
 5. **Hybrid architectures are the future**: Pure on-chain doesn't scale; pure IPFS lacks verifiability. The combination (CIDs on-chain, content on IPFS) is optimal
 
+6. **AI as the ultimate UX layer**: Blockchain complexity (CID formats, SCALE encoding, transaction batching) can be completely hidden behind conversational AI. Users describe what they want; AI handles the cryptographic details. This democratizes Web3 far beyond what traditional UIs can achieve.
+
 ### **Business learnings**:
 
 1. **Supply chain transparency is a $7.8B market** - Luxury goods, pharmaceuticals, aerospace parts need verifiable provenance to build consumer trust and product value
@@ -251,9 +271,13 @@ Returning to coding after 12 years in the military was daunting. Learning Rust a
 
 3. **QR codes are the killer UX** - Consumers understand "scan to verify." They don't need to know about Substrate or IPFS
 
-4. **On-chain coordination eliminates trust friction** - Traditional supply chains rely on email, PDFs, and phone calls between actors who don't trust each other. CARGE lets them exchange encrypted deliverables on-chain without revealing data to competitors. The blockchain becomes the trusted intermediary.
+4. **AI makes Web3 accessible** - Enterprises struggle with blockchain complexity. An AI that can interview stakeholders, understand business requirements, and deploy production workflows in 5 minutes removes the technical barrier. This is the bridge between Web2 and Web3.
 
-5. **Solo founding is viable but exhausting** - Technical execution is achievable alone. Business development while coding full-time is the real bottleneck
+5. **On-chain coordination eliminates trust friction** - Traditional supply chains rely on email, PDFs, and phone calls between actors who don't trust each other. CARGE lets them exchange encrypted deliverables on-chain without revealing data to competitors. The blockchain becomes the trusted intermediary.
+
+6. **Solo founding is viable but exhausting** - Technical execution is achievable alone. Business development while coding full-time is the real bottleneck
+
+7. **AI pair programming changed everything** - Building Substrate pallets, React frontends, and cryptographic protocols solo became feasible with AI assistants. What would have taken a team of 3-4 developers was achievable by one person with Claude/Cursor. This validates the "AI-augmented solo founder" model.
 
 ### **Personal growth**:
 
@@ -268,21 +292,33 @@ Transitioning from military to tech entrepreneurship taught me that **leadership
 
 ### **Short-term (3-6 months)**:
 
-1. **Tanssi mainnet deployment** - Launch as a Polkadot appchain for cost-effective block production and shared security
+1. **Enhanced AI Builder**:
+   - Multi-language support (FR, ES, CN)
+   - Voice input for workflow creation
+   - Visual workflow diagram generation
+   - AI-powered schema validation and optimization
 
-2. **First enterprise pilot** - Luxury goods manufacturer (wine/spirits) for product valorization through complete traceability, targeting 10,000 verified products
+2. **Tanssi mainnet deployment** - Launch as a Polkadot appchain for cost-effective block production and shared security
 
-3. **Mobile app** - Native iOS/Android for better QR scanning UX and offline verification caching
+3. **First enterprise pilot** - Luxury goods manufacturer (wine/spirits) for product valorization through complete traceability, targeting 10,000 verified products
+
+4. **Mobile app** - Native iOS/Android for better QR scanning UX and offline verification caching
 
 ### **Medium-term (6-12 months)**:
 
-5. **AI agent marketplace** - MCP-compatible agents can deploy custom workflows autonomously, creating a marketplace for workflow templates
+5. **AI Workflow Marketplace**:
+   - Pre-built templates generated by AI (wine, pharma, automotive, etc.)
+   - Community-driven workflow library with ratings
+   - Fork and customize existing workflows via AI chat
+   - Automated compliance checking (FDA, EU regulations, etc.)
 
-6. **Governance DAO** - Decentralize workflow template approval through on-chain governance with staking-based voting
+6. **AI agent marketplace** - MCP-compatible agents can deploy custom workflows autonomously, creating a marketplace for autonomous verification services
 
-7. **Enterprise SDK** - Rust/TypeScript/Python SDKs for easy integration with existing ERP systems (SAP, Oracle, etc.)
+7. **Governance DAO** - Decentralize workflow template approval through on-chain governance with staking-based voting
 
-8. **Audit trail analytics** - Dashboard for enterprises to visualize supply chain transparency and compliance
+8. **Enterprise SDK** - Rust/TypeScript/Python SDKs for easy integration with existing ERP systems (SAP, Oracle, etc.)
+
+9. **Audit trail analytics** - Dashboard for enterprises to visualize supply chain transparency and compliance
 
 ### **Long-term vision**:
 
@@ -306,6 +342,20 @@ Carge's goal: **1 million verified workflows by 2027**.
 
 ### **Try the demo**:
 
+**Option 1: AI Workflow Builder** (Recommended)
+1. **Go to "AI" page** → Click "How It Works"
+2. **Copy the AI prompt** → Paste into ChatGPT/Claude
+3. **Describe your supply chain** (e.g., "wine from vineyard to customer")
+4. **AI generates complete workflow JSON** with validation
+5. **Paste JSON back** → Deploy with single wallet signature
+6. **Watch deployment**:
+   - Parallel IPFS uploads (schemas, instructions, resources)
+   - Batch transaction preparation
+   - Single signature for entire workflow
+   - Automatic IPFS broadcasting to public gateways
+7. **Execute workflow** → Add to favorites → Start first step
+
+**Option 2: Verify Existing Proof**
 1. **Go to "Verify" page** → Upload the example proof file or scan QR code
 2. **Watch real-time verification**:
    - Searching blockchain for proof
@@ -336,13 +386,16 @@ graph TB
 
 | Metric | Value | Notes |
 |--------|-------|-------|
+| **AI workflow creation** | <5min | From idea to blockchain |
+| **Signature reduction** | 88% | 8 signatures → 1 (batch) |
 | **Proof verification** | <2s | 5-10x faster than initial version |
 | **Storage reduction** | 99% | vs pure on-chain storage |
 | **Cryptographic guarantee** | 100% | No trust assumptions |
 | **User experience** | Zero-install | Browser-based verification |
-| **Testnet uptime** | 2 month | Continuous operation |
+| **Testnet uptime** | 2+ months | Continuous operation |
 | **Custom pallets** | 3 | PKI, Crypto Trail, RAG |
 | **Lines of Rust** | ~1,500 | ~500 per custom pallet |
+| **Lines of React** | ~4,000 | Including AI builder |
 | **Test coverage** | >80% | Unit + integration tests |
 
 ---
@@ -383,26 +436,36 @@ graph TB
 | **Storage** | IPFS (Helia.js) | Decentralized content storage |
 | **Crypto** | X25519 + Sr25519 | ECDH key exchange + Schnorr signatures |
 | **Encryption** | ChaCha20-Poly1305 | Authenticated encryption |
-| **Frontend** | React + Vite | Progressive Web App |
-| **Wallet** | Polkadot.js, SubWallet | Substrate account management |
-| **AI Integration** | MCP (Model Context Protocol) | AI agent deployment |
+| **Frontend** | React + Vite + TailwindCSS | Progressive Web App |
+| **Wallet** | Polkadot.js, SubWallet, Talisman | Substrate account management |
+| **AI Integration** | Dual: Browser prompts + MCP | Human-AI and AI-AI workflows |
+| **Batch Transactions** | `api.tx.utility.batchAll` | Atomic multi-step deployment |
 | **QR Codes** | jsQR | Mobile verification |
+| **State Management** | LocalStorage + React Context | Favorites & user preferences |
 
 ---
 
 ## 🎯 Hackathon Categories
 
-### **Primary: Infrastructure & Tooling**
+### **Primary: AI & User Experience**
+
+- **AI Workflow Builder**: Natural language to blockchain deployment
+- **Intelligent prompt engineering**: Guides AI to generate blockchain-compliant workflows
+- **Single-signature batch deployment**: 88% reduction in wallet interactions
+- **Dual AI integration**: Browser-based + autonomous MCP agents
+- **Zero technical knowledge required**: Non-developers can deploy production workflows
+
+### **Secondary: Infrastructure & Tooling**
 
 - Novel use of Substrate pallets for workflow management
 - Reusable pallets for any proof-of-execution use case
 - Hybrid on-chain/IPFS architecture pattern
-- MCP integration for AI agent coordination
+- Batch transaction optimization with local hash calculation
 
-### **Secondary: Real-World Applications**
+### **Tertiary: Real-World Applications**
 
 - Product valorization for luxury goods through verifiable provenance
-- Supply chain transparency
+- Supply chain transparency with cryptographic guarantees
 - User-friendly QR workflow for non-technical users
 - Mobile-first PWA experience
 
