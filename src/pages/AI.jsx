@@ -516,13 +516,26 @@ export const Agent = () => {
   };
 
   return (
-    <div className="container mx-auto px-6 py-12 max-w-6xl">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-4xl font-light mb-4">{t('ai.title')}</h1>
-              <p className="text-gray-600">{t('ai.subtitle')}</p>
+    <>
+      {/* Compact Page Header */}
+      <div className="bg-white">
+        <div className="container mx-auto px-6 py-6 max-w-6xl">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            {/* Title and Description */}
+            <div className="flex-1 min-w-[300px]">
+              <div className="flex items-center gap-3 mb-1">
+                <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                  {t('ai.title')}
+                </h1>
+              </div>
+              <p className="text-gray-600">
+                {t('ai.subtitle')}
+              </p>
             </div>
 
             {/* How it works button */}
@@ -581,6 +594,9 @@ export const Agent = () => {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="container mx-auto px-6 py-12 max-w-6xl">
 
         {/* Step 1: Copy AI Instructions */}
         <div className="mb-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-xl shadow-2xl p-8">
@@ -886,6 +902,7 @@ export const Agent = () => {
           </div>
         )}
       </div>
+    </>
   );
 };
 
