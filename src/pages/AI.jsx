@@ -280,10 +280,11 @@ export const Agent = () => {
               if (!stepSchema.properties) {
                 errors.push(`${prefix}.schema.properties.${step.stepKey}.properties is required`);
               } else {
-                // Check first field is actor name
+                // Check first field is actor name (support EN "name" and FR "nom")
                 const firstField = Object.keys(stepSchema.properties)[0];
-                if (!firstField || !firstField.toLowerCase().includes('name')) {
-                  errors.push(`${prefix}: First field in schema must be actor's name (e.g., "producerName", "distributorName")`);
+                const lowerField = firstField?.toLowerCase() || '';
+                if (!firstField || (!lowerField.includes('name') && !lowerField.includes('nom'))) {
+                  errors.push(`${prefix}: First field in schema must be actor's name (e.g., "producerName", "producteurNom", "distributorName")`);
                 }
               }
             }
