@@ -62,7 +62,7 @@ const resources = {
         
       // What Makes the Difference
       differenceTitle: 'What Makes the Difference',
-      differenceDesc: 'Blockchain coordination creates extraordinary value',
+      differenceDesc: 'Automation + Privacy + Traceability',
       difference1Title: 'Zero Coordination',
       difference1Desc: 'Fill a form. The rest happens automatically. Zero emails, zero meetings to coordinate.',
       difference2Title: 'Competitors See Nothing',
@@ -465,7 +465,7 @@ const resources = {
         
       // Ce qui fait la différence
       differenceTitle: 'Ce qui fait la différence',
-      differenceDesc: 'La coordination blockchain crée une valeur extraordinaire',
+      differenceDesc: 'Automatisation + Confidentialité + Traçabilité',
       difference1Title: 'Zéro Coordination',
       difference1Desc: 'Remplissez un formulaire. Le reste se fait automatiquement. Zéro email, zéro réunion de coordination.',
       difference2Title: 'Vos Concurrents Ne Voient Rien',
