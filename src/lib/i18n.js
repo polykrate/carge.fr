@@ -127,7 +127,7 @@ const resources = {
         useCase6Desc: 'AI agents interview users to build regulatory files step by step. Questions, answers, and documents are signed on-chain. Automated guidance through complex administrative workflows.',
         
         // Workflow Example
-        workflowExampleTitle: 'Real Story: A 25-Year Journey in One Bottle',
+        workflowExampleTitle: 'How It Works: A 25-Year Journey in One Bottle',
         workflowExampleDesc: 'Mr. Wei Chen scans a Macallan bottle in Shanghai. Instantly, he sees 25 years of craftsmanship + 6 months journey across 3 continents. 7 actors signed. Every step verified. This is transparency that creates value.',
         workflowStep1: '1999-2024: The Macallan Distillery, Scotland',
         workflowStep1Desc: 'Master distiller fills hand-picked sherry oak casks from Jerez, Spain.\n25 years aging in Scottish Speyside.\n2024: Bottle #92 of batch B47 (2,400 bottles produced).\nQR code seals the story.',
@@ -530,7 +530,7 @@ const resources = {
         useCase6Desc: 'Des agents IA guident les utilisateurs dans la constitution de dossiers réglementaires, étape par étape. Questions, réponses et documents signés sur la chaîne pour une traçabilité complète.',
         
         // Exemple de Workflow
-        workflowExampleTitle: 'Histoire vraie : 25 ans de patience dans une bouteille',
+        workflowExampleTitle: 'Voici Comment : Un Parcours de 25 Ans dans une Bouteille',
         workflowExampleDesc: 'M. Wei Chen scanne une bouteille de Macallan à Shanghai. Instantanément, il découvre 25 ans de savoir-faire + 6 mois de voyage sur 3 continents. 7 acteurs ont signé. Chaque étape est vérifiée. C\'est la transparence qui crée de la valeur.',
         workflowStep1: '1999-2024 : The Macallan Distillery, Écosse',
         workflowStep1Desc: 'Le maître distillateur remplit des fûts de chêne de xérès sélectionnés à Jerez, Espagne.\n25 ans de vieillissement dans le Speyside écossais.\n2024 : Bouteille #92 du lot B47 (2 400 bouteilles produites).\nLe QR code scelle l\'histoire.',
