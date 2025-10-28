@@ -1688,6 +1688,7 @@ export const Verify = () => {
           </button>
           <button
             onClick={() => {
+              alert('🔵 QR BUTTON CLICKED! Mode=' + mode);
               console.log('🔵 QR button clicked, current mode:', mode);
               setMode('qr');
               setScanning(false);
@@ -1695,11 +1696,14 @@ export const Verify = () => {
               requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                   console.log('⏱️ RAF executed, checking ref...');
+                  alert('⏱️ RAF EXECUTED!');
                   if (qrScannerRef.current) {
                     console.log('✅ qrScannerRef.current exists:', qrScannerRef.current);
+                    alert('✅ REF EXISTS - WILL SCROLL');
                     scrollToElement(qrScannerRef);
                   } else {
                     console.log('❌ qrScannerRef.current is null/undefined');
+                    alert('❌ REF IS NULL');
                   }
                 });
               });
