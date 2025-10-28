@@ -5,7 +5,8 @@ import { useApp } from '../contexts/AppContext';
 import { RagClient } from '../lib/core/rag-client.js';
 import { CidConverter } from '../lib/core/cid-converter.js';
 import { FormGenerator } from '../lib/core/form-generator.js';
-import { showError, toastTx } from '../lib/toast';
+import { showError, showSuccess, toastTx } from '../lib/toast';
+import { getFavorites, toggleFavorite, isFavorite } from '../lib/favorites';
 import {
   waitForPolkadot,
   connectToApi,
@@ -52,6 +53,7 @@ export const Workflows = () => {
   const [searchTags, setSearchTags] = useState(''); // Tags search input
   const [searching, setSearching] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false); // Show/hide explanations
+  const [favorites, setFavorites] = useState([]); // User's favorite workflow hashes
   
   // Ref for form container
   const formContainerRef = useRef(null);
@@ -60,6 +62,17 @@ export const Workflows = () => {
   useEffect(() => {
     if (selectedAccount) {
       setRecipientAddress(selectedAccount);
+    }
+  }, [selectedAccount]);
+
+  // Load favorites when wallet connects
+  useEffect(() => {
+    if (selectedAccount) {
+      const userFavorites = getFavorites(selectedAccount);
+      setFavorites(userFavorites);
+      console.log(`⭐ Loaded ${userFavorites.length} favorites for ${selectedAccount}`);
+    } else {
+      setFavorites([]);
     }
   }, [selectedAccount]);
   
@@ -80,6 +93,30 @@ export const Workflows = () => {
   };
 
   // Format token amount with 12 decimals (RAG tokens)
+  /**
+   * Toggle favorite status for a workflow
+   */
+  const handleToggleFavorite = (workflowHash) => {
+    if (!selectedAccount) {
+      showError('Please connect your wallet to save favorites');
+      return;
+    }
+    
+    const newStatus = toggleFavorite(selectedAccount, workflowHash);
+    
+    // Update local state
+    if (newStatus) {
+      setFavorites([...favorites, workflowHash]);
+      showSuccess('Added to favorites');
+    } else {
+      setFavorites(favorites.filter(h => h !== workflowHash));
+      showSuccess('Removed from favorites');
+    }
+    
+    // Reload workflows to update display
+    loadRags();
+  };
+
   const formatTokenAmount = (amount) => {
     if (!amount || amount === '0') return '0';
     
@@ -630,41 +667,65 @@ export const Workflows = () => {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayRags.map((rag) => (
-                <button
-                  key={rag.hash}
-                  onClick={() => selectRag(rag)}
-                  className={`group text-left p-6 rounded-xl border-2 transition-all hover:shadow-xl ${
-                    selectedRag?.hash === rag.hash
-                      ? 'border-[#003399] bg-gradient-to-br from-blue-50 to-white shadow-lg scale-105'
-                      : 'border-gray-200 bg-white hover:border-[#003399] hover:scale-105'
-                  }`}
-                >
-                  {/* Icon & Badge */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all ${
-                      selectedRag?.hash === rag.hash 
-                        ? 'bg-[#003399] shadow-lg' 
-                        : 'bg-gray-100 group-hover:bg-[#003399]'
-                    }`}>
-                      <svg className={`w-8 h-8 transition-colors ${
-                        selectedRag?.hash === rag.hash 
-                          ? 'text-white' 
-                          : 'text-gray-600 group-hover:text-white'
-                      }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              {displayRags.map((rag) => {
+                const isFav = isFavorite(selectedAccount, rag.hash);
+                
+                return (
+                <div key={rag.hash} className="relative">
+                  {/* Favorite Star Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleFavorite(rag.hash);
+                    }}
+                    className="absolute top-3 right-3 z-10 p-2 rounded-lg hover:bg-white/80 transition-all group/star"
+                    title={isFav ? 'Remove from favorites' : 'Add to favorites'}
+                  >
+                    {isFav ? (
+                      <svg className="w-6 h-6 text-yellow-500 drop-shadow-md" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
-                    </div>
-                    {rag.metadata.steps && rag.metadata.steps.length > 0 && (
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${
-                        selectedRag?.hash === rag.hash
-                          ? 'bg-[#003399] text-white'
-                          : 'bg-blue-100 text-blue-800 group-hover:bg-blue-200'
-                      }`}>
-                        {rag.metadata.steps.length} Steps
-                      </span>
+                    ) : (
+                      <svg className="w-6 h-6 text-gray-400 group-hover/star:text-yellow-500 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                      </svg>
                     )}
-                  </div>
+                  </button>
+
+                  {/* Workflow Card */}
+                  <button
+                    onClick={() => selectRag(rag)}
+                    className={`w-full group text-left p-6 rounded-xl border-2 transition-all hover:shadow-xl ${
+                      selectedRag?.hash === rag.hash
+                        ? 'border-[#003399] bg-gradient-to-br from-blue-50 to-white shadow-lg scale-105'
+                        : 'border-gray-200 bg-white hover:border-[#003399] hover:scale-105'
+                    }`}
+                  >
+                    {/* Icon & Badge */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all ${
+                        selectedRag?.hash === rag.hash 
+                          ? 'bg-[#003399] shadow-lg' 
+                          : 'bg-gray-100 group-hover:bg-[#003399]'
+                      }`}>
+                        <svg className={`w-8 h-8 transition-colors ${
+                          selectedRag?.hash === rag.hash 
+                            ? 'text-white' 
+                            : 'text-gray-600 group-hover:text-white'
+                        }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      {rag.metadata.steps && rag.metadata.steps.length > 0 && (
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold transition-colors mr-10 ${
+                          selectedRag?.hash === rag.hash
+                            ? 'bg-[#003399] text-white'
+                            : 'bg-blue-100 text-blue-800 group-hover:bg-blue-200'
+                        }`}>
+                          {rag.metadata.steps.length} Steps
+                        </span>
+                      )}
+                    </div>
 
                   {/* Title & Description */}
                   <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-[#003399] transition-colors">
@@ -676,17 +737,19 @@ export const Workflows = () => {
                     </p>
                   )}
 
-                  {/* Selection Indicator */}
-                  {selectedRag?.hash === rag.hash && (
-                    <div className="mt-4 flex items-center gap-2 text-[#003399] font-semibold text-sm">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Selected
-                    </div>
-                  )}
-                </button>
-              ))}
+                    {/* Selection Indicator */}
+                    {selectedRag?.hash === rag.hash && (
+                      <div className="mt-4 flex items-center gap-2 text-[#003399] font-semibold text-sm">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Selected
+                      </div>
+                    )}
+                  </button>
+                </div>
+              );
+              })}
             </div>
           )}
         </div>

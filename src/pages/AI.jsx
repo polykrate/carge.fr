@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
@@ -6,6 +6,7 @@ import { RagClient } from '../lib/core/rag-client.js';
 import { CidConverter } from '../lib/core/cid-converter.js';
 import { showSuccess, showError } from '../lib/toast';
 import { logger } from '../lib/logger';
+import { addFavorite, isFavorite } from '../lib/favorites';
 
 const AI_INSTRUCTIONS = `# Blockchain Workflow Builder
 
@@ -129,9 +130,24 @@ export const Agent = () => {
   const [deploymentLog, setDeploymentLog] = useState([]);
   const [deployedMasterHash, setDeployedMasterHash] = useState(null);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
+  const [isDeployedFavorited, setIsDeployedFavorited] = useState(false);
   
   const textareaRef = useRef(null);
   const logRef = useRef(null);
+
+  // Auto-favorite deployed workflow
+  useEffect(() => {
+    if (deployedMasterHash && selectedAccount) {
+      const alreadyFavorited = isFavorite(selectedAccount, deployedMasterHash);
+      if (!alreadyFavorited) {
+        addFavorite(selectedAccount, deployedMasterHash);
+        setIsDeployedFavorited(true);
+        console.log('⭐ Auto-favorited deployed workflow');
+      } else {
+        setIsDeployedFavorited(true);
+      }
+    }
+  }, [deployedMasterHash, selectedAccount]);
 
   /**
    * Copy AI instructions to clipboard
@@ -838,6 +854,14 @@ export const Agent = () => {
                     </svg>
                     DEPLOYED
                   </span>
+                  {isDeployedFavorited && (
+                    <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full whitespace-nowrap flex items-center gap-1.5">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      FAVORITED
+                    </span>
+                  )}
                 </div>
                 <p className="text-gray-600 mb-6">{t('ai.successSubtitle')}</p>
 
