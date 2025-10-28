@@ -45,7 +45,7 @@ export const Home = () => {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
             <Link 
-              to="/verify#qr" 
+              to="/verify" 
               className="px-8 py-4 bg-[#003399] text-white rounded-lg hover:bg-[#002266] transition-all duration-300 font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105"
             >
               {t('home.ctaVerify')}
