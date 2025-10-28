@@ -560,14 +560,16 @@ const resources = {
       metric4Desc: 'Temps de vérification',
         
       // Ce qui fait la différence
-      differenceTitle: 'Ce qui fait la différence',
-      differenceDesc: 'Automatisation + Confidentialité + Traçabilité',
-      difference1Title: 'Zéro Coordination',
-      difference1Desc: 'Remplissez un formulaire. Le reste se fait automatiquement. Zéro email, zéro réunion de coordination.',
+      differenceTitle: 'Ce qui rend CARGE unique',
+      differenceDesc: 'Configuration IA • Confidentialité Totale • Zéro Coordination • Traçabilité Complète',
+      difference1Title: 'L\'IA Fait le Travail',
+      difference1Desc: 'Décrivez votre chaîne à ChatGPT ou Claude. L\'IA génère un workflow prêt pour la blockchain en quelques minutes. Pas de code, pas de complexité.',
       difference2Title: 'Vos Concurrents Ne Voient Rien',
       difference2Desc: 'Seul le destinataire voit vos données. Vos concurrents dans la chaîne n\'accèdent jamais à vos prix ou volumes.',
-      difference3Title: 'Votre produit raconte son histoire tout seul',
-      difference3Desc: 'Chaque acteur ajoute ses infos. Le certificat se construit seul. Vos clients voient le parcours complet vérifié.',
+      difference3Title: 'Zéro Coordination',
+      difference3Desc: 'Remplissez un formulaire. Le reste se fait automatiquement. Zéro email, zéro réunion de coordination.',
+      difference4Title: 'Votre produit raconte son histoire tout seul',
+      difference4Desc: 'Chaque acteur ajoute ses infos. Le certificat se construit seul. Vos clients voient le parcours complet vérifié.',
         
         // Principes Fondamentaux
         principlesTitle: 'Les principes fondamentaux du Chain as a Service (CaaS)',
