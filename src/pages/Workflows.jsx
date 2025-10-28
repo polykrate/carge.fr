@@ -308,6 +308,9 @@ export const Workflows = () => {
       setIsDetailsExpanded(false); // Reset details accordion when selecting new workflow
       console.log('Selected RAG:', rag.metadata.name);
       
+      // Pre-load master workflow CIDs in background (non-blocking)
+      preloadWorkflowCids(rag);
+      
       // Determine which schema to load
       let schemaCidHex;
       if (rag.metadata.steps && rag.metadata.steps.length > 0) {
@@ -339,6 +342,56 @@ export const Workflows = () => {
       setError(`Failed to load workflow schema: ${err.message}`);
     } finally {
       setLoadingSchema(false);
+    }
+  };
+
+  /**
+   * Pre-load workflow CIDs in background (non-blocking)
+   * Loads master workflow CIDs + all step CIDs into IPFS/Helia cache
+   */
+  const preloadWorkflowCids = async (rag) => {
+    try {
+      console.log('🔄 Pre-loading workflow CIDs in background...');
+      
+      const cidsToLoad = [];
+      
+      // Add master workflow CIDs
+      if (rag.metadata.instructionCid) cidsToLoad.push(rag.metadata.instructionCid);
+      if (rag.metadata.resourceCid) cidsToLoad.push(rag.metadata.resourceCid);
+      if (rag.metadata.schemaCid) cidsToLoad.push(rag.metadata.schemaCid);
+      
+      // Add all step CIDs if this is a master workflow
+      if (rag.metadata.steps && Array.isArray(rag.metadata.steps)) {
+        for (const stepHash of rag.metadata.steps) {
+          const stepRag = allRags.find(r => r.hash === stepHash);
+          if (stepRag) {
+            if (stepRag.metadata.instructionCid) cidsToLoad.push(stepRag.metadata.instructionCid);
+            if (stepRag.metadata.resourceCid) cidsToLoad.push(stepRag.metadata.resourceCid);
+            if (stepRag.metadata.schemaCid) cidsToLoad.push(stepRag.metadata.schemaCid);
+          }
+        }
+      }
+      
+      console.log(`📦 Pre-loading ${cidsToLoad.length} CIDs...`);
+      
+      // Pre-load all CIDs in parallel (non-blocking)
+      const loadPromises = cidsToLoad.map(async (hexCid) => {
+        try {
+          const cidString = CidConverter.hexToString(hexCid);
+          // Just trigger the download, we don't need the result
+          await ipfsClient.downloadJson(cidString);
+          console.log(`✅ Pre-loaded: ${cidString.substring(0, 20)}...`);
+        } catch (err) {
+          console.warn(`⚠️ Failed to pre-load CID:`, err.message);
+        }
+      });
+      
+      // Wait for all in background (don't block UI)
+      await Promise.allSettled(loadPromises);
+      console.log(`✅ Finished pre-loading ${cidsToLoad.length} CIDs`);
+    } catch (err) {
+      // Non-critical, just log
+      console.warn('⚠️ CID pre-loading failed (non-critical):', err);
     }
   };
 
