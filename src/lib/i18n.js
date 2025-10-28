@@ -108,14 +108,16 @@ const resources = {
       metric4Desc: 'Verification time',
         
       // What Makes the Difference
-      differenceTitle: 'What Makes the Difference',
-      differenceDesc: 'Automation + Privacy + Traceability',
-      difference1Title: 'Zero Coordination',
-      difference1Desc: 'Fill a form. The rest happens automatically. Zero emails, zero meetings to coordinate.',
+      differenceTitle: 'What Makes CARGE Different',
+      differenceDesc: 'AI-Powered Setup • End-to-End Privacy • Zero Coordination • Complete Traceability',
+      difference1Title: 'AI Builds It For You',
+      difference1Desc: 'Describe your supply chain to ChatGPT or Claude. The AI generates a blockchain-ready workflow in minutes. No coding, no complexity.',
       difference2Title: 'Competitors See Nothing',
       difference2Desc: 'Only the recipient sees your data. Your competitors in the chain never access your prices or volumes.',
-      difference3Title: 'Your Product Tells Its Own Story',
-      difference3Desc: 'Each party adds their info. The certificate builds itself. Your customers see the complete verified journey.',
+      difference3Title: 'Zero Coordination',
+      difference3Desc: 'Fill a form. The rest happens automatically. Zero emails, zero meetings to coordinate.',
+      difference4Title: 'Your Product Tells Its Own Story',
+      difference4Desc: 'Each party adds their info. The certificate builds itself. Your customers see the complete verified journey.',
         
         // Core Principles
         principlesTitle: 'Core CaaS Principles',
