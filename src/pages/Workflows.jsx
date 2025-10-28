@@ -1188,6 +1188,7 @@ export const Workflows = () => {
             )}
           </div>
         </div>
+        </div>
       )}
 
         {/* Form Generation */}
