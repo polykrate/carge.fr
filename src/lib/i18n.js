@@ -141,7 +141,7 @@ const resources = {
         workflowStep5Desc: 'Chinese customs cleared. GACC health certificate obtained.\nBilingual labels applied (EN/CN).\nAll 150 bottles QR-verified on blockchain.\nFree trade zone bonded warehouse.',
         workflowStep6: 'May 2024: Emperor\'s Cellar, Shanghai',
         workflowStep6Desc: 'Ultra-premium specialist receives bottle #92.\nClimate cellar 18°C, 65% humidity.\nComplete provenance verified: Scotland → UK → France → Hong Kong → Shanghai.\nPrice: ¥28,800 (~€3,600). VIP services included.',
-        workflowStep7: 'May 15, 2024: Mr. Wei Chen - Final Owner',
+        workflowStep7: 'October 15, 2024: Mr. Wei Chen - Final Owner',
         workflowStep7Desc: 'QR code on physical bottle + blockchain certificate = perfect match.\n7 actors signed, complete journey verified from Scotland.\nTasting notes: "Rich sherry, dark chocolate, 25 years in every sip."\n"Knowing exactly where this came from, who crafted it... it just tastes better. Every sip tells the whole story." Rating: 5/5',
       workflowExampleNoteTitle: 'Proof of Authenticity',
       workflowExampleNote: 'The power of the certificate: QR code on the bottle + blockchain validation = irrefutable proof. Mr. Chen doesn\'t just believe his bottle is authentic—he can prove it to anyone, anywhere. 6 months journey, 7 signatures, €180K insurance, all verified on-chain. This is what digital certificates enable: ownership of proof itself.',
