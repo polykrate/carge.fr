@@ -1691,16 +1691,18 @@ export const Verify = () => {
               console.log('🔵 QR button clicked, current mode:', mode);
               setMode('qr');
               setScanning(false);
-              // Scroll to QR scanner after mode change
-              setTimeout(() => {
-                console.log('⏱️ Timeout executed, checking ref...');
-                if (qrScannerRef.current) {
-                  console.log('✅ qrScannerRef.current exists:', qrScannerRef.current);
-                  scrollToElement(qrScannerRef);
-                } else {
-                  console.log('❌ qrScannerRef.current is null/undefined');
-                }
-              }, 1000); // Increased to 1000ms
+              // Scroll to QR scanner after React renders
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  console.log('⏱️ RAF executed, checking ref...');
+                  if (qrScannerRef.current) {
+                    console.log('✅ qrScannerRef.current exists:', qrScannerRef.current);
+                    scrollToElement(qrScannerRef);
+                  } else {
+                    console.log('❌ qrScannerRef.current is null/undefined');
+                  }
+                });
+              });
             }}
             className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
               mode === 'qr'
