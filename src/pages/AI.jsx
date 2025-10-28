@@ -363,6 +363,7 @@ export const Agent = () => {
         const schemaBytes = new TextEncoder().encode(schemaJson);
         const schemaCid = await ipfsClient.uploadFile(schemaBytes);
         addLog(`  ✅ Schema CID: ${schemaCid}`, 'success');
+        addLog(`  📡 Broadcasting to IPFS network...`, 'info');
         
         // Upload instruction if provided
         let instructionCid = null;
@@ -371,6 +372,7 @@ export const Agent = () => {
           const instructionBytes = new TextEncoder().encode(step.instruction);
           instructionCid = await ipfsClient.uploadFile(instructionBytes);
           addLog(`  ✅ Instruction CID: ${instructionCid}`, 'success');
+          addLog(`  📡 Broadcasting to IPFS network...`, 'info');
         }
         
         // Upload resource if provided
@@ -380,6 +382,7 @@ export const Agent = () => {
           const resourceBytes = new TextEncoder().encode(step.resource);
           resourceCid = await ipfsClient.uploadFile(resourceBytes);
           addLog(`  ✅ Resource CID: ${resourceCid}`, 'success');
+          addLog(`  📡 Broadcasting to IPFS network...`, 'info');
         }
         
         // Create RAG step on blockchain
@@ -443,6 +446,7 @@ export const Agent = () => {
         const masterInstructionBytes = new TextEncoder().encode(validatedWorkflow.master.instruction);
         masterInstructionCid = await ipfsClient.uploadFile(masterInstructionBytes);
         addLog(`  ✅ Master instruction CID: ${masterInstructionCid}`, 'success');
+        addLog(`  📡 Broadcasting to IPFS network...`, 'info');
       }
       
       // Upload master resource
@@ -452,6 +456,7 @@ export const Agent = () => {
         const masterResourceBytes = new TextEncoder().encode(validatedWorkflow.master.resource);
         masterResourceCid = await ipfsClient.uploadFile(masterResourceBytes);
         addLog(`  ✅ Master resource CID: ${masterResourceCid}`, 'success');
+        addLog(`  📡 Broadcasting to IPFS network...`, 'info');
       }
       
       // Create master RAG

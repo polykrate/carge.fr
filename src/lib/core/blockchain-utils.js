@@ -380,6 +380,7 @@ export async function submitRagWorkflowStep({
     }
     
     console.log('Uploaded to IPFS:', ipfsCid);
+    console.log('📡 Broadcasting to IPFS network...');
     
     // Convert CID to chain format (36 bytes)
     console.log('Converting CID to chain format:', ipfsCid);

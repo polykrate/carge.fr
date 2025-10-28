@@ -571,16 +571,66 @@ export class IpfsClient {
   }
 
   /**
-   * Upload file to IPFS via Kubo node
+   * Broadcast CID to public IPFS gateways for improved discoverability
+   * This pre-caches the CID on public gateways making it immediately available
+   * 
+   * @param {string} cid - CID to broadcast
+   * @returns {Promise<boolean>} Success status
+   */
+  async broadcastToGateway(cid) {
+    try {
+      console.log(`📡 Broadcasting CID to public gateways: ${cid}`);
+      
+      // Try multiple gateways in parallel (first success wins, don't wait for all)
+      const broadcastPromises = config.IPFS_PUBLIC_GATEWAYS.map(async (gateway) => {
+        try {
+          const url = `${gateway}${cid}`;
+          // HEAD request to trigger gateway caching without downloading full content
+          const response = await fetch(url, {
+            method: 'HEAD',
+            signal: AbortSignal.timeout(5000) // 5 second timeout per gateway
+          });
+          
+          if (response.ok) {
+            console.log(`✅ Cached on ${gateway}`);
+            return true;
+          }
+          return false;
+        } catch (error) {
+          console.warn(`⚠️ Gateway ${gateway} failed:`, error.message);
+          return false;
+        }
+      });
+      
+      // Wait for at least one success (or all failures)
+      const results = await Promise.allSettled(broadcastPromises);
+      const anySuccess = results.some(r => r.status === 'fulfilled' && r.value === true);
+      
+      if (anySuccess) {
+        console.log(`✅ CID ${cid} successfully broadcasted to public IPFS network`);
+      } else {
+        console.warn(`⚠️ CID ${cid} broadcast incomplete, but available via local Kubo node`);
+      }
+      
+      return anySuccess;
+    } catch (error) {
+      console.warn('⚠️ Gateway broadcast failed, CID still available via local node:', error.message);
+      return false;
+    }
+  }
+
+  /**
+   * Upload file to IPFS via Kubo node and broadcast to public gateways
    * ⚠️ WARNING: This only uploads to local node. For data persistence:
    * - Pin the returned CID on your Kubo node
    * - Use a pinning service for production (Pinata, Web3.Storage, etc.)
    * - The blockchain stores only the CID, not the data itself
    * 
    * @param {Uint8Array} data - File data to upload
+   * @param {boolean} broadcast - Whether to broadcast to public gateways (default: true)
    * @returns {Promise<string>} CID of uploaded file (must be pinned for persistence!)
    */
-  async uploadFile(data) {
+  async uploadFile(data, broadcast = true) {
     console.log(`Uploading file to IPFS (${data.length} bytes)...`);
     
     try {
@@ -605,6 +655,15 @@ export class IpfsClient {
       }
       
       console.log(`File uploaded to IPFS: ${cid}`);
+      
+      // Broadcast to public gateways for improved discoverability (non-blocking)
+      if (broadcast) {
+        // Don't await - fire and forget to avoid slowing down the upload flow
+        this.broadcastToGateway(cid).catch(err => {
+          console.warn('Gateway broadcast failed (non-critical):', err.message);
+        });
+      }
+      
       return cid;
     } catch (error) {
       console.error('Failed to upload to IPFS:', error);
