@@ -6,64 +6,57 @@ import { CidConverter } from '../lib/core/cid-converter.js';
 import { showSuccess, showError } from '../lib/toast';
 import { logger } from '../lib/logger';
 
-const AI_INSTRUCTIONS = `I need help creating a blockchain workflow for supply chain traceability.
+const AI_INSTRUCTIONS = `# Blockchain Workflow Builder
 
-Please ask me questions to understand:
-1. What industry/product (e.g., spirits, food, manufacturing)
-2. How many steps in the supply chain (e.g., production → distribution → retail → consumer)
-3. For each step:
-   - Step name and key (e.g., "production", "distribution")
-   - What actor does this step (e.g., "Distillery", "Distributor")
-   - What data needs to be captured (fields with types and validations)
-   - Example of this step in action
+I need a blockchain workflow for supply chain traceability. Please help me create it step by step.
 
-IMPORTANT BLOCKCHAIN LIMITS:
-- master.name: MAX 50 characters
-- master.description: MAX 300 characters
-- master.tags: MAX 10 tags, each tag MAX 15 characters
-- step.stepKey: MAX 50 characters (used as RAG name)
-- step.description: MAX 300 characters
-- step.tags: MAX 10 tags, each tag MAX 15 characters
-- steps array: MAX 64 steps total
+## Step 1: Gather Requirements
 
-Then, generate a complete workflow JSON with this EXACT structure:
+Ask me these questions:
+1. **Industry/Product**: What type of supply chain? (e.g., spirits, food, electronics)
+2. **Number of Steps**: How many stages in your supply chain?
+3. **For Each Step**:
+   - Step identifier (e.g., "production", "distribution")
+   - Actor name (e.g., "Distillery", "Distributor", "Retailer")
+   - What data to capture? (fields, types, validations)
+   - Real-world example of this step
+
+## Step 2: Generate JSON Workflow
+
+Once I answer, generate the complete JSON in a **code artifact** (Claude) or **code block** (ChatGPT) with this exact structure:
 
 \`\`\`json
 {
   "master": {
-    "name": "workflow-name-v1",
-    "description": "Brief description of the complete workflow",
-    "instruction": "MASTER WORKFLOW - Title\\n\\nComplete description with all steps listed:\\n1. STEP_NAME - Description\\n   Actor: Example\\n   Key: stepKey\\n...",
-    "resource": "Real-world example of complete workflow execution",
+    "name": "short-name-v1",
+    "description": "Brief workflow description",
+    "instruction": "MASTER WORKFLOW - [Title]\\n\\n[Description]\\n\\nWorkflow Steps:\\n1. [STEP 1] - [Description]\\n   Actor: [Name]\\n   Key: [stepKey]\\n...",
+    "resource": "Real-world example story",
     "tags": ["industry", "master", "v1"],
     "workflowType": "master",
     "version": "1.0"
   },
   "steps": [
     {
-      "stepKey": "production",
-      "stepName": "Production",
-      "description": "What this step does",
-      "instruction": "How to fill this step form with examples",
-      "resource": "Concrete example of this step",
-      "tags": ["industry", "production", "step-1", "v1"],
+      "stepKey": "step-identifier",
+      "stepName": "Human Readable Name",
+      "description": "What this step does (max 300 chars)",
+      "instruction": "How to fill this form with examples",
+      "resource": "Concrete example for this specific step",
+      "tags": ["industry", "step-identifier", "step-1", "v1"],
       "schema": {
         "type": "object",
-        "required": ["production"],
+        "required": ["step-identifier"],
         "properties": {
-          "production": {
+          "step-identifier": {
             "type": "object",
-            "required": ["actorName", "field1"],
+            "required": ["actorName", "otherRequiredFields"],
             "properties": {
               "actorName": {
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 200,
-                "description": "Name of the actor (FIRST FIELD - MANDATORY)"
-              },
-              "field1": {
-                "type": "string",
-                "description": "Your field"
+                "description": "Name of the actor performing this step"
               }
             }
           }
@@ -74,23 +67,55 @@ Then, generate a complete workflow JSON with this EXACT structure:
 }
 \`\`\`
 
-CRITICAL RULES:
-- FIRST field in each step schema MUST be the actor's name (producerName, distributorName, etc.)
-- Each step has: stepKey, stepName, description, instruction, resource, tags, schema
-- Schema follows JSON Schema standard
-- Tags must include: industry, stepKey, step-N, version
-- RESPECT BLOCKCHAIN LIMITS:
-  * master.name ≤ 50 chars
-  * master.description ≤ 300 chars
-  * master.tags: max 10 tags, each ≤ 15 chars
-  * step.stepKey ≤ 50 chars
-  * step.description ≤ 300 chars
-  * step.tags: max 10 tags, each ≤ 15 chars
-  * max 64 steps total
-  * IMPORTANT: stepKey + "-" + master.name ≤ 50 chars (RAG step name on blockchain)
-    Example: if master.name is "my-workflow-v1" (15 chars), stepKey max is 34 chars
+## Step 3: Fix Errors (If Validation Fails)
 
-Ask me questions now, then generate the complete JSON.`;
+If I give you validation errors, **ONLY fix what's broken**. Don't regenerate everything.
+
+For example, if I say:
+\`\`\`
+Error: master.description exceeds 300 characters
+\`\`\`
+
+Then respond:
+\`\`\`
+I'll shorten the master.description. Here's the corrected master object:
+\`\`\`json
+{
+  "master": {
+    "description": "[Shortened version under 300 chars]"
+  }
+}
+\`\`\`
+
+Just paste this into your existing JSON to fix it.
+\`\`\`
+
+## BLOCKCHAIN LIMITS (Critical!)
+
+| Field | Limit | Notes |
+|-------|-------|-------|
+| master.name | ≤ 50 chars | Used in all RAG step names |
+| master.description | ≤ 300 chars | |
+| master.tags | ≤ 10 tags, each ≤ 15 chars | |
+| step.stepKey | ≤ 50 chars | |
+| step.description | ≤ 300 chars | |
+| step.tags | ≤ 10 tags, each ≤ 15 chars | |
+| steps array | ≤ 64 steps | |
+| **RAG Name** | **≤ 50 chars** | **stepKey + "-" + master.name** |
+
+**Example**: If master.name = "spirits-v1" (10 chars), then stepKey max = 39 chars (50 - 1 for "-" - 10)
+
+## Critical Rules
+
+1. **FIRST field** in each step schema MUST be the actor's name (producerName, distributorName, etc.)
+2. Each step needs: \`stepKey\`, \`stepName\`, \`description\`, \`instruction\`, \`resource\`, \`tags\`, \`schema\`
+3. Schema follows JSON Schema standard (type, required, properties, etc.)
+4. Tags format: \`["industry", "stepKey", "step-N", "version"]\`
+5. **Always check**: \`stepKey.length + 1 + master.name.length ≤ 50\`
+
+---
+
+Ready! Ask me your questions now, then generate the JSON.`;
 
 export const Agent = () => {
   const { t } = useTranslation();
