@@ -350,161 +350,240 @@ export const Agent = () => {
         return cid;
       };
       
-      const stepHashes = [];
+      // ==================================================================
+      // PHASE 1: Upload ALL CIDs to IPFS (in parallel for speed)
+      // ==================================================================
+      addLog('\n📤 PHASE 1: Uploading all content to IPFS in parallel...', 'info');
       
-      // Deploy each step
-      for (let i = 0; i < validatedWorkflow.steps.length; i++) {
-        const step = validatedWorkflow.steps[i];
-        addLog(`\n📝 Step ${i + 1}/${validatedWorkflow.steps.length}: ${step.stepName}`, 'info');
+      const { u8aToHex } = await import('@polkadot/util');
+      
+      // Upload all step CIDs in parallel
+      const stepUploadsPromises = validatedWorkflow.steps.map(async (step, i) => {
+        const result = {
+          stepIndex: i,
+          stepKey: step.stepKey,
+          stepName: step.stepName,
+          description: step.description,
+          tags: step.tags
+        };
         
-        // Upload schema to IPFS
-        addLog(`  ⏳ Uploading schema to IPFS...`, 'info');
+        // Upload schema
         const schemaJson = JSON.stringify(step.schema);
         const schemaBytes = new TextEncoder().encode(schemaJson);
-        const schemaCid = await ipfsClient.uploadFile(schemaBytes);
-        addLog(`  ✅ Schema CID: ${schemaCid}`, 'success');
-        addLog(`  📡 Broadcasting to IPFS network...`, 'info');
+        result.schemaCid = await ipfsClient.uploadFile(schemaBytes);
         
         // Upload instruction if provided
-        let instructionCid = null;
         if (step.instruction) {
-          addLog(`  ⏳ Uploading instruction...`, 'info');
           const instructionBytes = new TextEncoder().encode(step.instruction);
-          instructionCid = await ipfsClient.uploadFile(instructionBytes);
-          addLog(`  ✅ Instruction CID: ${instructionCid}`, 'success');
-          addLog(`  📡 Broadcasting to IPFS network...`, 'info');
+          result.instructionCid = await ipfsClient.uploadFile(instructionBytes);
         }
         
         // Upload resource if provided
-        let resourceCid = null;
         if (step.resource) {
-          addLog(`  ⏳ Uploading resource...`, 'info');
           const resourceBytes = new TextEncoder().encode(step.resource);
-          resourceCid = await ipfsClient.uploadFile(resourceBytes);
-          addLog(`  ✅ Resource CID: ${resourceCid}`, 'success');
-          addLog(`  📡 Broadcasting to IPFS network...`, 'info');
+          result.resourceCid = await ipfsClient.uploadFile(resourceBytes);
         }
         
-        // Create RAG step on blockchain
-        addLog(`  ⏳ Creating RAG step on blockchain...`, 'info');
-        
-        // Generate step name with 50 char limit (blockchain constraint)
+        // Generate step name with 50 char limit
         let stepName = `${step.stepKey}-${validatedWorkflow.master.name}`;
         if (stepName.length > 50) {
-          // Truncate intelligently: keep stepKey + truncated master name
-          const maxMasterNameLength = 50 - step.stepKey.length - 1; // -1 for the dash
+          const maxMasterNameLength = 50 - step.stepKey.length - 1;
           const truncatedMasterName = validatedWorkflow.master.name.substring(0, maxMasterNameLength);
           stepName = `${step.stepKey}-${truncatedMasterName}`;
-          addLog(`  ⚠️ Step name truncated to 50 chars: ${stepName}`, 'warning');
+        }
+        result.fullStepName = stepName;
+        
+        // Convert to chain format
+        result.schemaHex = result.schemaCid 
+          ? u8aToHex(CidConverter.toChainFormat(result.schemaCid))
+          : u8aToHex(createEmptyCid());
+        result.instructionHex = result.instructionCid 
+          ? u8aToHex(CidConverter.toChainFormat(result.instructionCid))
+          : u8aToHex(createEmptyCid());
+        result.resourceHex = result.resourceCid 
+          ? u8aToHex(CidConverter.toChainFormat(result.resourceCid))
+          : u8aToHex(createEmptyCid());
+        
+        return result;
+      });
+      
+      // Upload master CIDs in parallel
+      const masterUploadsPromise = (async () => {
+        const result = {};
+        
+        if (validatedWorkflow.master.instruction) {
+          const instructionBytes = new TextEncoder().encode(validatedWorkflow.master.instruction);
+          result.instructionCid = await ipfsClient.uploadFile(instructionBytes);
         }
         
-        // Convert CIDs to chain format (36 bytes) and then to hex
-        const { u8aToHex } = await import('@polkadot/util');
-        const schemaHex = schemaCid 
-          ? u8aToHex(CidConverter.toChainFormat(schemaCid))
-          : u8aToHex(createEmptyCid());
-        const instructionHex = instructionCid 
-          ? u8aToHex(CidConverter.toChainFormat(instructionCid))
-          : u8aToHex(createEmptyCid());
-        const resourceHex = resourceCid 
-          ? u8aToHex(CidConverter.toChainFormat(resourceCid))
-          : u8aToHex(createEmptyCid());
+        if (validatedWorkflow.master.resource) {
+          const resourceBytes = new TextEncoder().encode(validatedWorkflow.master.resource);
+          result.resourceCid = await ipfsClient.uploadFile(resourceBytes);
+        }
         
-        const stepHash = await ragClient.storeRagMetadata(
-          selectedAccount,
-          stepName,
-          step.description,
-          instructionHex,
-          resourceHex,
-          schemaHex,
+        return result;
+      })();
+      
+      // Wait for all uploads
+      const [stepResults, masterResults] = await Promise.all([
+        Promise.all(stepUploadsPromises),
+        masterUploadsPromise
+      ]);
+      
+      addLog(`✅ All CIDs uploaded to IPFS!`, 'success');
+      stepResults.forEach((step, i) => {
+        addLog(`  Step ${i + 1}: Schema ${step.schemaCid}`, 'info');
+      });
+      
+      // ==================================================================
+      // PHASE 2: Prepare all extrinsics and calculate hashes locally
+      // ==================================================================
+      addLog('\n⚙️ PHASE 2: Preparing blockchain transactions...', 'info');
+      
+      const extrinsics = [];
+      const stepHashes = [];
+      
+      // Prepare step extrinsics and calculate their hashes
+      for (const stepData of stepResults) {
+        // Calculate hash locally (same algorithm as blockchain)
+        const stepHash = await ragClient.calculateMetadataHash(
+          stepData.instructionHex,
+          stepData.resourceHex,
+          stepData.schemaCidHex,
           [], // No steps for step RAGs
-          step.tags,
-          null // Use default TTL
+          stepData.fullStepName,
+          stepData.description,
+          stepData.tags
         );
         
         stepHashes.push({
-          stepNumber: i + 1,
-          stepKey: step.stepKey,
-          stepName: step.stepName,
+          stepNumber: stepData.stepIndex + 1,
+          stepKey: stepData.stepKey,
+          stepName: stepData.stepName,
           hash: stepHash,
-          schemaCid,
-          instructionCid,
-          resourceCid
+          schemaCid: stepData.schemaCid,
+          instructionCid: stepData.instructionCid,
+          resourceCid: stepData.resourceCid
         });
         
-        // Note: storeRagMetadata logs if RAG already exists
-        addLog(`  ✅ Step hash: ${stepHash}`, 'success');
+        // Prepare extrinsic (will be batched later)
+        const { extrinsic, api: stepApi } = await ragClient.prepareRagMetadataExtrinsic(
+          stepData.fullStepName,
+          stepData.description,
+          stepData.instructionHex,
+          stepData.resourceHex,
+          stepData.schemaHex,
+          [], // No steps for step RAGs
+          stepData.tags,
+          null
+        );
+        
+        extrinsics.push(extrinsic);
+        
+        // Close API connection (we'll reuse one later)
+        if (stepApi) await stepApi.disconnect();
       }
       
-      // Create master workflow
-      addLog(`\n🎯 Creating master workflow...`, 'info');
+      addLog(`✅ Prepared ${extrinsics.length} step transactions`, 'success');
       
-      // Upload master instruction
-      let masterInstructionCid = null;
-      if (validatedWorkflow.master.instruction) {
-        addLog(`  ⏳ Uploading master instruction...`, 'info');
-        const masterInstructionBytes = new TextEncoder().encode(validatedWorkflow.master.instruction);
-        masterInstructionCid = await ipfsClient.uploadFile(masterInstructionBytes);
-        addLog(`  ✅ Master instruction CID: ${masterInstructionCid}`, 'success');
-        addLog(`  📡 Broadcasting to IPFS network...`, 'info');
-      }
-      
-      // Upload master resource
-      let masterResourceCid = null;
-      if (validatedWorkflow.master.resource) {
-        addLog(`  ⏳ Uploading master resource...`, 'info');
-        const masterResourceBytes = new TextEncoder().encode(validatedWorkflow.master.resource);
-        masterResourceCid = await ipfsClient.uploadFile(masterResourceBytes);
-        addLog(`  ✅ Master resource CID: ${masterResourceCid}`, 'success');
-        addLog(`  📡 Broadcasting to IPFS network...`, 'info');
-      }
-      
-      // Create master RAG
-      addLog(`  ⏳ Creating master RAG on blockchain...`, 'info');
-      
-      // Convert master CIDs to chain format and then to hex
-      const { u8aToHex } = await import('@polkadot/util');
+      // Prepare master extrinsic with calculated step hashes
+      const masterInstructionHex = masterResults.instructionCid 
+        ? u8aToHex(CidConverter.toChainFormat(masterResults.instructionCid))
+        : u8aToHex(createEmptyCid());
+      const masterResourceHex = masterResults.resourceCid 
+        ? u8aToHex(CidConverter.toChainFormat(masterResults.resourceCid))
+        : u8aToHex(createEmptyCid());
       const masterSchemaHex = u8aToHex(createEmptyCid()); // No schema for master
-      const masterInstructionHex = masterInstructionCid 
-        ? u8aToHex(CidConverter.toChainFormat(masterInstructionCid))
-        : u8aToHex(createEmptyCid());
-      const masterResourceHex = masterResourceCid 
-        ? u8aToHex(CidConverter.toChainFormat(masterResourceCid))
-        : u8aToHex(createEmptyCid());
       
-      // Add 'master' tag if not present
       const masterTags = validatedWorkflow.master.tags.includes('master') 
         ? validatedWorkflow.master.tags 
         : ['master', ...validatedWorkflow.master.tags];
       
-      const masterHash = await ragClient.storeRagMetadata(
-        selectedAccount,
+      // Calculate master hash locally
+      const masterHash = await ragClient.calculateMetadataHash(
+        masterInstructionHex,
+        masterResourceHex,
+        masterSchemaHex,
+        stepHashes.map(s => s.hash),
+        validatedWorkflow.master.name,
+        validatedWorkflow.master.description,
+        masterTags
+      );
+      
+      const { extrinsic: masterExtrinsic, api: masterApi } = await ragClient.prepareRagMetadataExtrinsic(
         validatedWorkflow.master.name,
         validatedWorkflow.master.description,
         masterInstructionHex,
         masterResourceHex,
         masterSchemaHex,
-        stepHashes.map(s => s.hash), // All step hashes
+        stepHashes.map(s => s.hash),
         masterTags,
-        null // Use default TTL
+        null
       );
       
-      // Note: storeRagMetadata logs if RAG already exists
-      addLog(`  ✅ Master hash: ${masterHash}`, 'success');
-      setDeployedMasterHash(masterHash);
+      extrinsics.push(masterExtrinsic);
+      addLog(`✅ Prepared master transaction`, 'success');
       
-      // Success summary
-      addLog(`\n🎉 DEPLOYMENT SUCCESSFUL!`, 'success');
-      addLog(`\n📋 Workflow Details:`, 'info');
-      addLog(`  Name: ${validatedWorkflow.master.name}`, 'info');
-      addLog(`  Master Hash: ${masterHash}`, 'success');
-      addLog(`  Total Steps: ${stepHashes.length}`, 'info');
-      addLog(`\n📦 Step Hashes:`, 'info');
-      stepHashes.forEach(s => {
-        addLog(`  ${s.stepNumber}. ${s.stepName} (${s.stepKey}): ${s.hash}`, 'info');
+      // ==================================================================
+      // PHASE 3: Batch all transactions and sign ONCE
+      // ==================================================================
+      addLog('\n🔐 PHASE 3: Batching transactions and requesting signature...', 'info');
+      addLog(`📦 Total transactions to sign: ${extrinsics.length} (${extrinsics.length - 1} steps + 1 master)`, 'info');
+      
+      // Get wallet signer
+      await window.injectedWeb3['polkadot-js'].enable();
+      const injector = await window.injectedWeb3['polkadot-js'].injectedWeb3.accounts;
+      const signer = (await window.injectedWeb3['polkadot-js'].enable()).signer;
+      
+      // Create batch transaction (atomic - all or nothing)
+      const batchTx = masterApi.tx.utility.batchAll(extrinsics);
+      
+      addLog(`⏳ Waiting for wallet signature...`, 'info');
+      
+      // Sign and send - ONLY ONE SIGNATURE!
+      await new Promise((resolve, reject) => {
+        batchTx.signAndSend(selectedAccount, { signer }, ({ status, events, dispatchError }) => {
+          if (dispatchError) {
+            if (dispatchError.isModule) {
+              const decoded = masterApi.registry.findMetaError(dispatchError.asModule);
+              const { docs, name, section } = decoded;
+              reject(new Error(`${section}.${name}: ${docs.join(' ')}`));
+            } else {
+              reject(new Error(dispatchError.toString()));
+            }
+            return;
+          }
+          
+          if (status.isInBlock) {
+            addLog(`✅ Transaction included in block: ${status.asInBlock.toHex()}`, 'success');
+            
+            // Verify events
+            const metadataStoredEvents = events
+              .filter(({ event }) => event.section === 'rag' && event.method === 'MetadataStored');
+            
+            addLog(`📋 Verified ${metadataStoredEvents.length} RAG metadata stored on blockchain`, 'success');
+            
+            setDeployedMasterHash(masterHash);
+            
+            // Success summary
+            addLog(`\n🎉 DEPLOYMENT SUCCESSFUL!`, 'success');
+            addLog(`\n📋 Workflow Details:`, 'info');
+            addLog(`  Name: ${validatedWorkflow.master.name}`, 'info');
+            addLog(`  Master Hash: ${masterHash}`, 'success');
+            addLog(`  Total Steps: ${stepHashes.length}`, 'info');
+            addLog(`\n📦 Step Hashes:`, 'info');
+            stepHashes.forEach(s => {
+              addLog(`  ${s.stepNumber}. ${s.stepName} (${s.stepKey}): ${s.hash}`, 'info');
+            });
+            
+            showSuccess('Workflow deployed successfully with a single signature!');
+            
+            // Disconnect
+            masterApi.disconnect();
+            resolve();
+          }
+        });
       });
-      
-      showSuccess('Workflow deployed successfully!');
       
     } catch (error) {
       logger.error('Deployment failed:', error);

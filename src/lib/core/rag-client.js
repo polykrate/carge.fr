@@ -11,6 +11,58 @@ export class RagClient {
   }
 
   /**
+   * Create a RAG metadata extrinsic without signing it (for batching)
+   * @returns {Promise<Object>} Unsigned extrinsic
+   */
+  async prepareRagMetadataExtrinsic(
+    name,
+    description,
+    instructionCid,
+    resourceCid,
+    schemaCid,
+    stepHashes = [],
+    tags = [],
+    ttl = null
+  ) {
+    try {
+      const { ApiPromise, WsProvider } = await import('@polkadot/api');
+      
+      // Connect to blockchain
+      const provider = new WsProvider(this.substrateClient.rpcUrl);
+      const api = await ApiPromise.create({ provider });
+      
+      // Clean hex strings (ensure 0x prefix)
+      const cleanHex = (hex) => {
+        if (typeof hex !== 'string') {
+          throw new Error('CID must be a hex string');
+        }
+        return hex.startsWith('0x') ? hex : `0x${hex}`;
+      };
+      
+      const instructionCidHex = cleanHex(instructionCid);
+      const resourceCidHex = cleanHex(resourceCid);
+      const schemaCidHex = cleanHex(schemaCid);
+      
+      // Create extrinsic WITHOUT signing
+      const extrinsic = api.tx.rag.storeMetadata(
+        instructionCidHex,
+        resourceCidHex,
+        schemaCidHex,
+        stepHashes.map(h => cleanHex(h)),
+        name,
+        description,
+        tags,
+        ttl
+      );
+      
+      return { extrinsic, api };
+    } catch (error) {
+      console.error('Error preparing RAG extrinsic:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get all RAGs from the blockchain
    * Uses state_getKeys RPC to query all entries in rag.ragStorage
    * @returns Promise<Array<{hash: string, metadata: Object}>>
