@@ -146,6 +146,22 @@ export const Home = () => {
               </p>
             </div>
           </div>
+
+          {/* CTA: Try AI Builder */}
+          <div className="mt-12 text-center">
+            <Link
+              to="/ai#step1"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-[#003399] text-white rounded-lg hover:from-purple-700 hover:to-[#002266] transition-all font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              Try AI Builder
+            </Link>
+            <p className="mt-3 text-sm text-gray-600">
+              Create custom workflows in 2 minutes with ChatGPT or Claude
+            </p>
+          </div>
         </div>
       </section>
 
@@ -355,108 +371,6 @@ export const Home = () => {
         </div>
       </section>
 
-      {/* AI-Powered Workflow Builder */}
-      <section className="py-20 bg-white border-t border-gray-100">
-        <div className="container mx-auto px-6 max-w-6xl">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-[#003399] text-white rounded-full text-sm font-medium mb-4">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              {t('home.aiAgentBadge')}
-            </div>
-            <h2 className="text-4xl font-bold mb-4 text-gray-900">{t('home.aiAgentTitle')}</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              {t('home.aiAgentDesc')}
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            {/* Left: Features */}
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Chat with AI</h3>
-                  <p className="text-gray-600">Describe your supply chain to ChatGPT or Claude. The AI generates a complete workflow JSON.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Instant Validation</h3>
-                  <p className="text-gray-600">Paste the JSON, validate against blockchain limits. AI fixes errors automatically.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">One-Click Deploy</h3>
-                  <p className="text-gray-600">Deploy entire workflow to blockchain in seconds. No coding required.</p>
-                </div>
-              </div>
-
-              <Link
-                to="/ai#step1"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-[#003399] text-white rounded-lg hover:from-purple-700 hover:to-[#002266] transition-all font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                Try AI Builder
-              </Link>
-            </div>
-
-            {/* Right: Visual */}
-            <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-8 border-2 border-gray-200">
-              <div className="bg-white rounded-lg p-6 shadow-lg">
-                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200">
-                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  <span className="ml-2 text-xs text-gray-500 font-mono">workflow-builder.json</span>
-                </div>
-                <pre className="text-xs font-mono text-gray-700 overflow-x-auto">
-{`{
-  "master": {
-    "name": "wine-origin-v1",
-    "description": "Premium wine..."
-  },
-  "steps": [
-    {
-      "stepKey": "harvest",
-      "stepName": "Grape Harvest",
-      "schema": { ... }
-    },
-    ...
-  ]
-}`}
-                </pre>
-              </div>
-              <div className="mt-4 flex items-center gap-2 text-sm text-gray-600">
-                <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span className="font-medium">Validated & Ready for Deployment</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Why Trust CARGE */}
       <section className="py-20 bg-gradient-to-br from-[#003399]/5 via-white to-blue-50/30 border-t border-gray-100">
