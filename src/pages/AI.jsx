@@ -523,7 +523,7 @@ export const Agent = () => {
             {/* How it works button */}
             <button
               onClick={() => setShowHowItWorks(!showHowItWorks)}
-              className="flex items-center gap-2 px-4 py-2 text-sm text-[#003399] hover:bg-blue-50 rounded-lg transition-colors border border-gray-200 hover:border-[#003399]"
+              className="flex items-center gap-2 px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors border border-gray-200 hover:border-purple-600"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -605,8 +605,8 @@ export const Agent = () => {
         {/* Step 2: Paste & Validate Workflow JSON */}
         <div className="mb-8 bg-white rounded-2xl shadow-xl border-2 border-gray-200 p-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-              <svg className="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-[#003399] rounded-xl flex items-center justify-center">
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
@@ -622,7 +622,7 @@ export const Agent = () => {
             onChange={(e) => setWorkflowJson(e.target.value)}
             placeholder={t('ai.pastePlaceholder')}
             rows={12}
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-900 focus:ring-2 focus:ring-purple-900/20 transition font-mono text-sm resize-y"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 transition font-mono text-sm resize-y"
           />
 
           <div className="flex gap-3 mt-4">
