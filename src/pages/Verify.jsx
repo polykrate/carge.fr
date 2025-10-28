@@ -218,6 +218,7 @@ export const Verify = () => {
   const [recipientAddress, setRecipientAddress] = useState('');
   const formContainerRef = useRef(null);
   const workflowSectionRef = useRef(null);
+  const workflowContinuationRef = useRef(null);
   
   // Auto-fill recipient address with connected wallet address
   useEffect(() => {
@@ -591,6 +592,10 @@ export const Verify = () => {
   useEffect(() => {
     if (nextStepSchema && formContainerRef.current) {
       FormGenerator.generateForm(nextStepSchema, 'next-step-form-fields');
+      // Auto-scroll to workflow continuation section after form is rendered
+      setTimeout(() => {
+        workflowContinuationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
     }
   }, [nextStepSchema]);
 
@@ -2455,7 +2460,7 @@ export const Verify = () => {
 
       {/* Workflow Continuation Section */}
       {workflowInfo && (
-        <div className="bg-white bg-opacity-70 rounded-lg p-6 mt-8 border-2 border-[#003399]/20 shadow-lg">
+        <div ref={workflowContinuationRef} className="bg-white bg-opacity-70 rounded-lg p-6 mt-8 border-2 border-[#003399]/20 shadow-lg">
           {/* Header - Like workflow summary */}
           <div className="bg-gradient-to-br from-[#003399]/5 to-blue-50 rounded-lg p-4 mb-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
