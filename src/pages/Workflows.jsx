@@ -206,28 +206,81 @@ export const Workflows = () => {
       setLoading(true);
       setError(null);
       
-      console.log('Loading pinned RAGs from blockchain...');
+      console.log('Loading pinned & favorite RAGs from blockchain...');
       const ragClient = new RagClient(substrateClient);
-      const loadedRags = await ragClient.getAllRags();
       
-      // Store ALL RAGs (needed for step resolution)
-      setAllRags(loadedRags);
-      
-      // Filter only RAG masters (workflows with steps)
-      const ragMasters = loadedRags.filter(rag => {
-        return rag.metadata?.steps && rag.metadata.steps.length > 0;
-      });
-      
-      // Get user favorites
+      // Get user favorites (hashes)
       const userFavorites = selectedAccount ? getFavorites(selectedAccount) : [];
       
-      // Display pinned workflows (hardcoded + user favorites)
-      const pinnedRags = ragMasters.filter(rag => {
-        return PINNED_WORKFLOWS.includes(rag.metadata?.name) || userFavorites.includes(rag.hash);
+      const loadedRags = [];
+      const stepHashes = new Set();
+      
+      // 1. Load hardcoded pinned workflows by tags
+      for (const workflowName of PINNED_WORKFLOWS) {
+        try {
+          console.log(`🔍 Searching for pinned workflow: ${workflowName}`);
+          const results = await ragClient.searchRagsByTags([workflowName]);
+          if (results.length > 0) {
+            const rag = results[0];
+            loadedRags.push(rag);
+            
+            // Collect step hashes
+            if (rag.metadata?.steps && Array.isArray(rag.metadata.steps)) {
+              rag.metadata.steps.forEach(hash => stepHashes.add(hash));
+            }
+            console.log(`✅ Found pinned workflow: ${workflowName} (${rag.metadata.steps?.length || 0} steps)`);
+          }
+        } catch (err) {
+          console.warn(`⚠️ Failed to load pinned workflow ${workflowName}:`, err);
+        }
+      }
+      
+      // 2. Load user favorite workflows by hashes
+      if (userFavorites.length > 0) {
+        console.log(`🔍 Loading ${userFavorites.length} favorite workflows...`);
+        try {
+          const favoriteRags = await ragClient.getRagsByHashes(userFavorites);
+          
+          for (const rag of favoriteRags) {
+            // Avoid duplicates
+            if (!loadedRags.some(r => r.hash === rag.hash)) {
+              loadedRags.push(rag);
+              
+              // Collect step hashes
+              if (rag.metadata?.steps && Array.isArray(rag.metadata.steps)) {
+                rag.metadata.steps.forEach(hash => stepHashes.add(hash));
+              }
+            }
+          }
+          console.log(`✅ Loaded ${favoriteRags.length} favorite workflows`);
+        } catch (err) {
+          console.warn('⚠️ Failed to load favorite workflows:', err);
+        }
+      }
+      
+      // 3. Load all step RAGs
+      if (stepHashes.size > 0) {
+        console.log(`🔍 Loading ${stepHashes.size} step RAGs...`);
+        try {
+          const stepRags = await ragClient.getRagsByHashes(Array.from(stepHashes));
+          loadedRags.push(...stepRags);
+          console.log(`✅ Loaded ${stepRags.length} step RAGs`);
+        } catch (err) {
+          console.warn('⚠️ Failed to load step RAGs:', err);
+        }
+      }
+      
+      // Store all loaded RAGs (masters + steps)
+      setAllRags(loadedRags);
+      
+      // Filter only RAG masters for display (workflows with steps)
+      const ragMasters = loadedRags.filter(rag => {
+        return rag.metadata?.steps && Array.isArray(rag.metadata.steps) && rag.metadata.steps.length > 0;
       });
       
-      console.log(`Loaded ${pinnedRags.length} pinned RAG master(s) (${PINNED_WORKFLOWS.length} hardcoded + ${userFavorites.length} user favorites, from ${ragMasters.length} total masters, ${loadedRags.length} total RAGs)`);
-      setDisplayRags(pinnedRags);
+      setDisplayRags(ragMasters);
+      
+      console.log(`✅ Loaded ${ragMasters.length} workflows (${PINNED_WORKFLOWS.length} pinned + ${userFavorites.length} favorites) with ${stepHashes.size} step RAGs (${loadedRags.length} total RAGs)`);
     } catch (err) {
       console.error('Failed to load RAGs:', err);
       setError('Failed to load workflows from blockchain');
