@@ -434,12 +434,12 @@ export const Verify = () => {
     }
   }, [workflowHistory, verifyingChainOfTrust]);
   
-  // Example proof JSON - Macallan 25 Years Workflow V5 (7 steps: Production → Consumer)
-  // Real executed workflow with proof hash: 0xd865ea4852dc632c9d31e7e82751d6c334057621cb4559b48f093af6bd598691
+  // Example proof JSON - Macallan 25 Years Workflow V5 (6 steps: Production → Retail)
+  // Real executed workflow with proof hash: 0xe3596af49ac1c832465199717d4bb48901aa295e10e89d72b900e28c4f0539a7
   const exampleProof = {
     "ragData": {
       "ragHash": "0x8a8874f71768ad02a5d2ce15af202135becfd9aa455a2c41a22e0214bc5c36e8",
-      "stepHash": "0xaef9ea84831037c3e7f78f10cee4a6fb21ecb5261ecfffc8042e9afe201f7d6c",
+      "stepHash": "0x2409a55343b255e786b1167ac6abb005ddd145c940d124ec3eafa215e510b3e0",
       "livrable": {
         "production": {
           "producerName": "The Macallan Distillery",
@@ -558,24 +558,6 @@ export const Verify = () => {
           "storageConditions": "Climate cellar 18°C, 65% humidity, high-security display, VIP tasting room",
           "retailPrice": 28800,
           "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
-        },
-        "consumer": {
-          "consumerRating": 5,
-          "purchaseDate": "2024-10-15",
-          "finalDestination": "Private collection, Shanghai penthouse",
-          "bottleNumber": "92",
-          "consumerType": "collectionneur",
-          "purchaseLocation": "Shanghai, China",
-          "batchNumber": "B47",
-          "purchaseCurrency": "CNY",
-          "tastingNotes": "Rich dried fruits, sherry sweetness, oak complexity, dark chocolate, hint of spice. Smooth finish with lingering warmth.",
-          "fromEntity": "Emperor's Cellar - Ultra-Premium Specialist",
-          "usage": "Collection",
-          "feedback": "Simply extraordinary. The deep mahogany color promises richness, and it delivers. The sherry oak influence is sublime – dark chocolate, dried fruit, rich spices. Each sip reveals another layer. 25 years of Scottish craftsmanship in a glass. The QR blockchain verification gives me confidence in its authenticity. Worth every yuan. A true collector's piece.",
-          "consumerName": "Mr. Wei Chen, Private Collector",
-          "retailerName": "Emperor's Cellar - Ultra-Premium Specialist",
-          "purchasePrice": 28800,
-          "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
         }
       }
     }
@@ -611,6 +593,42 @@ export const Verify = () => {
       FormGenerator.generateForm(nextStepSchema, 'next-step-form-fields');
     }
   }, [nextStepSchema]);
+
+  // Pre-fill form with example data for consumer step
+  useEffect(() => {
+    if (workflowInfo?.isExample && nextStepSchema) {
+      // Wait for form to be rendered
+      setTimeout(() => {
+        const exampleConsumerData = {
+          consumerName: 'Mr. Wei Chen, Private Collector',
+          purchaseDate: '2024-10-15',
+          retailerName: 'Emperor\'s Cellar - Ultra-Premium Specialist',
+          consumerType: 'collectionneur',
+          purchaseLocation: 'Shanghai, China',
+          finalDestination: 'Private collection, Shanghai penthouse',
+          batchNumber: 'B47',
+          bottleNumber: '92',
+          purchasePrice: '28800',
+          purchaseCurrency: 'CNY',
+          usage: 'Collection',
+          tastingNotes: 'Rich dried fruits, sherry sweetness, oak complexity, dark chocolate, hint of spice. Smooth finish with lingering warmth.',
+          feedback: 'Simply extraordinary. The deep mahogany color promises richness, and it delivers. The sherry oak influence is sublime – dark chocolate, dried fruit, rich spices. Each sip reveals another layer. 25 years of Scottish craftsmanship in a glass. The QR blockchain verification gives me confidence in its authenticity. Worth every yuan. A true collector\'s piece.',
+          rating: '5'
+        };
+
+        // Fill form fields
+        Object.entries(exampleConsumerData).forEach(([key, value]) => {
+          const input = document.querySelector(`[name="consumer.${key}"]`);
+          if (input) {
+            input.value = value;
+            // Trigger change event for React forms
+            const event = new Event('input', { bubbles: true });
+            input.dispatchEvent(event);
+          }
+        });
+      }, 100);
+    }
+  }, [workflowInfo?.isExample, nextStepSchema]);
 
   // Load example proof when arriving from Home page
   useEffect(() => {
@@ -1115,13 +1133,17 @@ export const Verify = () => {
       console.log('Schema loaded successfully');
       setNextStepSchema(schemaObj);
       
+      // Check if this is the example workflow (retail step proof)
+      const isExampleWorkflow = stepHash === '0x2409a55343b255e786b1167ac6abb005ddd145c940d124ec3eafa215e510b3e0';
+      
       setWorkflowInfo({
         masterRag,
         currentStep: currentStepIndex + 2, // Next step (1-indexed)
         totalSteps: masterRag.metadata.steps.length,
         nextStepRag,
         livrable,
-        isLastStep: false
+        isLastStep: false,
+        isExample: isExampleWorkflow
       });
 
     } catch (err) {
@@ -2352,7 +2374,7 @@ export const Verify = () => {
             <p className="text-xs text-blue-700 mt-2">
               Expected hash: <code className="bg-blue-100 px-2 py-1 rounded font-mono">{firstStepHash.substring(0, 20)}...{firstStepHash.substring(firstStepHash.length - 10)}</code>
             </p>
-            {firstStepHash === '0x610b90a3472cab175af976348cf4d1c3e7b76b928ec1c37ce9617a55a55b03e9' && (
+            {firstStepHash === '0x2210161b7fb2f09a31e88e0222429641551a9b7a254af386d76ae832301f84b1' && (
               <div className="mt-3 p-3 bg-green-50 border border-green-300 rounded-lg">
                 <p className="text-xs text-green-900">
                   <strong>{t('about.qrExampleHint')}</strong> {' '}
