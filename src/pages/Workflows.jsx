@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { RagClient } from '../lib/core/rag-client.js';
 import { CidConverter } from '../lib/core/cid-converter.js';
@@ -19,6 +19,7 @@ export const Workflows = () => {
   const { t } = useTranslation();
   const { substrateClient, ipfsClient, selectedAccount } = useApp();
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Generate Polkadot.js Apps explorer link for a block number
   const getBlockExplorerLink = (blockNumber) => {
@@ -723,24 +724,35 @@ export const Workflows = () => {
 
         {/* Available Workflows Section */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6 gap-4">
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">{t('workflows.available')}</h2>
               <p className="text-gray-600">Select a workflow to get started</p>
             </div>
-            <button
-              onClick={() => {
-                setSearchTags('');
-                setSelectedRag(null);
-                loadRags();
-              }}
-              className="flex items-center gap-2 px-4 py-2 text-sm bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm hover:shadow-md"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              {t('workflows.clearSearch')}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/ai')}
+                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all shadow-md hover:shadow-lg font-medium"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                {t('workflows.buildWithAI')}
+              </button>
+              <button
+                onClick={() => {
+                  setSearchTags('');
+                  setSelectedRag(null);
+                  loadRags();
+                }}
+                className="flex items-center gap-2 px-4 py-2 text-sm bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm hover:shadow-md"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                {t('workflows.clearSearch')}
+              </button>
+            </div>
           </div>
 
           {/* Tags Search */}
