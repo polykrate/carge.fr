@@ -541,7 +541,7 @@ export const Agent = () => {
           {showHowItWorks && (
             <div className="mt-6 animate-fadeIn">
               <div className="grid md:grid-cols-4 gap-4">
-                <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4">
+                <div className="bg-purple-50/50 border border-purple-200 rounded-lg p-4 hover:bg-purple-50 hover:border-purple-300 transition-all">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
                       <span className="text-white font-bold text-sm">1</span>
@@ -550,7 +550,7 @@ export const Agent = () => {
                   </div>
                   <p className="text-sm text-gray-600">{t('ai.step1Desc')}</p>
                 </div>
-                <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4">
+                <div className="bg-purple-50/50 border border-purple-200 rounded-lg p-4 hover:bg-purple-50 hover:border-purple-300 transition-all">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
                       <span className="text-white font-bold text-sm">2</span>
@@ -559,7 +559,7 @@ export const Agent = () => {
                   </div>
                   <p className="text-sm text-gray-600">{t('ai.step2Desc')}</p>
                 </div>
-                <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4">
+                <div className="bg-purple-50/50 border border-purple-200 rounded-lg p-4 hover:bg-purple-50 hover:border-purple-300 transition-all">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
                       <span className="text-white font-bold text-sm">3</span>
@@ -568,7 +568,7 @@ export const Agent = () => {
                   </div>
                   <p className="text-sm text-gray-600">{t('ai.step3Desc')}</p>
                 </div>
-                <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4">
+                <div className="bg-purple-50/50 border border-purple-200 rounded-lg p-4 hover:bg-purple-50 hover:border-purple-300 transition-all">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
                       <span className="text-white font-bold text-sm">4</span>
