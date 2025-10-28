@@ -36,100 +36,28 @@ export const Home = () => {
             {t('home.title')}
           </h1>
 
-          {/* Subtitle */}
-          <p className="text-xl md:text-3xl font-semibold text-gray-800 mb-8 leading-tight">
-            {t('home.subtitle')}
-          </p>
-
-          {/* Value Proposition - 3 key points */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 text-base md:text-lg text-gray-700 mb-6 font-medium max-w-4xl mx-auto flex-wrap">
-            <span className="flex items-center justify-center gap-2 w-full sm:w-auto">
-              <svg className="w-5 h-5 text-[#003399] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              {t('home.heroPoint1')}
-            </span>
-            <span className="hidden sm:inline text-[#003399]">•</span>
-            <span className="flex items-center justify-center gap-2 w-full sm:w-auto">
-              <svg className="w-5 h-5 text-[#003399] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-              </svg>
-              {t('home.heroPoint2')}
-            </span>
-            <span className="hidden sm:inline text-[#003399]">•</span>
-            <span className="flex items-center justify-center gap-2 w-full sm:w-auto">
-              <svg className="w-5 h-5 text-[#003399] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-              </svg>
-              {t('home.heroPoint3')}
-            </span>
-          </div>
-
-          {/* Target audience */}
-          <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-            {t('home.heroDesc')}
+          {/* Subtitle with value proposition */}
+          <p className="text-xl md:text-2xl font-medium text-gray-700 mb-10 max-w-3xl mx-auto leading-tight">
+            {t('home.differenceDesc')}
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+            <Link 
+              to="/verify" 
+              className="px-8 py-4 bg-[#003399] text-white rounded-lg hover:bg-[#002266] transition-all duration-300 font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105"
+            >
+              {t('home.ctaVerify')}
+            </Link>
             <button
               onClick={scrollToWorkflow}
-              className="group px-8 py-4 bg-[#003399] text-white rounded-lg hover:bg-[#002266] transition-all duration-300 font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105 flex items-center justify-center gap-2"
+              className="group px-8 py-4 border-2 border-[#003399] text-[#003399] rounded-lg hover:bg-[#003399] hover:text-white transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2"
             >
               {t('home.ctaSeeExample')}
               <svg className="w-5 h-5 group-hover:translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            <Link 
-              to="/verify" 
-              className="px-8 py-4 border-2 border-[#003399] text-[#003399] rounded-lg hover:bg-[#003399] hover:text-white transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-105"
-            >
-              {t('home.ctaVerify')}
-            </Link>
-            <a
-              href="mailto:admin@carge.fr?subject=Demo%20Request%20-%20CARGE%20Anti-Counterfeiting&body=Hello,%0D%0A%0D%0AI'm%20interested%20in%20a%20demo%20of%20CARGE%20for%20my%20brand.%0D%0A%0D%0ACompany:%20%0D%0AIndustry:%20%0D%0AUse%20Case:%20%0D%0A%0D%0AThank%20you!"
-              className="px-8 py-4 bg-gradient-to-r from-[#003399] to-blue-700 text-white rounded-lg hover:from-[#002266] hover:to-blue-800 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              {t('home.ctaDemo')}
-            </a>
-          </div>
-
-          {/* AI Agent CTA Highlight */}
-          <div className="max-w-2xl mx-auto mb-16">
-            <Link
-              to="/agent"
-              className="group block bg-gradient-to-r from-purple-600 to-[#003399] rounded-2xl p-6 shadow-2xl hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex-shrink-0">
-                  <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                    <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex-1 text-left">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold text-white uppercase tracking-wide">
-                      {t('home.aiAgentBadge')}
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-1">
-                    {t('home.aiAgentTitle')}
-                  </h3>
-                  <p className="text-white/90 text-sm">
-                    {t('home.aiAgentDesc')}
-                  </p>
-                </div>
-                <svg className="w-6 h-6 text-white flex-shrink-0 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </div>
-            </Link>
           </div>
           
           {/* Trust Indicators / Key Metrics */}
@@ -413,6 +341,109 @@ export const Home = () => {
         </div>
       </section>
 
+      {/* AI-Powered Workflow Builder */}
+      <section className="py-20 bg-white border-t border-gray-100">
+        <div className="container mx-auto px-6 max-w-6xl">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-[#003399] text-white rounded-full text-sm font-medium mb-4">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              {t('home.aiAgentBadge')}
+            </div>
+            <h2 className="text-4xl font-bold mb-4 text-gray-900">{t('home.aiAgentTitle')}</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              {t('home.aiAgentDesc')}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            {/* Left: Features */}
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Chat with AI</h3>
+                  <p className="text-gray-600">Describe your supply chain to ChatGPT or Claude. The AI generates a complete workflow JSON.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Instant Validation</h3>
+                  <p className="text-gray-600">Paste the JSON, validate against blockchain limits. AI fixes errors automatically.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">One-Click Deploy</h3>
+                  <p className="text-gray-600">Deploy entire workflow to blockchain in seconds. No coding required.</p>
+                </div>
+              </div>
+
+              <Link
+                to="/agent"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-[#003399] text-white rounded-lg hover:from-purple-700 hover:to-[#002266] transition-all font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                Try AI Builder
+              </Link>
+            </div>
+
+            {/* Right: Visual */}
+            <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-8 border-2 border-gray-200">
+              <div className="bg-white rounded-lg p-6 shadow-lg">
+                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200">
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <span className="ml-2 text-xs text-gray-500 font-mono">workflow-builder.json</span>
+                </div>
+                <pre className="text-xs font-mono text-gray-700 overflow-x-auto">
+{`{
+  "master": {
+    "name": "wine-origin-v1",
+    "description": "Premium wine..."
+  },
+  "steps": [
+    {
+      "stepKey": "harvest",
+      "stepName": "Grape Harvest",
+      "schema": { ... }
+    },
+    ...
+  ]
+}`}
+                </pre>
+              </div>
+              <div className="mt-4 flex items-center gap-2 text-sm text-gray-600">
+                <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="font-medium">Validated & Ready for Deployment</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Why Trust CARGE */}
       <section className="py-20 bg-gradient-to-br from-[#003399]/5 via-white to-blue-50/30 border-t border-gray-100">
         <div className="container mx-auto px-6 max-w-5xl">
@@ -582,15 +613,6 @@ export const Home = () => {
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link
-              to="/agent"
-              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-[#003399] text-white rounded-lg hover:from-purple-700 hover:to-[#002266] transition font-medium text-lg shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              {t('home.ctaCreateWithAI')}
-            </Link>
-            <Link
               to="/workflows"
               className="px-8 py-4 bg-white text-[#003399] rounded-lg hover:bg-gray-100 transition font-medium text-lg"
             >
@@ -602,6 +624,15 @@ export const Home = () => {
             >
               {t('home.ctaQuickSign')}
             </Link>
+            <a
+              href="mailto:admin@carge.fr?subject=Demo%20Request%20-%20CARGE%20Anti-Counterfeiting&body=Hello,%0D%0A%0D%0AI'm%20interested%20in%20a%20demo%20of%20CARGE%20for%20my%20brand.%0D%0A%0D%0ACompany:%20%0D%0AIndustry:%20%0D%0AUse%20Case:%20%0D%0A%0D%0AThank%20you!"
+              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-[#003399] text-white rounded-lg hover:from-purple-700 hover:to-[#002266] transition font-medium text-lg shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              {t('home.ctaDemo')}
+            </a>
           </div>
         </div>
       </section>
