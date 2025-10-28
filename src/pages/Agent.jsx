@@ -102,6 +102,7 @@ export const Agent = () => {
   const [deploying, setDeploying] = useState(false);
   const [deploymentLog, setDeploymentLog] = useState([]);
   const [deployedMasterHash, setDeployedMasterHash] = useState(null);
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
   
   const textareaRef = useRef(null);
   const logRef = useRef(null);
@@ -475,83 +476,91 @@ export const Agent = () => {
           <p className="text-gray-600">{t('agent.subtitle')}</p>
         </div>
 
-        {/* How It Works */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-medium mb-6 text-gray-900">{t('agent.howItWorksTitle')}</h2>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="group relative bg-gradient-to-br from-purple-900 via-purple-800 to-violet-900 rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 border border-purple-700/50 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative">
-                <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white text-xl font-bold mb-4 ring-2 ring-white/20">
-                  1
-                </div>
-                <h3 className="font-semibold text-white mb-2 text-sm">{t('agent.step1Title')}</h3>
-                <p className="text-xs text-purple-100/80 leading-relaxed">{t('agent.step1Desc')}</p>
-              </div>
+        {/* How It Works Button */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              {/* Empty space for layout balance */}
             </div>
-            
-            <div className="group relative bg-gradient-to-br from-purple-900 via-purple-800 to-violet-900 rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 border border-purple-700/50 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative">
-                <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white text-xl font-bold mb-4 ring-2 ring-white/20">
-                  2
-                </div>
-                <h3 className="font-semibold text-white mb-2 text-sm">{t('agent.step2Title')}</h3>
-                <p className="text-xs text-purple-100/80 leading-relaxed">{t('agent.step2Desc')}</p>
-              </div>
-            </div>
-            
-            <div className="group relative bg-gradient-to-br from-violet-900 via-purple-800 to-fuchsia-900 rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 border border-violet-700/50 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative">
-                <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white text-xl font-bold mb-4 ring-2 ring-white/20">
-                  3
-                </div>
-                <h3 className="font-semibold text-white mb-2 text-sm">{t('agent.step3Title')}</h3>
-                <p className="text-xs text-purple-100/80 leading-relaxed">{t('agent.step3Desc')}</p>
-              </div>
-            </div>
-            
-            <div className="group relative bg-gradient-to-br from-violet-900 via-purple-800 to-fuchsia-900 rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 border border-violet-700/50 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative">
-                <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white text-xl font-bold mb-4 ring-2 ring-white/20">
-                  4
-                </div>
-                <h3 className="font-semibold text-white mb-2 text-sm">{t('agent.step4Title')}</h3>
-                <p className="text-xs text-purple-100/80 leading-relaxed">{t('agent.step4Desc')}</p>
-              </div>
-            </div>
+            <button
+              onClick={() => setShowHowItWorks(!showHowItWorks)}
+              className="flex items-center gap-2 px-4 py-2 text-sm text-[#003399] hover:bg-blue-50 rounded-lg transition-colors border border-gray-200 hover:border-[#003399]"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {showHowItWorks ? 'Hide details' : 'How it works?'}
+            </button>
           </div>
+
+          {/* Expandable How it works section */}
+          {showHowItWorks && (
+            <div className="mt-6 animate-fadeIn">
+              <div className="grid md:grid-cols-4 gap-4">
+                <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-bold text-sm">1</span>
+                    </div>
+                    <h3 className="font-semibold text-gray-900">{t('agent.step1Title')}</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">{t('agent.step1Desc')}</p>
+                </div>
+                <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-bold text-sm">2</span>
+                    </div>
+                    <h3 className="font-semibold text-gray-900">{t('agent.step2Title')}</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">{t('agent.step2Desc')}</p>
+                </div>
+                <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-bold text-sm">3</span>
+                    </div>
+                    <h3 className="font-semibold text-gray-900">{t('agent.step3Title')}</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">{t('agent.step3Desc')}</p>
+                </div>
+                <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-bold text-sm">4</span>
+                    </div>
+                    <h3 className="font-semibold text-gray-900">{t('agent.step4Title')}</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">{t('agent.step4Desc')}</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Step 1: Copy AI Instructions */}
-        <div className="mb-8 bg-gradient-to-br from-purple-900 via-violet-900 to-fuchsia-950 rounded-xl shadow-2xl p-8 border border-purple-700/50 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-600/20 via-transparent to-transparent"></div>
-          <div className="relative">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center ring-2 ring-white/20">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-2xl font-semibold text-white">{t('agent.instructionsTitle')}</h2>
-                <p className="text-purple-100/80">{t('agent.instructionsSubtitle')}</p>
-              </div>
-            </div>
-            
-            <button
-              onClick={copyInstructions}
-              className="w-full px-6 py-4 bg-white text-purple-900 rounded-lg hover:bg-purple-50 transition-all font-bold text-lg shadow-xl hover:shadow-2xl flex items-center justify-center gap-3 group"
-            >
-              <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        <div className="mb-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-xl shadow-2xl p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              {t('agent.copyInstructionsBtn')}
-            </button>
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold text-white">{t('agent.instructionsTitle')}</h2>
+              <p className="text-white/90">{t('agent.instructionsSubtitle')}</p>
+            </div>
           </div>
+          
+          <button
+            onClick={copyInstructions}
+            className="w-full px-6 py-4 bg-white text-purple-600 rounded-lg hover:bg-gray-100 transition-all font-bold text-lg shadow-xl hover:shadow-2xl flex items-center justify-center gap-3 group"
+          >
+            <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            {t('agent.copyInstructionsBtn')}
+          </button>
         </div>
 
         {/* Step 2: Paste & Validate Workflow JSON */}
@@ -581,7 +590,7 @@ export const Agent = () => {
             <button
               onClick={validateWorkflow}
               disabled={!workflowJson.trim()}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-900 to-violet-900 text-white rounded-lg hover:from-purple-800 hover:to-violet-800 transition-all font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-[#003399] text-white rounded-lg hover:from-purple-700 hover:to-[#002266] transition-all font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -734,7 +743,7 @@ export const Agent = () => {
               <button
                 onClick={deployWorkflow}
                 disabled={deploying || !selectedAccount}
-                className="w-full px-6 py-4 bg-gradient-to-r from-purple-900 to-fuchsia-900 hover:from-purple-800 hover:to-fuchsia-800 text-white rounded-lg transition-all font-bold text-lg shadow-2xl hover:shadow-purple-900/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 group"
+                className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-[#003399] hover:from-purple-700 hover:to-[#002266] text-white rounded-lg transition-all font-bold text-lg shadow-2xl hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 group"
               >
                 {deploying ? (
                   <>
