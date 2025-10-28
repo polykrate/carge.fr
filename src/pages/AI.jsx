@@ -58,7 +58,11 @@ Once I answer, generate the complete JSON in a **code artifact** (Claude) or **c
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 200,
-                "description": "Name of the actor performing this step"
+                "description": "Name of the actor performing this step (FIRST FIELD - MUST end with 'Name')"
+              },
+              "otherField": {
+                "type": "string",
+                "description": "Example field (use English camelCase names)"
               }
             }
           }
@@ -109,11 +113,12 @@ Just paste this into your existing JSON to fix it.
 
 ## Critical Rules
 
-1. **FIRST field** in each step schema MUST be the actor's name (producerName, distributorName, etc.)
+1. **FIRST field** in each step schema MUST be the actor's name in ENGLISH ending with "Name" (producerName, distributorName, sellerName, etc. - NOT producteurNom, vendeurNom)
 2. Each step needs: \`stepKey\`, \`stepName\`, \`description\`, \`instruction\`, \`resource\`, \`tags\`, \`schema\`
 3. Schema follows JSON Schema standard (type, required, properties, etc.)
 4. Tags format: \`["industry", "stepKey", "step-N", "version"]\`
 5. **Always check**: \`stepKey.length + 1 + master.name.length ≤ 50\`
+6. **All field names** must be in English (camelCase): use "harvestDate" not "dateRecolte", "unitPrice" not "prixUnitaire"
 
 ---
 
@@ -280,11 +285,10 @@ export const Agent = () => {
               if (!stepSchema.properties) {
                 errors.push(`${prefix}.schema.properties.${step.stepKey}.properties is required`);
               } else {
-                // Check first field is actor name (support EN "name" and FR "nom")
+                // Check first field is actor name
                 const firstField = Object.keys(stepSchema.properties)[0];
-                const lowerField = firstField?.toLowerCase() || '';
-                if (!firstField || (!lowerField.includes('name') && !lowerField.includes('nom'))) {
-                  errors.push(`${prefix}: First field in schema must be actor's name (e.g., "producerName", "producteurNom", "distributorName")`);
+                if (!firstField || !firstField.toLowerCase().includes('name')) {
+                  errors.push(`${prefix}: First field in schema must be actor's name (e.g., "producerName", "distributorName")`);
                 }
               }
             }

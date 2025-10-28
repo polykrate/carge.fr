@@ -29,51 +29,51 @@ Traçabilité complète du café Robusta produit par les petits producteurs de l
         "properties": {
           "production": {
             "type": "object",
-            "required": ["producteurNom", "village", "superficieHa", "varieteCafe", "quantiteRecolteeKg", "dateRecolte"],
+            "required": ["producerName", "village", "surfaceHa", "coffeeVariety", "harvestedKg", "harvestDate"],
             "properties": {
-              "producteurNom": {
+              "producerName": {
                 "type": "string",
                 "minLength": 2,
                 "maxLength": 100,
-                "description": "Nom complet du producteur de café (PREMIER CHAMP - OBLIGATOIRE)"
+                "description": "Full name of the coffee producer (FIRST FIELD - MANDATORY)"
               },
               "village": {
                 "type": "string",
                 "minLength": 2,
                 "maxLength": 100,
-                "description": "Nom du village (ex: Digba, Daloa)"
+                "description": "Village name (e.g., Digba, Daloa)"
               },
-              "superficieHa": {
+              "surfaceHa": {
                 "type": "number",
                 "minimum": 0.1,
                 "maximum": 100,
-                "description": "Superficie cultivée en hectares"
+                "description": "Cultivated area in hectares"
               },
-              "varieteCafe": {
+              "coffeeVariety": {
                 "type": "string",
-                "enum": ["Robusta", "Arabusta", "Arabica", "Autre"],
-                "description": "Variété de café cultivée"
+                "enum": ["Robusta", "Arabusta", "Arabica", "Other"],
+                "description": "Coffee variety cultivated"
               },
-              "quantiteRecolteeKg": {
+              "harvestedKg": {
                 "type": "number",
                 "minimum": 1,
-                "description": "Quantité de cerises de café récoltées en kg"
+                "description": "Quantity of coffee cherries harvested in kg"
               },
-              "dateRecolte": {
+              "harvestDate": {
                 "type": "string",
                 "format": "date",
-                "description": "Date de la récolte (format: YYYY-MM-DD)"
+                "description": "Harvest date (format: YYYY-MM-DD)"
               },
-              "pratiquesAgricoles": {
+              "farmingPractices": {
                 "type": "string",
                 "maxLength": 200,
-                "description": "Description des pratiques (bio, agroforesterie, traditionnel, etc.)"
+                "description": "Farming practices description (organic, agroforestry, traditional, etc.)"
               },
               "altitudeM": {
                 "type": "number",
                 "minimum": 0,
                 "maximum": 2000,
-                "description": "Altitude de la plantation en mètres"
+                "description": "Plantation altitude in meters"
               }
             }
           }
@@ -93,50 +93,50 @@ Traçabilité complète du café Robusta produit par les petits producteurs de l
         "properties": {
           "traitement": {
             "type": "object",
-            "required": ["producteurNom", "methodeTraitement", "dureeSechageJours", "tauxHumidite", "dateFinTraitement", "quantiteCafeKg"],
+            "required": ["producerName", "processingMethod", "dryingDays", "moistureRate", "processingEndDate", "parchmentCoffeeKg"],
             "properties": {
-              "producteurNom": {
+              "producerName": {
                 "type": "string",
                 "minLength": 2,
                 "maxLength": 100,
-                "description": "Nom du producteur effectuant le traitement (PREMIER CHAMP - OBLIGATOIRE)"
+                "description": "Name of the producer doing the processing (FIRST FIELD - MANDATORY)"
               },
-              "methodeTraitement": {
+              "processingMethod": {
                 "type": "string",
-                "enum": ["Nature", "Lavé", "Honey", "Semi-lavé"],
-                "description": "Méthode de traitement utilisée"
+                "enum": ["Natural", "Washed", "Honey", "Semi-washed"],
+                "description": "Processing method used"
               },
-              "dureeSechageJours": {
+              "dryingDays": {
                 "type": "number",
                 "minimum": 1,
                 "maximum": 60,
-                "description": "Durée du séchage en jours"
+                "description": "Drying duration in days"
               },
-              "tauxHumidite": {
+              "moistureRate": {
                 "type": "number",
                 "minimum": 8,
                 "maximum": 15,
-                "description": "Taux d'humidité final en pourcentage (optimal: 11-12%)"
+                "description": "Final moisture rate in percentage (optimal: 11-12%)"
               },
-              "dateFinTraitement": {
+              "processingEndDate": {
                 "type": "string",
                 "format": "date",
-                "description": "Date de fin du traitement (format: YYYY-MM-DD)"
+                "description": "Processing end date (format: YYYY-MM-DD)"
               },
-              "quantiteCafeKg": {
+              "parchmentCoffeeKg": {
                 "type": "number",
                 "minimum": 1,
-                "description": "Quantité de café parche obtenue en kg"
+                "description": "Quantity of parchment coffee obtained in kg"
               },
-              "qualiteGrade": {
+              "qualityGrade": {
                 "type": "string",
                 "maxLength": 50,
-                "description": "Grade de qualité (Grade 1, 2, 3, etc.)"
+                "description": "Quality grade (Grade 1, 2, 3, etc.)"
               },
               "observations": {
                 "type": "string",
                 "maxLength": 200,
-                "description": "Observations sur la qualité, défauts, etc."
+                "description": "Observations on quality, defects, etc."
               }
             }
           }
@@ -156,44 +156,44 @@ Traçabilité complète du café Robusta produit par les petits producteurs de l
         "properties": {
           "stockage": {
             "type": "object",
-            "required": ["responsableNom", "lieuStockage", "dateDebut", "quantiteStockeeKg"],
+            "required": ["storageManagerName", "storageLocation", "storageStartDate", "storedQuantityKg"],
             "properties": {
-              "responsableNom": {
+              "storageManagerName": {
                 "type": "string",
                 "minLength": 2,
                 "maxLength": 100,
-                "description": "Nom du responsable du stockage (PREMIER CHAMP - OBLIGATOIRE)"
+                "description": "Name of the storage manager (FIRST FIELD - MANDATORY)"
               },
-              "lieuStockage": {
+              "storageLocation": {
                 "type": "string",
                 "minLength": 2,
                 "maxLength": 150,
-                "description": "Lieu précis du stockage (entrepôt, coopérative, etc.)"
+                "description": "Precise storage location (warehouse, cooperative, etc.)"
               },
-              "dateDebut": {
+              "storageStartDate": {
                 "type": "string",
                 "format": "date",
-                "description": "Date de mise en stockage (format: YYYY-MM-DD)"
+                "description": "Storage start date (format: YYYY-MM-DD)"
               },
-              "quantiteStockeeKg": {
+              "storedQuantityKg": {
                 "type": "number",
                 "minimum": 1,
-                "description": "Quantité de café stockée en kg"
+                "description": "Quantity of coffee stored in kg"
               },
-              "conditionsStockage": {
+              "storageConditions": {
                 "type": "string",
                 "maxLength": 200,
-                "description": "Description des conditions (sacs, température, ventilation)"
+                "description": "Storage conditions description (bags, temperature, ventilation)"
               },
-              "controlesQualite": {
+              "qualityControls": {
                 "type": "string",
                 "maxLength": 200,
-                "description": "Contrôles effectués pendant le stockage"
+                "description": "Quality controls performed during storage"
               },
-              "typeConditionnement": {
+              "packagingType": {
                 "type": "string",
-                "enum": ["Sacs jute", "Sacs plastique", "Sacs toile", "Vrac", "Autre"],
-                "description": "Type de conditionnement utilisé"
+                "enum": ["Jute bags", "Plastic bags", "Canvas bags", "Bulk", "Other"],
+                "description": "Type of packaging used"
               }
             }
           }
@@ -213,54 +213,54 @@ Traçabilité complète du café Robusta produit par les petits producteurs de l
         "properties": {
           "vente": {
             "type": "object",
-            "required": ["vendeurNom", "acheteurNom", "quantiteVendueKg", "prixUnitaireFCFA", "prixTotalFCFA", "dateVente"],
+            "required": ["sellerName", "buyerName", "soldQuantityKg", "unitPriceFCFA", "totalPriceFCFA", "saleDate"],
             "properties": {
-              "vendeurNom": {
+              "sellerName": {
                 "type": "string",
                 "minLength": 2,
                 "maxLength": 100,
-                "description": "Nom du producteur vendeur (PREMIER CHAMP - OBLIGATOIRE)"
+                "description": "Name of the producer seller (FIRST FIELD - MANDATORY)"
               },
-              "acheteurNom": {
+              "buyerName": {
                 "type": "string",
                 "minLength": 2,
                 "maxLength": 150,
-                "description": "Nom de l'acheteur (société, coopérative, exportateur)"
+                "description": "Name of the buyer (company, cooperative, exporter)"
               },
-              "quantiteVendueKg": {
+              "soldQuantityKg": {
                 "type": "number",
                 "minimum": 1,
-                "description": "Quantité de café vendue en kg"
+                "description": "Quantity of coffee sold in kg"
               },
-              "prixUnitaireFCFA": {
+              "unitPriceFCFA": {
                 "type": "number",
                 "minimum": 1,
-                "description": "Prix unitaire en Francs CFA par kg"
+                "description": "Unit price in CFA Francs per kg"
               },
-              "prixTotalFCFA": {
+              "totalPriceFCFA": {
                 "type": "number",
                 "minimum": 1,
-                "description": "Prix total de la transaction en Francs CFA"
+                "description": "Total transaction price in CFA Francs"
               },
-              "dateVente": {
+              "saleDate": {
                 "type": "string",
                 "format": "date",
-                "description": "Date de la vente (format: YYYY-MM-DD)"
+                "description": "Sale date (format: YYYY-MM-DD)"
               },
-              "destinationFinale": {
+              "finalDestination": {
                 "type": "string",
                 "maxLength": 100,
-                "description": "Destination du café (Export Europe, Marché local, etc.)"
+                "description": "Coffee destination (Europe Export, Local Market, etc.)"
               },
-              "primeQualiteFCFA": {
+              "qualityPremiumFCFA": {
                 "type": "number",
                 "minimum": 0,
-                "description": "Prime de qualité obtenue grâce à la traçabilité (FCFA/kg)"
+                "description": "Quality premium obtained thanks to traceability (FCFA/kg)"
               },
-              "numeroTransaction": {
+              "transactionNumber": {
                 "type": "string",
                 "maxLength": 50,
-                "description": "Numéro de reçu ou de transaction"
+                "description": "Receipt or transaction number"
               }
             }
           }
