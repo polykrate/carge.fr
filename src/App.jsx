@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { AppProvider } from './contexts/AppContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Layout } from './components/Layout';
+import { ScrollToTop } from './components/ScrollToTop';
 import './lib/i18n'; // Initialize i18n
 
 // 🚀 Lazy load ALL pages for optimal performance
@@ -46,6 +47,7 @@ function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <AppProvider>
+          <ScrollToTop />
           <Toaster position="top-right" />
           <Layout>
                     <Suspense fallback={<PageLoader />}>
