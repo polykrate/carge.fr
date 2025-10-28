@@ -224,10 +224,16 @@ export const Verify = () => {
   
   // Scroll to QR scanner when mode changes to 'qr'
   useEffect(() => {
-    if (mode === 'qr' && qrScannerRef.current) {
+    if (mode === 'qr') {
+      // Wait longer to ensure QR component is fully rendered
       setTimeout(() => {
-        scrollToElement(qrScannerRef);
-      }, 300);
+        if (qrScannerRef.current) {
+          console.log('Scrolling to QR scanner', qrScannerRef.current);
+          scrollToElement(qrScannerRef);
+        } else {
+          console.log('QR scanner ref not found');
+        }
+      }, 500); // Increased delay
     }
   }, [mode]);
   
