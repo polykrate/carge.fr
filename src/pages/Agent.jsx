@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../contexts/AppContext';
 import { RagClient } from '../lib/core/rag-client.js';
@@ -103,6 +103,17 @@ export const Agent = () => {
   const [deploymentLog, setDeploymentLog] = useState([]);
   const [deployedMasterHash, setDeployedMasterHash] = useState(null);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
+  
+  const step1Ref = useRef(null);
+
+  // Scroll to Step 1 if hash is present
+  useEffect(() => {
+    if (window.location.hash === '#step1' && step1Ref.current) {
+      setTimeout(() => {
+        step1Ref.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, []);
   
   const textareaRef = useRef(null);
   const logRef = useRef(null);
@@ -536,7 +547,7 @@ export const Agent = () => {
         </div>
 
         {/* Step 1: Copy AI Instructions */}
-        <div className="mb-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-xl shadow-2xl p-8">
+        <div ref={step1Ref} className="mb-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-xl shadow-2xl p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
               <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
