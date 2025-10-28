@@ -471,17 +471,14 @@ export const Agent = () => {
   return (
     <div className="container mx-auto px-6 py-12 max-w-6xl">
         {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-light mb-4">{t('agent.title')}</h1>
-          <p className="text-gray-600">{t('agent.subtitle')}</p>
-        </div>
-
-        {/* How It Works Button */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
             <div>
-              {/* Empty space for layout balance */}
+              <h1 className="text-4xl font-light mb-4">{t('agent.title')}</h1>
+              <p className="text-gray-600">{t('agent.subtitle')}</p>
             </div>
+
+            {/* How it works button */}
             <button
               onClick={() => setShowHowItWorks(!showHowItWorks)}
               className="flex items-center gap-2 px-4 py-2 text-sm text-[#003399] hover:bg-blue-50 rounded-lg transition-colors border border-gray-200 hover:border-[#003399]"
