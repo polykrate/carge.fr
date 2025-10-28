@@ -150,7 +150,7 @@ export const Home = () => {
           {/* CTA: Try AI Builder */}
           <div className="mt-12 text-center">
             <Link
-              to="/ai#step1"
+              to="/ai"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-[#003399] text-white rounded-lg hover:from-purple-700 hover:to-[#002266] transition-all font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
