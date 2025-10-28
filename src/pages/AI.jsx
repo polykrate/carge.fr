@@ -449,7 +449,7 @@ export const Agent = () => {
         const stepHash = await ragClient.calculateMetadataHash(
           stepData.instructionHex,
           stepData.resourceHex,
-          stepData.schemaCidHex,
+          stepData.schemaHex,
           [], // No steps for step RAGs
           stepData.fullStepName,
           stepData.description,
@@ -531,9 +531,9 @@ export const Agent = () => {
       addLog(`📦 Total transactions to sign: ${extrinsics.length} (${extrinsics.length - 1} steps + 1 master)`, 'info');
       
       // Get wallet signer
-      await window.injectedWeb3['polkadot-js'].enable();
-      const injector = await window.injectedWeb3['polkadot-js'].injectedWeb3.accounts;
-      const signer = (await window.injectedWeb3['polkadot-js'].enable()).signer;
+      const { web3FromAddress } = await import('@polkadot/extension-dapp');
+      const injector = await web3FromAddress(selectedAccount);
+      const signer = injector.signer;
       
       // Create batch transaction (atomic - all or nothing)
       const batchTx = masterApi.tx.utility.batchAll(extrinsics);
