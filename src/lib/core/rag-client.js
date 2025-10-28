@@ -436,5 +436,217 @@ export class RagClient {
       throw error;
     }
   }
+
+  /**
+   * Calculate metadata hash (same as blockchain logic)
+   * Hash = blake2_256(instruction_cid + resource_cid + schema_cid + blake2_256(steps.encode()))
+   * @param {string} instructionCid - 36 bytes hex
+   * @param {string} resourceCid - 36 bytes hex
+   * @param {string} schemaCid - 36 bytes hex
+   * @param {Array<string>} stepHashes - Array of 32 bytes hex
+   * @returns {Promise<string>} Metadata hash (0x-prefixed)
+   */
+  async calculateMetadataHash(instructionCid, resourceCid, schemaCid, stepHashes = []) {
+    const { blake2AsU8a, blake2AsHex } = await import('@polkadot/util-crypto');
+    const { hexToU8a, compactToU8a, u8aConcat } = await import('@polkadot/util');
+    
+    // Remove 0x prefix if present
+    const cleanHex = (hex) => hex.startsWith('0x') ? hex.slice(2) : hex;
+    
+    // Convert CIDs to bytes (36 bytes each)
+    const instructionBytes = hexToU8a('0x' + cleanHex(instructionCid));
+    const resourceBytes = hexToU8a('0x' + cleanHex(resourceCid));
+    const schemaBytes = hexToU8a('0x' + cleanHex(schemaCid));
+    
+    // Encode steps as SCALE Vec<[u8; 32]>
+    // SCALE encoding: compact length + items
+    const stepsCount = stepHashes.length;
+    const compactLength = compactToU8a(stepsCount);
+    
+    // Concatenate compact length + all step hashes
+    const stepByteArrays = [compactLength];
+    for (const stepHash of stepHashes) {
+      const stepBytes = hexToU8a('0x' + cleanHex(stepHash));
+      stepByteArrays.push(stepBytes);
+    }
+    const stepsBytes = u8aConcat(...stepByteArrays);
+    
+    // Hash the steps
+    const stepsHash = blake2AsU8a(stepsBytes, 256);
+    
+    // Concatenate: instruction (36) + resource (36) + schema (36) + steps_hash (32) = 140 bytes
+    const input = new Uint8Array(140);
+    input.set(instructionBytes, 0);
+    input.set(resourceBytes, 36);
+    input.set(schemaBytes, 72);
+    input.set(stepsHash, 108);
+    
+    // Final hash
+    return blake2AsHex(input, 256);
+  }
+
+  /**
+   * Store RAG metadata on the blockchain
+   * @param {string} senderAddress - Account address creating the RAG
+   * @param {string} name - Name of the RAG (max 50 chars)
+   * @param {string} description - Description (max 300 chars)
+   * @param {string} instructionCid - CID for instruction (36 bytes hex)
+   * @param {string} resourceCid - CID for resource (36 bytes hex)
+   * @param {string} schemaCid - CID for schema (36 bytes hex)
+   * @param {Array<string>} stepHashes - Array of step hashes (32 bytes hex each, max 64)
+   * @param {Array<string>} tags - Array of tags (max 10 tags, each max 15 chars)
+   * @param {number} ttl - Optional time-to-live in blocks
+   * @returns {Promise<string>} Metadata hash
+   */
+  async storeRagMetadata(
+    senderAddress,
+    name,
+    description,
+    instructionCid,
+    resourceCid,
+    schemaCid,
+    stepHashes = [],
+    tags = [],
+    ttl = null
+  ) {
+    try {
+      console.log('🔧 Creating RAG metadata on blockchain...');
+      
+      // Calculate metadata hash
+      const expectedHash = await this.calculateMetadataHash(
+        instructionCid,
+        resourceCid,
+        schemaCid,
+        stepHashes
+      );
+      console.log(`📊 Expected metadata hash: ${expectedHash}`);
+      
+      // Check if RAG already exists
+      const existingRag = await this.getRagByHash(expectedHash);
+      if (existingRag) {
+        console.log(`✅ RAG already exists with hash: ${expectedHash}`);
+        console.log(`   Name: ${existingRag.metadata.name}`);
+        console.log(`   Skipping creation, returning existing hash`);
+        return expectedHash;
+      }
+      
+      console.log('✨ RAG does not exist yet, creating...');
+      
+      // Import required utilities
+      const { ApiPromise, WsProvider } = await import('@polkadot/api');
+      const { waitForPolkadot, getWalletSigner } = await import('./blockchain-utils.js');
+      
+      // Wait for Polkadot extension
+      await waitForPolkadot();
+      
+      // Convert HTTP(S) RPC URL to WebSocket
+      const wsUrl = this.substrateClient.rpcUrl
+        .replace('https://', 'wss://')
+        .replace('http://', 'ws://');
+      
+      // Create API connection
+      console.log('Connecting to API:', wsUrl);
+      const wsProvider = new WsProvider(wsUrl);
+      const api = await ApiPromise.create({ provider: wsProvider });
+      console.log('✅ API connected');
+      
+      // Get wallet signer
+      const injector = await getWalletSigner(senderAddress);
+      
+      // Prepare parameters
+      // CIDs should be 36-byte hex strings (with or without 0x prefix)
+      const cleanHex = (hex) => hex.startsWith('0x') ? hex : `0x${hex}`;
+      
+      const instructionCidHex = cleanHex(instructionCid);
+      const resourceCidHex = cleanHex(resourceCid);
+      const schemaCidHex = cleanHex(schemaCid);
+      
+      console.log('Parameters:', {
+        name,
+        description,
+        instructionCid: instructionCidHex.slice(0, 20) + '...',
+        resourceCid: resourceCidHex.slice(0, 20) + '...',
+        schemaCid: schemaCidHex.slice(0, 20) + '...',
+        stepHashesCount: stepHashes.length,
+        tagsCount: tags.length
+      });
+      
+      // Create extrinsic
+      const extrinsic = api.tx.rag.storeMetadata(
+        instructionCidHex,
+        resourceCidHex,
+        schemaCidHex,
+        stepHashes.map(h => cleanHex(h)),
+        name,
+        description,
+        tags,
+        ttl
+      );
+      
+      // Sign and send
+      console.log('📝 Signing and sending transaction...');
+      
+      return new Promise((resolve, reject) => {
+        extrinsic
+          .signAndSend(senderAddress, { signer: injector.signer }, ({ status, events, dispatchError }) => {
+            console.log(`Transaction status: ${status.type}`);
+            
+            if (status.isInBlock) {
+              console.log(`✅ Transaction included in block: ${status.asInBlock.toHex()}`);
+              
+              // Check for errors
+              if (dispatchError) {
+                let errorMessage = 'Transaction failed';
+                
+                if (dispatchError.isModule) {
+                  const decoded = api.registry.findMetaError(dispatchError.asModule);
+                  errorMessage = `${decoded.section}.${decoded.name}: ${decoded.docs.join(' ')}`;
+                } else {
+                  errorMessage = dispatchError.toString();
+                }
+                
+                console.error('❌ Dispatch error:', errorMessage);
+                api.disconnect();
+                reject(new Error(errorMessage));
+                return;
+              }
+              
+              // Extract metadata hash from events
+              let metadataHash = null;
+              events.forEach(({ event }) => {
+                console.log(`Event: ${event.section}.${event.method}`);
+                
+                if (event.section === 'rag' && event.method === 'MetadataStored') {
+                  // MetadataStored event: { metadata_hash, instruction_cid, resource_cid, schema_cid, publisher, staked_amount, expires_at }
+                  // metadata_hash is at index 0 (32 bytes)
+                  metadataHash = event.data[0].toHex();
+                  console.log(`✅ Metadata hash: ${metadataHash}`);
+                }
+              });
+              
+              api.disconnect();
+              
+              if (metadataHash) {
+                resolve(metadataHash);
+              } else {
+                reject(new Error('Metadata hash not found in events'));
+              }
+            }
+            
+            if (status.isFinalized) {
+              console.log(`✅ Transaction finalized in block: ${status.asFinalized.toHex()}`);
+            }
+          })
+          .catch(error => {
+            console.error('❌ Transaction error:', error);
+            api.disconnect();
+            reject(error);
+          });
+      });
+    } catch (error) {
+      console.error('❌ Failed to store RAG metadata:', error);
+      throw error;
+    }
+  }
 }
 

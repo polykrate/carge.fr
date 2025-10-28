@@ -71,7 +71,7 @@ export const Home = () => {
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
             <button
               onClick={scrollToWorkflow}
               className="group px-8 py-4 bg-[#003399] text-white rounded-lg hover:bg-[#002266] transition-all duration-300 font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105 flex items-center justify-center gap-2"
@@ -96,6 +96,40 @@ export const Home = () => {
               </svg>
               {t('home.ctaDemo')}
             </a>
+          </div>
+
+          {/* AI Agent CTA Highlight */}
+          <div className="max-w-2xl mx-auto mb-16">
+            <Link
+              to="/agent"
+              className="group block bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]"
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                    <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold text-white uppercase tracking-wide">
+                      {t('home.aiAgentBadge')}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-1">
+                    {t('home.aiAgentTitle')}
+                  </h3>
+                  <p className="text-white/90 text-sm">
+                    {t('home.aiAgentDesc')}
+                  </p>
+                </div>
+                <svg className="w-6 h-6 text-white flex-shrink-0 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </div>
+            </Link>
           </div>
           
           {/* Trust Indicators / Key Metrics */}
@@ -547,6 +581,15 @@ export const Home = () => {
             {t('home.ctaDesc')}
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Link
+              to="/agent"
+              className="px-8 py-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg hover:from-purple-600 hover:to-indigo-700 transition font-medium text-lg shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              {t('home.ctaCreateWithAI')}
+            </Link>
             <Link
               to="/workflows"
               className="px-8 py-4 bg-white text-[#003399] rounded-lg hover:bg-gray-100 transition font-medium text-lg"
