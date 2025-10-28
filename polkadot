@@ -464,10 +464,10 @@ graph TB
 
 ### **Tertiary: Real-World Applications**
 
-- Product valorization for luxury goods through verifiable provenance
-- Supply chain transparency with cryptographic guarantees
-- User-friendly QR workflow for non-technical users
-- Mobile-first PWA experience
+- **Product valorization for creators**: Artisans, craftsmen, small producers, and luxury brands all need verifiable provenance to differentiate authentic products and build direct consumer relationships
+- **Supply chain transparency**: Cryptographic guarantees for any multi-party workflow (food, manufacturing, pharmaceuticals, art, etc.)
+- **Consumer empowerment**: QR code verification puts authenticity proof in customers' hands
+- **Zero technical barrier**: Non-technical creators can deploy production-grade workflows via AI in minutes
 
 ---
 
