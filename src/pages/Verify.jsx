@@ -1688,18 +1688,19 @@ export const Verify = () => {
           </button>
           <button
             onClick={() => {
-              console.log('QR button clicked, current mode:', mode);
+              console.log('🔵 QR button clicked, current mode:', mode);
               setMode('qr');
               setScanning(false);
               // Scroll to QR scanner after mode change
               setTimeout(() => {
+                console.log('⏱️ Timeout executed, checking ref...');
                 if (qrScannerRef.current) {
-                  console.log('Scrolling to QR scanner from onClick');
+                  console.log('✅ qrScannerRef.current exists:', qrScannerRef.current);
                   scrollToElement(qrScannerRef);
                 } else {
-                  console.log('QR scanner ref not available yet');
+                  console.log('❌ qrScannerRef.current is null/undefined');
                 }
-              }, 600);
+              }, 1000); // Increased to 1000ms
             }}
             className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
               mode === 'qr'
