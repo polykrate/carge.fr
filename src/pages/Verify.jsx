@@ -222,20 +222,6 @@ export const Verify = () => {
   const workflowContinuationRef = useRef(null);
   const qrScannerRef = useRef(null);
   
-  // Scroll to QR scanner when mode changes to 'qr'
-  useEffect(() => {
-    if (mode === 'qr') {
-      // Wait longer to ensure QR component is fully rendered
-      setTimeout(() => {
-        if (qrScannerRef.current) {
-          console.log('Scrolling to QR scanner', qrScannerRef.current);
-          scrollToElement(qrScannerRef);
-        } else {
-          console.log('QR scanner ref not found');
-        }
-      }, 500); // Increased delay
-    }
-  }, [mode]);
   
   // Auto-fill recipient address with connected wallet address
   useEffect(() => {
@@ -1702,8 +1688,18 @@ export const Verify = () => {
           </button>
           <button
             onClick={() => {
+              console.log('QR button clicked, current mode:', mode);
               setMode('qr');
               setScanning(false);
+              // Scroll to QR scanner after mode change
+              setTimeout(() => {
+                if (qrScannerRef.current) {
+                  console.log('Scrolling to QR scanner from onClick');
+                  scrollToElement(qrScannerRef);
+                } else {
+                  console.log('QR scanner ref not available yet');
+                }
+              }, 600);
             }}
             className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
               mode === 'qr'
