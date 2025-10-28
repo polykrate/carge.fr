@@ -37,13 +37,8 @@ export const Home = () => {
           </h1>
 
           {/* Subtitle */}
-          <p className="text-xl md:text-2xl font-medium text-gray-700 mb-10 max-w-3xl mx-auto leading-tight">
+          <p className="text-xl md:text-2xl font-medium text-gray-700 mb-12 max-w-3xl mx-auto leading-tight">
             {t('home.subtitle')}
-          </p>
-
-          {/* Value Proposition */}
-          <p className="text-lg text-gray-600 mb-10 max-w-2xl mx-auto">
-            {t('home.differenceDesc')}
           </p>
 
           {/* CTA Buttons */}
