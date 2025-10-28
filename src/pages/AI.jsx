@@ -726,7 +726,7 @@ export const Agent = () => {
             onChange={(e) => setWorkflowJson(e.target.value)}
             placeholder={t('ai.pastePlaceholder')}
             rows={12}
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 transition font-mono text-sm resize-y"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-600 focus:ring-4 focus:ring-purple-600/20 transition-all duration-300 font-mono text-sm resize-y bg-gradient-to-br from-white to-purple-50/30 hover:border-purple-400 shadow-sm focus:shadow-lg"
           />
 
           <div className="flex gap-3 mt-4">
@@ -853,9 +853,9 @@ export const Agent = () => {
                 <div className="absolute left-5 top-8 bottom-8 w-0.5 bg-gradient-to-b from-blue-500 to-purple-500"></div>
                 
                 {validatedWorkflow.steps.map((step, i) => (
-                  <div key={i} className="relative flex items-start gap-4 bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition">
+                  <div key={i} className="relative flex items-start gap-4 bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 hover:from-purple-100 hover:to-blue-100 transition-all duration-300 border border-purple-200/50 hover:border-purple-300 hover:shadow-md">
                     {/* Step number */}
-                    <div className="relative z-10 flex-shrink-0 w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold shadow-md">
+                    <div className="relative z-10 flex-shrink-0 w-10 h-10 bg-gradient-to-r from-purple-600 to-[#003399] text-white rounded-full flex items-center justify-center font-bold shadow-lg">
                       {i + 1}
                     </div>
                     
@@ -870,9 +870,9 @@ export const Agent = () => {
                       <p className="text-sm text-gray-600 mb-2">{step.description}</p>
                       <div className="flex flex-wrap gap-1">
                         {step.tags.map((tag, j) => (
-                          <span key={j} className="px-2 py-0.5 bg-gray-200 text-gray-600 rounded text-xs">
-                            {tag}
-                          </span>
+                        <span key={j} className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                          {tag}
+                        </span>
                         ))}
                       </div>
                     </div>
@@ -913,28 +913,35 @@ export const Agent = () => {
 
         {/* Deployment Log */}
         {deploymentLog.length > 0 && (
-          <div className="mb-8 bg-gray-900 rounded-xl p-6">
+          <div className="mb-8 bg-gradient-to-br from-purple-900 via-gray-900 to-[#003399] rounded-2xl p-6 shadow-2xl border border-purple-500/30">
             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+              <div className="w-8 h-8 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
               {t('ai.deploymentLogTitle')}
             </h3>
             <div
               ref={logRef}
-              className="bg-black rounded-lg p-4 max-h-96 overflow-y-auto font-mono text-sm"
+              className="bg-black/40 backdrop-blur-md rounded-xl p-4 max-h-96 overflow-y-auto font-mono text-sm border border-purple-500/20 shadow-inner"
             >
               {deploymentLog.map((log, i) => (
                 <div
                   key={i}
-                  className={`mb-1 ${
-                    log.type === 'success' ? 'text-green-400' :
-                    log.type === 'error' ? 'text-red-400' :
-                    log.type === 'warning' ? 'text-yellow-400' :
+                  className={`mb-1 flex items-start gap-2 ${
+                    log.type === 'success' ? 'text-green-300' :
+                    log.type === 'error' ? 'text-red-300' :
+                    log.type === 'warning' ? 'text-yellow-300' :
                     'text-gray-300'
                   }`}
                 >
-                  {log.message}
+                  <span className="flex-shrink-0 mt-1">
+                    {log.type === 'success' ? '✓' : 
+                     log.type === 'error' ? '✗' : 
+                     log.type === 'warning' ? '⚠' : '›'}
+                  </span>
+                  <span className="flex-1">{log.message}</span>
                 </div>
               ))}
             </div>
