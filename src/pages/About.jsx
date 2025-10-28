@@ -114,7 +114,7 @@ export const About = () => {
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="flex-shrink-0">
               <img 
-                src="/docs/macallan-example-qrcode.png" 
+                src="/docs/macallan-v5-qrcode.png" 
                 alt="QR Code - Macallan 25 Years Example"
                 className="w-48 h-48 rounded-lg shadow-lg border-4 border-white"
               />
@@ -137,8 +137,8 @@ export const About = () => {
                 <button
                   onClick={() => {
                     const link = document.createElement('a');
-                    link.href = '/docs/macallan-example-qrcode.png';
-                    link.download = 'macallan-example-qrcode.png';
+                    link.href = '/docs/macallan-v5-qrcode.png';
+                    link.download = 'macallan-v5-qrcode.png';
                     link.click();
                   }}
                   className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white text-[#003399] text-sm font-medium rounded-lg border-2 border-[#003399] hover:bg-blue-50 transition-all duration-200"
