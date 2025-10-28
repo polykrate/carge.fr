@@ -729,13 +729,16 @@ export const Workflows = () => {
               <p className="text-gray-600">Select a workflow to get started</p>
             </div>
             <button
-              onClick={loadRags}
-              className="flex items-center gap-2 px-4 py-2 text-sm bg-white border-2 border-[#003399] text-[#003399] rounded-lg hover:bg-[#003399] hover:text-white transition-all shadow-sm hover:shadow-md"
+              onClick={() => {
+                setSearchTags('');
+                loadRags();
+              }}
+              className="flex items-center gap-2 px-4 py-2 text-sm bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm hover:shadow-md"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
-              {t('workflows.refresh')}
+              {t('workflows.clearSearch')}
             </button>
           </div>
 
