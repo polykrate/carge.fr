@@ -165,7 +165,7 @@ const resources = {
         faq6Q: 'How long does implementation take?',
         faq6A: 'Web interface: immediate (just connect your wallet). API integration: 1-2 weeks typical. Full ERP integration: 4-6 weeks with our support team.',
         faq7Q: 'How can I deploy my own workflows on the blockchain?',
-        faq7A: 'For now, please contact us at admin@carge.fr to deploy custom workflows. In the near future, you will be able to deploy workflows directly by connecting an AI agent compatible with MCP (Model Context Protocol) to interact with the blockchain.',
+        faq7A: 'Use our AI Builder in the "AI" tab! Just describe your supply chain to ChatGPT or Claude, and it will generate the workflow JSON. Then paste it in our interface, validate, and deploy to the blockchain in one click. No coding required—workflows deploy in minutes!',
         
         useCase4Title: 'AI Invoice Digitization for Chorus Pro',
         useCase4Desc: 'Deploy an on-chain AI process to automatically dematerialize invoices for French government platform Chorus Pro. Secure, auditable, and compliant.',
@@ -616,7 +616,7 @@ const resources = {
         faq6Q: 'Quel est le délai d\'implémentation ?',
         faq6A: 'Interface web : immédiat (il suffit de connecter votre portefeuille). Intégration API : 1 à 2 semaines en moyenne. Intégration ERP complète : 4 à 6 semaines avec l\'accompagnement de notre équipe support.',
         faq7Q: 'Comment déployer mes propres workflows sur la blockchain ?',
-        faq7A: 'Actuellement, contactez-nous à admin@carge.fr pour déployer des workflows personnalisés. Prochainement, vous pourrez déployer vos workflows directement en connectant un agent IA compatible MCP (Model Context Protocol) qui interagira avec la blockchain.',
+        faq7A: 'Utilisez notre AI Builder dans l\'onglet "AI" ! Décrivez simplement votre chaîne d\'approvisionnement à ChatGPT ou Claude, et il génère le JSON du workflow. Collez-le ensuite dans notre interface, validez et déployez sur la blockchain en un clic. Aucun code requis—vos workflows se déploient en quelques minutes !',
         
         useCase4Title: 'Dématérialisation des factures pour Chorus Pro',
         useCase4Desc: 'Déployez un processus IA sur la chaîne pour dématérialiser automatiquement vos factures vers la plateforme gouvernementale Chorus Pro. Une solution sécurisée, auditable et conforme.',
