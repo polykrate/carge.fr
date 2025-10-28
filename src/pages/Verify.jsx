@@ -217,6 +217,7 @@ export const Verify = () => {
   const [submittingStep, setSubmittingStep] = useState(false);
   const [recipientAddress, setRecipientAddress] = useState('');
   const formContainerRef = useRef(null);
+  const workflowSectionRef = useRef(null);
   
   // Auto-fill recipient address with connected wallet address
   useEffect(() => {
@@ -423,6 +424,15 @@ export const Verify = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workflowHistory]);
+  
+  // Auto-scroll to workflow section when it becomes visible
+  useEffect(() => {
+    if (workflowHistory && !verifyingChainOfTrust && workflowSectionRef.current) {
+      setTimeout(() => {
+        workflowSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 500);
+    }
+  }, [workflowHistory, verifyingChainOfTrust]);
   
   // Example proof JSON - Macallan 25 Years Workflow V5 (7 steps: Production → Consumer)
   // Real executed workflow with proof hash: 0xd865ea4852dc632c9d31e7e82751d6c334057621cb4559b48f093af6bd598691
@@ -954,6 +964,11 @@ export const Verify = () => {
           const history = await verifier.reconstructWorkflowHistory(proof, ragClient, ipfsClient);
           setWorkflowHistory(history);
           console.log('📜 Workflow history reconstructed:', history);
+          
+          // Auto-expand first step
+          if (history.history && history.history.length > 0) {
+            setExpandedSteps({ 0: true });
+          }
           
           await new Promise(resolve => setTimeout(resolve, 300));
           
@@ -1830,7 +1845,7 @@ export const Verify = () => {
 
             {/* Workflow Summary + Vertical Steps Timeline (mobile-optimized) */}
             {workflowHistory && !verifyingChainOfTrust && (
-              <div className="mt-6 space-y-4">
+              <div ref={workflowSectionRef} className="mt-6 space-y-4">
                 {/* Compact Workflow Summary */}
                 <div className="bg-white bg-opacity-70 rounded-lg p-4 sm:p-6 border border-gray-200">
                   {/* Title and Status Badge */}
