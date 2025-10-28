@@ -65,15 +65,28 @@ export const Workflows = () => {
     }
   }, [selectedAccount]);
 
-  // Load favorites when wallet connects
+  // Load favorites when wallet connects and reload display
   useEffect(() => {
     if (selectedAccount) {
       const userFavorites = getFavorites(selectedAccount);
       setFavorites(userFavorites);
       console.log(`⭐ Loaded ${userFavorites.length} favorites for ${selectedAccount}`);
+      
+      // Reload display to show user favorites
+      if (allRags.length > 0) {
+        const ragMasters = allRags.filter(rag => 
+          rag.metadata?.steps && Array.isArray(rag.metadata.steps) && rag.metadata.steps.length > 0
+        );
+        const pinnedRags = ragMasters.filter(rag => {
+          return PINNED_WORKFLOWS.includes(rag.metadata?.name) || userFavorites.includes(rag.hash);
+        });
+        setDisplayRags(pinnedRags);
+        console.log(`Updated display with ${pinnedRags.length} workflows (${PINNED_WORKFLOWS.length} hardcoded + ${userFavorites.length} favorites)`);
+      }
     } else {
       setFavorites([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAccount]);
   
   // Convert hex address to SS58
@@ -106,15 +119,28 @@ export const Workflows = () => {
     
     // Update local state
     if (newStatus) {
+      // Added to favorites
       setFavorites([...favorites, workflowHash]);
       showSuccess('Added to favorites');
+      
+      // Add to displayRags if not already there
+      const workflowToAdd = allRags.find(rag => rag.hash === workflowHash);
+      if (workflowToAdd && !displayRags.some(rag => rag.hash === workflowHash)) {
+        setDisplayRags([...displayRags, workflowToAdd]);
+      }
     } else {
+      // Removed from favorites
       setFavorites(favorites.filter(h => h !== workflowHash));
       showSuccess('Removed from favorites');
+      
+      // Remove from displayRags only if not a hardcoded pinned workflow
+      const workflow = allRags.find(rag => rag.hash === workflowHash);
+      const isHardcodedPinned = workflow && PINNED_WORKFLOWS.includes(workflow.metadata?.name);
+      
+      if (!isHardcodedPinned) {
+        setDisplayRags(displayRags.filter(rag => rag.hash !== workflowHash));
+      }
     }
-    
-    // Reload workflows to update display
-    loadRags();
   };
 
   const formatTokenAmount = (amount) => {
@@ -192,12 +218,15 @@ export const Workflows = () => {
         return rag.metadata?.steps && rag.metadata.steps.length > 0;
       });
       
-      // Only display pinned workflows
+      // Get user favorites
+      const userFavorites = selectedAccount ? getFavorites(selectedAccount) : [];
+      
+      // Display pinned workflows (hardcoded + user favorites)
       const pinnedRags = ragMasters.filter(rag => {
-        return PINNED_WORKFLOWS.includes(rag.metadata?.name);
+        return PINNED_WORKFLOWS.includes(rag.metadata?.name) || userFavorites.includes(rag.hash);
       });
       
-      console.log(`Loaded ${pinnedRags.length} pinned RAG master(s) (from ${ragMasters.length} total masters, ${loadedRags.length} total RAGs)`);
+      console.log(`Loaded ${pinnedRags.length} pinned RAG master(s) (${PINNED_WORKFLOWS.length} hardcoded + ${userFavorites.length} user favorites, from ${ragMasters.length} total masters, ${loadedRags.length} total RAGs)`);
       setDisplayRags(pinnedRags);
     } catch (err) {
       console.error('Failed to load RAGs:', err);
