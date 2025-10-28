@@ -77,10 +77,10 @@ export const Header = () => {
               {t('nav.workflows')}
             </Link>
             <Link
-              to="/agent"
-              className={isActive('/agent') ? 'text-gray-900 font-medium' : 'text-gray-600 hover:text-gray-900'}
+              to="/ai"
+              className={isActive('/ai') ? 'text-gray-900 font-medium' : 'text-gray-600 hover:text-gray-900'}
             >
-              {t('nav.agent')}
+              {t('nav.ai')}
             </Link>
             <Link
               to="/about"
@@ -330,13 +330,13 @@ export const Header = () => {
                 {t('nav.workflows')}
               </Link>
               <Link
-                to="/agent"
+                to="/ai"
                 onClick={closeMobileMenu}
                 className={`px-3 py-2 rounded-lg text-sm ${
-                  isActive('/agent') ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'
+                  isActive('/ai') ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                {t('nav.agent')}
+                {t('nav.ai')}
               </Link>
               <Link
                 to="/about"

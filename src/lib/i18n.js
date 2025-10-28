@@ -32,14 +32,14 @@ const resources = {
   nav: {
     home: 'Home',
     workflows: 'Workflows',
-    agent: 'Agent',
+    ai: 'AI',
     quickSign: 'Quick Sign',
     verifyProof: 'Verify Proof',
     about: 'About',
   },
 
-  // Agent Page
-  agent: {
+  // AI Page
+  ai: {
     badge: 'AI-Powered Workflow Builder',
     title: 'Create Workflow with AI',
     subtitle: 'Let your AI assistant design your workflow, then deploy it to the blockchain in one click',
@@ -484,14 +484,14 @@ const resources = {
       nav: {
         home: 'Accueil',
         workflows: 'Workflows',
-        agent: 'Agent',
+        ai: 'IA',
         quickSign: 'Signature Rapide',
         verifyProof: 'Vérifier Preuve',
         about: 'À propos',
       },
 
-      // Agent Page
-      agent: {
+      // IA Page
+      ai: {
         badge: 'Créateur de Workflow par IA',
         title: 'Créer un Workflow avec l\'IA',
         subtitle: 'Laissez votre assistant IA concevoir votre workflow, puis déployez-le sur la blockchain en un clic',

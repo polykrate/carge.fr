@@ -10,7 +10,7 @@ import './lib/i18n'; // Initialize i18n
 // Each page loads only when user navigates to it
 const Home = lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
 const Workflows = lazy(() => import('./pages/Workflows').then(m => ({ default: m.Workflows })));
-const Agent = lazy(() => import('./pages/Agent').then(m => ({ default: m.Agent })));
+const AI = lazy(() => import('./pages/AI').then(m => ({ default: m.Agent })));
 const QuickSign = lazy(() => import('./pages/QuickSign').then(m => ({ default: m.QuickSign })));
 const Verify = lazy(() => import('./pages/Verify').then(m => ({ default: m.Verify })));
 const About = lazy(() => import('./pages/About').then(m => ({ default: m.About })));
@@ -52,7 +52,7 @@ function App() {
                       <Routes>
                         <Route path="/" element={<Home />} />
                         <Route path="/workflows" element={<Workflows />} />
-                        <Route path="/agent" element={<Agent />} />
+                        <Route path="/ai" element={<AI />} />
                         <Route path="/quick-sign" element={<QuickSign />} />
                         <Route path="/verify" element={<Verify />} />
                         <Route path="/about" element={<About />} />

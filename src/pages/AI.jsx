@@ -485,8 +485,8 @@ export const Agent = () => {
         <div className="mb-8">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-4xl font-light mb-4">{t('agent.title')}</h1>
-              <p className="text-gray-600">{t('agent.subtitle')}</p>
+              <h1 className="text-4xl font-light mb-4">{t('ai.title')}</h1>
+              <p className="text-gray-600">{t('ai.subtitle')}</p>
             </div>
 
             {/* How it works button */}
@@ -510,36 +510,36 @@ export const Agent = () => {
                     <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
                       <span className="text-white font-bold text-sm">1</span>
                     </div>
-                    <h3 className="font-semibold text-gray-900">{t('agent.step1Title')}</h3>
+                    <h3 className="font-semibold text-gray-900">{t('ai.step1Title')}</h3>
                   </div>
-                  <p className="text-sm text-gray-600">{t('agent.step1Desc')}</p>
+                  <p className="text-sm text-gray-600">{t('ai.step1Desc')}</p>
                 </div>
                 <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
                       <span className="text-white font-bold text-sm">2</span>
                     </div>
-                    <h3 className="font-semibold text-gray-900">{t('agent.step2Title')}</h3>
+                    <h3 className="font-semibold text-gray-900">{t('ai.step2Title')}</h3>
                   </div>
-                  <p className="text-sm text-gray-600">{t('agent.step2Desc')}</p>
+                  <p className="text-sm text-gray-600">{t('ai.step2Desc')}</p>
                 </div>
                 <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
                       <span className="text-white font-bold text-sm">3</span>
                     </div>
-                    <h3 className="font-semibold text-gray-900">{t('agent.step3Title')}</h3>
+                    <h3 className="font-semibold text-gray-900">{t('ai.step3Title')}</h3>
                   </div>
-                  <p className="text-sm text-gray-600">{t('agent.step3Desc')}</p>
+                  <p className="text-sm text-gray-600">{t('ai.step3Desc')}</p>
                 </div>
                 <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-[#003399] rounded-lg flex items-center justify-center flex-shrink-0">
                       <span className="text-white font-bold text-sm">4</span>
                     </div>
-                    <h3 className="font-semibold text-gray-900">{t('agent.step4Title')}</h3>
+                    <h3 className="font-semibold text-gray-900">{t('ai.step4Title')}</h3>
                   </div>
-                  <p className="text-sm text-gray-600">{t('agent.step4Desc')}</p>
+                  <p className="text-sm text-gray-600">{t('ai.step4Desc')}</p>
                 </div>
               </div>
             </div>
@@ -555,8 +555,8 @@ export const Agent = () => {
               </svg>
             </div>
             <div>
-              <h2 className="text-2xl font-semibold text-white">{t('agent.instructionsTitle')}</h2>
-              <p className="text-white/90">{t('agent.instructionsSubtitle')}</p>
+              <h2 className="text-2xl font-semibold text-white">{t('ai.instructionsTitle')}</h2>
+              <p className="text-white/90">{t('ai.instructionsSubtitle')}</p>
             </div>
           </div>
           
@@ -567,7 +567,7 @@ export const Agent = () => {
             <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
             </svg>
-            {t('agent.copyInstructionsBtn')}
+            {t('ai.copyInstructionsBtn')}
           </button>
         </div>
 
@@ -580,8 +580,8 @@ export const Agent = () => {
               </svg>
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">{t('agent.pasteTitle')}</h2>
-              <p className="text-gray-600">{t('agent.pasteSubtitle')}</p>
+              <h2 className="text-2xl font-bold text-gray-900">{t('ai.pasteTitle')}</h2>
+              <p className="text-gray-600">{t('ai.pasteSubtitle')}</p>
             </div>
           </div>
 
@@ -589,7 +589,7 @@ export const Agent = () => {
             ref={textareaRef}
             value={workflowJson}
             onChange={(e) => setWorkflowJson(e.target.value)}
-            placeholder={t('agent.pastePlaceholder')}
+            placeholder={t('ai.pastePlaceholder')}
             rows={12}
             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-900 focus:ring-2 focus:ring-purple-900/20 transition font-mono text-sm resize-y"
           />
@@ -603,7 +603,7 @@ export const Agent = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              {t('agent.validateBtn')}
+              {t('ai.validateBtn')}
             </button>
             <button
               onClick={() => {
@@ -613,7 +613,7 @@ export const Agent = () => {
               }}
               className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all font-semibold"
             >
-              {t('agent.clearBtn')}
+              {t('ai.clearBtn')}
             </button>
           </div>
         </div>
@@ -629,7 +629,7 @@ export const Agent = () => {
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-bold text-red-900 mb-2">
-                  {t('agent.validationErrorsTitle')} ({validationErrors.length})
+                  {t('ai.validationErrorsTitle')} ({validationErrors.length})
                 </h3>
                 <div className="bg-white rounded-lg p-4 mb-4 max-h-64 overflow-y-auto">
                   <ul className="space-y-1 text-sm font-mono text-red-800">
@@ -648,7 +648,7 @@ export const Agent = () => {
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
-                  {t('agent.copyErrorsBtn')}
+                  {t('ai.copyErrorsBtn')}
                 </button>
               </div>
             </div>
@@ -665,8 +665,8 @@ export const Agent = () => {
                 </svg>
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-green-900">{t('agent.validatedTitle')}</h2>
-                <p className="text-green-700">{t('agent.validatedSubtitle')}</p>
+                <h2 className="text-2xl font-bold text-green-900">{t('ai.validatedTitle')}</h2>
+                <p className="text-green-700">{t('ai.validatedSubtitle')}</p>
               </div>
             </div>
 
@@ -676,23 +676,23 @@ export const Agent = () => {
                 <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                {t('agent.masterWorkflowTitle')}
+                {t('ai.masterWorkflowTitle')}
               </h3>
               <div className="grid md:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="font-semibold text-gray-600">{t('agent.nameLabel')}</span>
+                  <span className="font-semibold text-gray-600">{t('ai.nameLabel')}</span>
                   <div className="mt-1 font-mono text-purple-600">{validatedWorkflow.master.name}</div>
                 </div>
                 <div>
-                  <span className="font-semibold text-gray-600">{t('agent.versionLabel')}</span>
+                  <span className="font-semibold text-gray-600">{t('ai.versionLabel')}</span>
                   <div className="mt-1">{validatedWorkflow.master.version}</div>
                 </div>
                 <div className="md:col-span-2">
-                  <span className="font-semibold text-gray-600">{t('agent.descriptionLabel')}</span>
+                  <span className="font-semibold text-gray-600">{t('ai.descriptionLabel')}</span>
                   <div className="mt-1 text-gray-700">{validatedWorkflow.master.description}</div>
                 </div>
                 <div className="md:col-span-2">
-                  <span className="font-semibold text-gray-600">{t('agent.tagsLabel')}</span>
+                  <span className="font-semibold text-gray-600">{t('ai.tagsLabel')}</span>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {validatedWorkflow.master.tags.map((tag, i) => (
                       <span key={i} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
@@ -710,7 +710,7 @@ export const Agent = () => {
                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                {t('agent.stepsTitle')} ({validatedWorkflow.steps.length})
+                {t('ai.stepsTitle')} ({validatedWorkflow.steps.length})
               </h3>
               
               <div className="relative space-y-4">
@@ -756,20 +756,20 @@ export const Agent = () => {
                 {deploying ? (
                   <>
                     <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    {t('agent.deployingBtn')}
+                    {t('ai.deployingBtn')}
                   </>
                 ) : (
                   <>
                     <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    {t('agent.deployBtn')}
+                    {t('ai.deployBtn')}
                   </>
                 )}
               </button>
               {!selectedAccount && (
                 <p className="text-center text-sm text-orange-600 mt-3">
-                  {t('agent.walletWarning')}
+                  {t('ai.walletWarning')}
                 </p>
               )}
             </div>
@@ -783,7 +783,7 @@ export const Agent = () => {
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              {t('agent.deploymentLogTitle')}
+              {t('ai.deploymentLogTitle')}
             </h3>
             <div
               ref={logRef}
@@ -816,18 +816,18 @@ export const Agent = () => {
                 </svg>
               </div>
               <div>
-                <h2 className="text-3xl font-bold">{t('agent.successTitle')}</h2>
-                <p className="text-white/90">{t('agent.successSubtitle')}</p>
+                <h2 className="text-3xl font-bold">{t('ai.successTitle')}</h2>
+                <p className="text-white/90">{t('ai.successSubtitle')}</p>
               </div>
             </div>
             
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-              <div className="font-semibold mb-2">{t('agent.masterHashLabel')}</div>
+              <div className="font-semibold mb-2">{t('ai.masterHashLabel')}</div>
               <div className="font-mono text-sm bg-black/30 rounded-lg p-3 break-all">
                 {deployedMasterHash}
               </div>
               <div className="mt-4 text-sm text-white/80">
-                {t('agent.useHashHint')}
+                {t('ai.useHashHint')}
               </div>
             </div>
           </div>
