@@ -27,8 +27,9 @@ export class RagClient {
     try {
       const { ApiPromise, WsProvider } = await import('@polkadot/api');
       
-      // Connect to blockchain
-      const provider = new WsProvider(this.substrateClient.rpcUrl);
+      // Connect to blockchain using WebSocket URL
+      const wsUrl = this.substrateClient.wsUrl || this.substrateClient.rpcUrl.replace('https://', 'wss://').replace('http://', 'ws://');
+      const provider = new WsProvider(wsUrl);
       const api = await ApiPromise.create({ provider });
       
       // Clean hex strings (ensure 0x prefix)
