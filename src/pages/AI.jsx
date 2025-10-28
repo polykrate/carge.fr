@@ -107,31 +107,15 @@ export const Agent = () => {
   
   const step1Ref = useRef(null);
 
-  // Handle scroll behavior on page load
+  // Scroll to Step 1 only if hash is explicitly present
   useEffect(() => {
-    // Disable browser scroll restoration
-    if ('scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual';
-    }
-    
     if (window.location.hash === '#step1' && step1Ref.current) {
-      // Scroll to Step 1 only if hash is present
       setTimeout(() => {
         scrollToElement(step1Ref);
         // Clear hash after scrolling
         window.history.replaceState(null, '', window.location.pathname);
       }, 100);
-    } else {
-      // Scroll to top immediately for normal navigation
-      window.scrollTo({ top: 0, behavior: 'instant' });
     }
-    
-    return () => {
-      // Restore default scroll behavior on unmount
-      if ('scrollRestoration' in window.history) {
-        window.history.scrollRestoration = 'auto';
-      }
-    };
   }, []);
   
   const textareaRef = useRef(null);
