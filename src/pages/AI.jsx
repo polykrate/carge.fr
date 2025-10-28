@@ -530,10 +530,9 @@ export const Agent = () => {
       addLog('\n🔐 PHASE 3: Batching transactions and requesting signature...', 'info');
       addLog(`📦 Total transactions to sign: ${extrinsics.length} (${extrinsics.length - 1} steps + 1 master)`, 'info');
       
-      // Get wallet signer
-      const { web3FromAddress } = await import('@polkadot/extension-dapp');
-      const injector = await web3FromAddress(selectedAccount);
-      const signer = injector.signer;
+      // Get wallet signer (with proper web3Enable initialization)
+      const { getWalletSigner } = await import('../lib/core/blockchain-utils.js');
+      const injector = await getWalletSigner(selectedAccount);
       
       // Create batch transaction (atomic - all or nothing)
       const batchTx = masterApi.tx.utility.batchAll(extrinsics);
@@ -542,7 +541,7 @@ export const Agent = () => {
       
       // Sign and send - ONLY ONE SIGNATURE!
       await new Promise((resolve, reject) => {
-        batchTx.signAndSend(selectedAccount, { signer }, ({ status, events, dispatchError }) => {
+        batchTx.signAndSend(selectedAccount, { signer: injector.signer }, ({ status, events, dispatchError }) => {
           if (dispatchError) {
             if (dispatchError.isModule) {
               const decoded = masterApi.registry.findMetaError(dispatchError.asModule);
