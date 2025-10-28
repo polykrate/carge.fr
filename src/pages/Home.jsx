@@ -120,6 +120,59 @@ export const Home = () => {
         </div>
       </section>
 
+      {/* What Makes the Difference */}
+      <section className="py-20 bg-gray-50 border-t border-gray-100">
+        <div className="container mx-auto px-6 max-w-6xl">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4 text-[#003399]">{t('home.differenceTitle')}</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              {t('home.differenceDesc')}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Difference 1 */}
+            <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
+                <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.difference1Title')}</h3>
+              <p className="text-gray-600 leading-relaxed">
+                {t('home.difference1Desc')}
+              </p>
+            </div>
+
+            {/* Difference 2 */}
+            <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
+                <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.difference2Title')}</h3>
+              <p className="text-gray-600 leading-relaxed">
+                {t('home.difference2Desc')}
+              </p>
+            </div>
+
+            {/* Difference 3 */}
+            <div className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-[#003399] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="w-16 h-16 bg-[#003399]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#003399]/20 transition-colors">
+                <svg className="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900 group-hover:text-[#003399] transition-colors">{t('home.difference3Title')}</h3>
+              <p className="text-gray-600 leading-relaxed">
+                {t('home.difference3Desc')}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Workflow Example */}
       <section ref={workflowSectionRef} className="py-20 bg-white border-t border-gray-100">
         <div className="container mx-auto px-6 max-w-4xl">
@@ -254,7 +307,7 @@ export const Home = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               <div className="flex-1">
-                <div className="font-semibold text-[#003399] mb-1">Privacy by Design</div>
+                <div className="font-semibold text-[#003399] mb-1">{t('home.workflowExampleNoteTitle')}</div>
                 <p className="text-sm text-gray-700 leading-relaxed mb-3">{t('home.workflowExampleNote')}</p>
                 <Link 
                   to="/verify"
@@ -377,18 +430,19 @@ export const Home = () => {
             </div>
           </div>
 
-          {/* Learn More Link */}
-          <div className="text-center">
-            <Link
-              to="/about"
-              className="inline-flex items-center gap-2 text-[#003399] font-semibold hover:underline text-lg"
-            >
-              {t('home.trustLearnMore')}
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </Link>
-          </div>
+        {/* Learn More Link */}
+        <div className="text-center">
+          <Link
+            to="/verify"
+            state={{ loadExample: true }}
+            className="inline-flex items-center gap-2 text-[#003399] font-semibold hover:underline text-lg"
+          >
+            {t('home.trustLearnMore')}
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </Link>
+        </div>
         </div>
       </section>
 

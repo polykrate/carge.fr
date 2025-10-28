@@ -1,0 +1,417 @@
+# Carge 
+
+## 💡 Inspiration
+
+As a veteran, I learned that centralized command works—until it doesn't. In degraded environments, **decentralization becomes survival**. During humanitarian operations, including the Beirut harbor explosion response where I led logistics, I saw firsthand how critical it is to coordinate multiple actors without a single point of failure.
+
+This experience shaped Carge: **a decentralized system where trust is cryptographic, not hierarchical**.
+
+---
+
+## 🎯 What it does
+
+**Carge is a decentralized PKI for workflow execution built on Substrate.**
+
+It combines three innovations:
+
+1. **Decentralized PKI** (`pallet-pki`): Each participant has a cryptographic identity anchored on-chain with Sr25519 exchange keys and libp2p peer IDs for encrypted cid transmissions
+2. **Multi-actor workflows** (`pallet-crypto-trail`): Send and receive encrypted deliverables on-chain between participants. Each step's output is encrypted, transmitted via IPFS, and only decryptable by the designated recipient—no external channels needed
+3. **RAG workflow storage** (`pallet-rag`): Multi-step workflow schemas stored as IPFS CIDs on-chain with tag-based search
+
+**Primary use case**: Supply chain transparency to enhance product value. Each step (manufacturing, transport, retail) is cryptographically signed, creating verifiable proof of authenticity that consumers can trust.
+
+---
+
+## 🔧 How I built it
+
+### **Substrate Custom Pallets**
+
+Carge is built on **three custom Substrate pallets**, deployed on a Tanssi appchain candidate:
+
+#### 1️⃣ **`pallet-pki`** - Public Key Infrastructure
+
+**Purpose**: Decentralized identity management for workflow participants
+
+**Key features**:
+- **Exchange keys**: Sr25519 public keys (32 bytes) for ECDH key exchange
+- **Peer IDs**: Libp2p peer identifiers (38 bytes) for P2P network coordination
+- **Profile CIDs**: Optional IPFS CID v1 (36 bytes) for extended profile data
+- **TTL management**: Automatic expiration and cleanup of stale keys
+- **Staking**: Anti-spam protection with minimum stake requirement
+
+**Storage**:
+```rust
+pub struct PkiProfile<T: Config> {
+    pub exchange_key: [u8; 32],        // Bob's public key for ECDH
+    pub peer_id: [u8; 38],             // Libp2p multiaddr peer ID
+    pub profile_cid: Option<[u8; 36]], // IPFS CID v1 (optional)
+    pub staked_amount: Balance,         // Staked currency
+    pub created_at: BlockNumber,        // Creation block
+    pub expires_at: BlockNumber,        // TTL expiration
+}
+```
+
+**Use case**: Before executing a workflow step, Alice retrieves Bob's `exchange_key` from his PKI profile to encrypt the next step's CID and sends it to Bob's `peer_id` via IPFS.
+
+---
+
+#### 2️⃣ **`pallet-crypto-trail`** - Cryptographic Workflow Trails
+
+**Purpose**: Immutable storage of encrypted workflow steps with cryptographic proofs
+
+**Key features**:
+- **Encrypted CIDs**: ChaCha20-Poly1305 encrypted IPFS CIDs (52 bytes: 36 + 16 MAC)
+- **Ephemeral keys**: Alice's ephemeral public key (32 bytes) for ECDH key exchange
+- **Dual nonces**: Separate nonces for CID encryption (12 bytes) and content encryption (12 bytes)
+- **Content CID**: Clear IPFS CID v1 (36 bytes) for content indexing
+- **Substrate signatures**: Sr25519 signatures (64 bytes) for authenticity
+- **TTL + Staking**: Time-to-live with economic security
+
+**Storage**:
+```rust
+pub struct CryptoTrail<T: Config> {
+    pub creator: AccountId,                  // Who created this trail
+    pub encrypted_cid: [u8; 52],             // Encrypted CID + MAC
+    pub ephemeral_pubkey: [u8; 32],          // Alice's ephemeral key
+    pub cid_nonce: [u8; 12],                 // Nonce for CID encryption
+    pub content_nonce: [u8; 12],             // Nonce for content encryption
+    pub content_cid: [u8; 36],               // Clear CID for indexing
+    pub substrate_signature: [u8; 64],       // Sr25519 signature
+    pub staked_amount: Balance,              // Economic stake
+    pub created_at: BlockNumber,             // Creation block
+    pub expires_at: BlockNumber,             // TTL expiration
+}
+```
+
+**Cryptography workflow**:
+1. Alice generates ephemeral keypair `(ephemeral_sk, ephemeral_pk)`
+2. Alice retrieves Bob's `exchange_key` from his PKI profile
+3. Alice computes shared secret: `shared_secret = ECDH(ephemeral_sk, bob_exchange_key)`
+4. Alice derives encryption key: `key = HKDF(shared_secret)`
+5. Alice encrypts next step CID: `encrypted_cid = ChaCha20-Poly1305(key, cid_nonce, next_step_cid)`
+6. Alice signs the trail with her Substrate key: `signature = Sign(substrate_sk, content_hash)`
+7. Alice submits extrinsic to store trail on-chain
+8. The extrinsic **verifies the signature on-chain** before accepting the storage
+9. Trail stored with `ephemeral_pk` (Bob will use it to decrypt)
+
+**Indexed by**: `content_cid` (allows anyone to verify a proof by its content hash)
+
+---
+
+#### 3️⃣ **`pallet-rag`** - RAG Metadata & Workflow Schemas
+
+**Purpose**: Store and retrieve workflow definitions with Retrieval-Augmented Generation metadata
+
+**Key features**:
+- **Triple CID storage**: Instruction CID, Resource CID, Schema CID (3×36 bytes)
+- **Multi-step workflows**: Up to 64 workflow steps (each 32-byte hash)
+- **Metadata**: Name (50 chars), description (300 chars), tags (10×15 chars)
+- **Tag-based search**: Efficient categorization and discovery
+- **Publisher tracking**: Accountability with staking
+- **TTL + Staking**: Economic incentives for quality metadata
+
+**Storage**:
+```rust
+pub struct RagMetadata<T: Config> {
+    pub instruction_cid: [u8; 36],           // Instructions IPFS CID
+    pub resource_cid: [u8; 36],              // Resources IPFS CID
+    pub schema_cid: [u8; 36],                // JSON Schema IPFS CID
+    pub steps: BoundedVec<[u8; 32], 64>,     // Workflow step hashes
+    pub created_at: BlockNumber,             // Creation block
+    pub expires_at: BlockNumber,             // TTL expiration
+    pub staked_amount: Balance,              // Economic stake
+    pub publisher: AccountId,                // Who published this
+    pub name: BoundedVec<u8, 50>,            // Name (max 50 chars)
+    pub description: BoundedVec<u8, 300>,    // Description (max 300 chars)
+    pub tags: BoundedVec<BoundedVec<u8, 15>, 10>, // Tags for search
+}
+```
+
+**Indexed by**: `Blake2-256(instruction_cid || resource_cid || schema_cid)` - Ensures uniqueness while enabling efficient lookups
+
+**Use case**: 
+1. A wine producer deploys a "Bordeaux 2024" workflow with tags: `["wine", "supply-chain", "luxury"]`
+2. Each step is defined: Harvest → Fermentation → Bottling → Distribution → Retail
+3. The workflow is stored as RAG metadata with IPFS CIDs pointing to detailed instructions
+4. Anyone can search by tags and execute the workflow
+
+---
+
+### **Full Stack Architecture**
+
+**Blockchain Layer (Substrate)**:
+- Custom runtime with `pallet-pki`, `pallet-crypto-trail`, `pallet-rag`
+- Deployed on Tanssi appchain infrastructure
+- Block time: ~6 seconds
+- Storage cost: ~0.01 tokens per trail entry (economic spam protection)
+
+**Storage Layer (IPFS/Helia)**:
+- Decentralized P2P IPFS node in browser (Helia.js)
+- Encrypted workflow content stored off-chain
+- IPFS CID v1 stored on-chain as 36-byte fixed arrays
+- No centralized gateway dependency
+
+**Frontend (React dApp)**:
+- Live at [carge.fr](https://carge.fr)
+- Polkadot.js integration for wallet connection
+- SubWallet, Talisman, Polkadot.js extension support
+- QR code scanning for mobile verification
+- Real-time blockchain verification (<2s)
+
+**AI Integration (MCP)**:
+- Model Context Protocol server for AI agents
+- AI agents can deploy workflows directly to blockchain
+- Autonomous workflow creation and management
+- Compatible MCP like Claude, Mistral or others
+
+---
+
+## 🚧 Challenges I ran into
+
+### **The hardest challenge: working alone for a year.**
+
+Building a full-stack parachain candidate (3 custom Substrate pallets + dApp + MCP integration) solo means:
+
+- Wearing all hats: blockchain dev, frontend dev, cryptography engineer, business dev
+- No immediate feedback loop or pair programming
+- Self-funding development while seeking initial customers
+- Balancing technical depth with business viability
+
+### **Technical challenges solved**:
+
+1. **Cryptography complexity**: Implementing ECDH key exchange with ephemeral keys + ChaCha20-Poly1305 encryption in a pallet required deep understanding of Substrate's crypto primitives
+
+2. **Fixed-size storage optimization**: All data structures use fixed-size arrays (no `Vec`) to enable `MaxEncodedLen` and optimize storage costs:
+   - CID v1: 36 bytes (not 59-byte string)
+   - Sr25519 signatures: 64 bytes
+   - Peer IDs: 38 bytes (multihash format)
+
+3. **TTL cleanup scalability**: Designed efficient block-based cleanup with bounded vectors (`BoundedVec<_, 1000>`) to prevent runtime bloat
+
+4. **Hybrid on-chain/IPFS architecture**: Balancing cost (what goes on-chain) vs decentralization (what stays on IPFS)
+
+5. **Browser-based IPFS**: Getting Helia.js (IPFS in browser) to work reliably with WebRTC and WebTransport for P2P connections, need a kubo node to work properly right now
+
+6. **Chain of custody verification**: Ensuring authenticity by verifying that each step's creator matches the previous step's designated recipient, the steps are in chronological order, reconstructing the on-chain workflow hash to validate each step, and ensuring data format matches the schema
+
+---
+
+## 🏆 Accomplishments that I'm proud of
+
+### **From Java in 2012 to Substrate in 2024**
+
+Returning to coding after 12 years in the military was daunting. Learning Rust and Substrate from scratch while building production-ready pallets has been an incredible journey.
+
+**Key technical achievements**:
+- ✅ **3 production pallets** with benchmarking, tests, and runtime integration
+- ✅ **99% storage reduction** vs pure on-chain (IPFS hybrid)
+- ✅ **<2s proof verification** (5-10x faster than initial version)
+- ✅ **Zero-install verification** (browser-based IPFS node)
+- ✅ **Complete on-chain coordination** - Send/receive encrypted deliverables between actors without external channels (no email, no file sharing)
+- ✅ **MCP AI integration** (autonomous workflow deployment)
+
+### **Live production deployment**
+
+- **2 month uptime** on testnet
+- **Full workflow execution** with multi-actor coordination
+- **QR code product verification** in production
+- **AI agent deployment** via MCP server
+
+---
+
+## 📚 What I learned
+
+### **Technical learnings**:
+
+1. **Substrate forces good architecture**: The pallet system's strict requirements (storage versioning, weights, benchmarking) initially felt constraining but ultimately led to cleaner code
+
+2. **Cryptography is hard but essential**: Implementing ECDH + ChaCha20-Poly1305 correctly requires understanding not just the algorithms but also nonce management, key derivation, and MAC verification
+
+3. **Storage optimization matters**: In blockchain, every byte costs. Using fixed-size arrays instead of vectors saved ~60% storage costs
+
+4. **TTL is necessary for scalability**: Without automatic cleanup, blockchain state grows unbounded. TTL with economic incentives (staking) creates a self-cleaning system
+
+5. **Hybrid architectures are the future**: Pure on-chain doesn't scale; pure IPFS lacks verifiability. The combination (CIDs on-chain, content on IPFS) is optimal
+
+### **Business learnings**:
+
+1. **Supply chain transparency is a $7.8B market** - Luxury goods, pharmaceuticals, aerospace parts need verifiable provenance to build consumer trust and product value
+
+2. **"Blockchain" is still a red flag** - Enterprises are skeptical. Reframing as "cryptographic audit trail" or "zero-trust supply chain" gets better reception
+
+3. **QR codes are the killer UX** - Consumers understand "scan to verify." They don't need to know about Substrate or IPFS
+
+4. **On-chain coordination eliminates trust friction** - Traditional supply chains rely on email, PDFs, and phone calls between actors who don't trust each other. CARGE lets them exchange encrypted deliverables on-chain without revealing data to competitors. The blockchain becomes the trusted intermediary.
+
+5. **Solo founding is viable but exhausting** - Technical execution is achievable alone. Business development while coding full-time is the real bottleneck
+
+### **Personal growth**:
+
+Transitioning from military to tech entrepreneurship taught me that **leadership in decentralized systems requires different skills**: 
+- expression clear intentions for the AI to code instead of giving orders
+- Building consensus through code instead of enforcing hierarchy
+- Trusting cryptography instead of trusting people
+
+---
+
+## 🚀 What's next for Carge
+
+### **Short-term (3-6 months)**:
+
+1. **Tanssi mainnet deployment** - Launch as a Polkadot appchain for cost-effective block production and shared security
+
+2. **First enterprise pilot** - Luxury goods manufacturer (wine/spirits) for product valorization through complete traceability, targeting 10,000 verified products
+
+3. **Mobile app** - Native iOS/Android for better QR scanning UX and offline verification caching
+
+### **Medium-term (6-12 months)**:
+
+5. **AI agent marketplace** - MCP-compatible agents can deploy custom workflows autonomously, creating a marketplace for workflow templates
+
+6. **Governance DAO** - Decentralize workflow template approval through on-chain governance with staking-based voting
+
+7. **Enterprise SDK** - Rust/TypeScript/Python SDKs for easy integration with existing ERP systems (SAP, Oracle, etc.)
+
+8. **Audit trail analytics** - Dashboard for enterprises to visualize supply chain transparency and compliance
+
+### **Long-term vision**:
+
+**Deploying IA onchain through the MCP and uses them as SaaS/Oracle**
+
+**Make blockchain-verified workflows as common as HTTPS.**
+
+Every supply chain, every audit, every certification process should be cryptographically provable. Not because "blockchain is cool," but because **transparency creates value**:
+- Consumers pay premium prices for verifiable provenance
+- Producers build lasting relationships through direct connection
+- Trust becomes a measurable, tradable asset
+- Complete traceability naturally eliminates fraud as a side effect
+
+Carge's goal: **1 million verified workflows by 2027**.
+
+---
+
+## 🎬 Live Demo
+
+**Deployed at**: [carge.fr](https://carge.fr)
+
+### **Try the demo**:
+
+1. **Go to "Verify" page** → Upload the example proof file or scan QR code
+2. **Watch real-time verification**:
+   - Searching blockchain for proof
+   - Verifying Substrate signature
+   - Reconstructing workflow history
+   - Checking chain of trust
+3. **See full workflow history** with step-by-step breakdown
+4. **Test product QR verification** by scanning the product QR code
+
+### **Technical flow**:
+
+```mermaid
+graph TB
+    A[Alice: Gets proof off-chain or o-nchain] --> B[Alice: Uploads proof to Verify page]
+    B --> C[Verify workflow continuity from producer]
+    C --> D[Check last signature is Bob's]
+    D --> E[Alice: Scans product QR code]
+    E --> F[Verify QR matches first step producer]
+    F --> G[Alice: Buys bottle from Bob]
+    G --> H[Bob: Completes workflow step]
+    H --> I[Bob: Sets Alice as next recipient]
+    I --> J[Cryptographic chain of custody verified]
+```
+
+---
+
+## 📊 Key Metrics
+
+| Metric | Value | Notes |
+|--------|-------|-------|
+| **Proof verification** | <2s | 5-10x faster than initial version |
+| **Storage reduction** | 99% | vs pure on-chain storage |
+| **Cryptographic guarantee** | 100% | No trust assumptions |
+| **User experience** | Zero-install | Browser-based verification |
+| **Testnet uptime** | 2 month | Continuous operation |
+| **Custom pallets** | 3 | PKI, Crypto Trail, RAG |
+| **Lines of Rust** | ~1,500 | ~500 per custom pallet |
+| **Test coverage** | >80% | Unit + integration tests |
+
+---
+
+## 🔐 Security Considerations
+
+### **Cryptographic Security**:
+
+- **ECDH key exchange**: Ephemeral keys prevent replay attacks
+- **ChaCha20-Poly1305**: Authenticated encryption ensures confidentiality + integrity
+- **Sr25519 signatures**: Schnorr signatures on Ristretto group (128-bit security)
+- **Blake2 hashing**: Fast, secure hashing for content and metadata
+- **Nonce uniqueness**: Separate nonces for CID and content encryption
+
+### **Economic Security**:
+
+- **Staking requirements**: Minimum stake for PKI profiles, crypto trails, and RAG metadata
+- **TTL cleanup**: Expired entries automatically unstaked and removed
+- **Slashing**: Malicious publishers can be slashed (treasury receives funds)
+- **Anti-spam**: Economic cost prevents blockchain bloat
+
+### **Operational Security**:
+
+
+- **Decentralized storage**: No single point of failure (IPFS)
+- **Browser-based verification**: No server dependency for proof checking
+- **Open source**: Transparent, auditable code
+- **Substrate security**: Inherits Polkadot's security model
+
+---
+
+## 🛠️ Technical Stack Summary
+
+| Component | Technology | Purpose |
+|-----------|-----------|---------|
+| **Blockchain** | Substrate (Rust) | Custom runtime with 3 pallets |
+| **Consensus** | Tanssi appchain | Shared security + block production |
+| **Storage** | IPFS (Helia.js) | Decentralized content storage |
+| **Crypto** | Sr25519 | Schnorr signatures + ECDH |
+| **Encryption** | ChaCha20-Poly1305 | Authenticated encryption |
+| **Frontend** | React + Vite | Progressive Web App |
+| **Wallet** | Polkadot.js, SubWallet | Substrate account management |
+| **AI Integration** | MCP (Model Context Protocol) | AI agent deployment |
+| **QR Codes** | jsQR | Mobile verification |
+
+---
+
+## 🎯 Hackathon Categories
+
+### **Primary: Infrastructure & Tooling**
+
+- Novel use of Substrate pallets for workflow management
+- Reusable pallets for any proof-of-execution use case
+- Hybrid on-chain/IPFS architecture pattern
+- MCP integration for AI agent coordination
+
+### **Secondary: Real-World Applications**
+
+- Product valorization for luxury goods through verifiable provenance
+- Supply chain transparency
+- User-friendly QR workflow for non-technical users
+- Mobile-first PWA experience
+
+---
+
+## 📞 Contact & Links
+
+- **Live dApp**: [carge.fr](https://carge.fr)
+- **Email**: contact@carge.fr
+- **GitHub**: https://github.com/polykrate
+---
+
+## 🙏 Thank you
+
+To the Polkadot community for building the infrastructure that makes projects like Carge possible. 
+
+From a military officer who once coordinated logistics in war zones, to a solo founder building decentralized trust systems—**this is what decentralization looks like in practice**.
+
+---
+
+**Carge: Code as Law**
+

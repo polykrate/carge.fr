@@ -229,11 +229,20 @@ export const Verify = () => {
   const extractStepIdentity = (stepData, stepKey) => {
     if (!stepData || typeof stepData !== 'object') return null;
     
-    // Priority fields for identity extraction
+    // Priority fields for identity extraction (v5 with first field naming)
     const identityFields = [
-      'distilleryName', 'distributorName', 'importerName', 'exporterName', 
-      'retailerName', 'consumerName', 'companyName', 'organizationName',
-      'name', 'supplier', 'manufacturer'
+      'producerName',      // production step
+      'distributorName',   // nationalDistribution step
+      'importerName',      // import1 and import2 steps
+      'exporterName',      // export step
+      'retailerName',      // retail step
+      'consumerName',      // consumer step
+      'distilleryName',    // legacy compatibility
+      'companyName',
+      'organizationName',
+      'name',
+      'supplier',
+      'manufacturer'
     ];
     
     // Try to find a matching identity field

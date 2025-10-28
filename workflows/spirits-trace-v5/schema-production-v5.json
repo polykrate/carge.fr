@@ -1,0 +1,132 @@
+{
+  "type": "object",
+  "required": ["production"],
+  "properties": {
+    "production": {
+      "type": "object",
+      "required": [
+        "producerName",
+        "spiritType",
+        "productName",
+        "batchNumber",
+        "bottleNumberRange",
+        "totalBottlesProduced",
+        "distillationYear",
+        "bottlingYear",
+        "ageYears",
+        "volumePerBottle",
+        "alcoholPercentage",
+        "distillationLocation",
+        "caskType",
+        "qrCodeApplied"
+      ],
+      "properties": {
+        "producerName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Name of the distillery or producer (FIRST FIELD)"
+        },
+        "spiritType": {
+          "type": "string",
+          "enum": ["whisky", "cognac", "rum", "gin", "vodka", "tequila", "brandy", "other"],
+          "description": "Type of spirit being produced"
+        },
+        "productName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Full product name including age statement if applicable"
+        },
+        "batchNumber": {
+          "type": "string",
+          "pattern": "^[A-Z0-9-]+$",
+          "minLength": 1,
+          "maxLength": 50,
+          "description": "Unique batch identifier"
+        },
+        "bottleNumberRange": {
+          "type": "string",
+          "pattern": "^[0-9]+-[0-9]+$",
+          "description": "Range of bottle numbers (e.g., '1-2400')"
+        },
+        "totalBottlesProduced": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000,
+          "description": "Total number of bottles in this batch"
+        },
+        "distillationYear": {
+          "type": "integer",
+          "minimum": 1900,
+          "maximum": 2100,
+          "description": "Year of distillation"
+        },
+        "bottlingYear": {
+          "type": "integer",
+          "minimum": 1900,
+          "maximum": 2100,
+          "description": "Year of bottling"
+        },
+        "ageYears": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Age statement in years"
+        },
+        "volumePerBottle": {
+          "type": "number",
+          "enum": [0.5, 0.7, 0.75, 1, 1.5, 1.75],
+          "description": "Volume per bottle in liters"
+        },
+        "alcoholPercentage": {
+          "type": "number",
+          "minimum": 20,
+          "maximum": 80,
+          "description": "Alcohol by volume percentage"
+        },
+        "distillationLocation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Location where the spirit was distilled"
+        },
+        "caskType": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Type of cask used for aging"
+        },
+        "caskOrigin": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Origin of the casks used"
+        },
+        "colorDescription": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Description of the spirit's color"
+        },
+        "qrCodeApplied": {
+          "type": "boolean",
+          "description": "Whether QR codes are applied to bottles"
+        },
+        "certifications": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "maxItems": 10,
+          "description": "List of certifications or designations"
+        },
+        "productionNotes": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Additional production notes or special characteristics"
+        }
+      }
+    }
+  }
+}
+

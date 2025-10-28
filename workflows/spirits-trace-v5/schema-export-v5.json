@@ -1,0 +1,147 @@
+{
+  "type": "object",
+  "required": ["export"],
+  "properties": {
+    "export": {
+      "type": "object",
+      "required": [
+        "exporterName",
+        "transferDate",
+        "fromEntity",
+        "originCountry",
+        "finalDestinationCountry",
+        "batchNumber",
+        "bottleNumberRange",
+        "bottlesInLot",
+        "volumeTotal",
+        "storageConditions",
+        "qualityCheck",
+        "transportMethod",
+        "exportLicense"
+      ],
+      "properties": {
+        "exporterName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Name of the exporting company (FIRST FIELD)"
+        },
+        "transferDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of transfer (YYYY-MM-DD)"
+        },
+        "fromEntity": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Name of the sending entity"
+        },
+        "originCountry": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "description": "Origin country"
+        },
+        "finalDestinationCountry": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "description": "Final destination country"
+        },
+        "batchNumber": {
+          "type": "string",
+          "pattern": "^[A-Z0-9-]+$",
+          "minLength": 1,
+          "maxLength": 50,
+          "description": "Batch number being transferred"
+        },
+        "bottleNumberRange": {
+          "type": "string",
+          "pattern": "^[0-9]+-[0-9]+$",
+          "description": "Range of bottle numbers in this transfer"
+        },
+        "bottlesInLot": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000,
+          "description": "Number of bottles in this lot"
+        },
+        "volumeTotal": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 1000000,
+          "description": "Total volume in liters"
+        },
+        "storageConditions": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300,
+          "description": "Storage conditions during transport"
+        },
+        "qualityCheck": {
+          "type": "string",
+          "enum": ["conforme", "non-conforme", "pending"],
+          "description": "Quality verification status"
+        },
+        "transportMethod": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Method of transportation (air cargo, sea freight, etc.)"
+        },
+        "gpsTracking": {
+          "type": "boolean",
+          "description": "GPS tracking enabled"
+        },
+        "insuranceValue": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10000000,
+          "description": "Insurance value amount"
+        },
+        "insuranceCurrency": {
+          "type": "string",
+          "enum": ["EUR", "USD", "GBP", "CNY", "HKD", "JPY"],
+          "description": "Insurance currency"
+        },
+        "exportLicense": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Export license number"
+        },
+        "exportLicenseCid": {
+          "type": "string",
+          "pattern": "^baf[a-z0-9]+$",
+          "description": "IPFS CID of export license document (AUDIT)"
+        },
+        "customsDeclaration": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Customs declaration number"
+        },
+        "customsDeclarationCid": {
+          "type": "string",
+          "pattern": "^baf[a-z0-9]+$",
+          "description": "IPFS CID of customs declaration (AUDIT)"
+        },
+        "airWaybill": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Air waybill number"
+        },
+        "airWaybillCid": {
+          "type": "string",
+          "pattern": "^baf[a-z0-9]+$",
+          "description": "IPFS CID of air waybill (AUDIT)"
+        },
+        "transferNotes": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Additional notes about the transfer"
+        }
+      }
+    }
+  }
+}
+

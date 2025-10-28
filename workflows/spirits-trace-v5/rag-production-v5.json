@@ -1,0 +1,10 @@
+{
+  "name": "production-spirits-v5",
+  "description": "Initial production step - Distillery creates premium spirits batch with QR codes",
+  "instruction": "Record the initial production of premium spirits at the distillery.\n\nKey information to capture:\n- Producer name (FIRST FIELD - used for identity display)\n- Spirit type and full product name\n- Batch number and bottle range\n- Distillation and bottling years\n- Age statement\n- Volume per bottle and alcohol percentage\n- Distillation location\n- Cask type and origin\n- QR code application status\n- Certifications\n- Production notes\n\nThis is the foundation step that creates the immutable origin record on the blockchain. The QR code applied to each bottle will reference this production step hash.",
+  "resource": "Example: The Macallan Distillery produces a batch of 25-year-old Single Malt Whisky. Batch B47 contains 2,400 bottles numbered 1-2400. Distilled in 1999 at Easter Elchies, Speyside, Scotland. Matured 25 years in hand-picked Sherry Oak casks from Jerez, Spain. Bottled in 2024 at 43% ABV, 0.7L per bottle. Deep mahogany color. QR codes applied to all bottles. Certified by Scotch Whisky Association with Protected Geographical Indication.",
+  "schema": "SEE schema-production-v5.json",
+  "tags": ["spirits", "production", "step-1", "v5", "macallan"],
+  "stepType": "production"
+}
+

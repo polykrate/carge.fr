@@ -1,0 +1,10 @@
+{
+  "name": "import2-spirits-v5",
+  "description": "Final country import - Import to final destination country with local compliance",
+  "instruction": "Record the final import into destination country with full local regulatory compliance.\n\nKey information to capture:\n- Importer name (FIRST FIELD - used for identity display)\n- Transfer date\n- From entity (previous holder)\n- Destination country\n- Batch number and bottle range\n- Number of bottles and total volume\n- Storage conditions at bonded warehouse\n- Quality check status\n- QR blockchain verification status\n- Transport method\n- Import license with CID for audit\n- GACC certificate with CID for audit (China)\n- Health certificate with CID for audit\n- Bilingual labeling compliance\n- Labeling languages\n- Transfer notes\n\nThis step records entry into final market with all regulatory approvals.",
+  "resource": "Example: Shanghai Premium Imports receives 150 bottles (range 1-150) from Golden Dragon Spirits, Hong Kong on April 20, 2024. Secured ground transport Hong Kong to Shanghai bonded zone. Chinese customs cleared with import license CN-IMPORT-SPIRITS-2024-SH-B47. GACC health certificate GACC-HEALTH-CERT-2024-0420-SPIRITS obtained. Bilingual labels applied (EN/CN). All 150 bottles QR-verified on blockchain. Stored in Shanghai free trade zone bonded warehouse at 18°C, 65% humidity.",
+  "schema": "SEE schema-import2-v5.json",
+  "tags": ["spirits", "import2", "step-5", "v5", "final-import"],
+  "stepType": "import2"
+}
+

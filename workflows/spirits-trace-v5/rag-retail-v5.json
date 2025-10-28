@@ -1,0 +1,10 @@
+{
+  "name": "retail-spirits-v5",
+  "description": "Retail distribution - Individual bottle transfer to premium retail outlet",
+  "instruction": "Record the transfer of individual bottle to premium retail location.\n\nKey information to capture:\n- Retailer name (FIRST FIELD - used for identity display)\n- Transfer date\n- From entity (previous holder)\n- Batch number and individual bottle number\n- Volume of individual bottle\n- Storage conditions at retail location\n- Quality check status\n- Blockchain verification status\n- Provenance verification details\n- Transport method\n- Retail price and currency\n- Retail price in EUR (optional conversion)\n- VIP services included\n- Transfer notes\n\nThis step records the bottle reaching the premium retail point ready for final consumer purchase.",
+  "resource": "Example: Emperor's Cellar - Ultra-Premium Specialist receives bottle #92 from batch B47 from Shanghai Premium Imports on May 5, 2024. White-glove secured delivery to premium retail cellar. Blockchain verification shows complete provenance Scotland → UK → France → Hong Kong → Shanghai. All 5 transfers cryptographically signed. Stored in climate cellar 18°C, 65% humidity. Price: ¥28,800 CNY (~€3,600 EUR). VIP services included for collectors.",
+  "schema": "SEE schema-retail-v5.json",
+  "tags": ["spirits", "retail", "step-6", "v5", "premium"],
+  "stepType": "retail"
+}
+
