@@ -2,9 +2,19 @@
 
 ## 💡 Inspiration
 
-As a veteran, I learned that centralized command works—until it doesn't. In degraded environments, **decentralization becomes survival**. During humanitarian operations, including the Beirut harbor explosion response where I led logistics, I saw firsthand how critical it is to coordinate multiple actors without a single point of failure.
+As a military officer, I got interested in **Public Key Infrastructure (PKI)** systems—tools like Hyperledger Fabric that promised secure, decentralized coordination. The concept was brilliant, but the reality was frustrating: **permissioned, complex to deploy, and not scalable**.
 
-This experience shaped Carge: **a decentralized system where trust is cryptographic, not hierarchical**.
+Everyone uses PKI to prove identity. But PKI is fundamentally **an infrastructure for secure coordination**—it can be used for much more than just certificates.
+
+During humanitarian operations, including the Beirut harbor explosion response where I led logistics, I saw how critical decentralized coordination becomes when infrastructure fails. Multiple actors, zero pre-existing trust, no single point of failure—**exactly the problem PKI should solve, but traditional systems don't scale**.
+
+That's when I decided to build Carge: **A decentralized PKI where anyone can register their cryptographic identity on-chain, with no permission needed and no central authority.**
+
+In traditional PKI, trust flows from certificate authorities. In Carge, trust flows from cryptographic proof consistency. Your identity is your key. What's valid depends on verifiable proofs, not on who signed your certificate.
+
+This is the cypherpunk ethos, as Eric Hughes wrote in 1993: **"Cypherpunks write code. We know that someone has to write software to defend privacy, and... we're going to write it."**
+
+Carge is built for everyone—not just institutions. Web3 should be accessible to ordinary people, not locked behind technical barriers or corporate gatekeepers.
 
 ---
 
@@ -14,7 +24,7 @@ This experience shaped Carge: **a decentralized system where trust is cryptograp
 
 It combines three innovations:
 
-1. **Decentralized PKI** (`pallet-pki`): Each participant has a cryptographic identity anchored on-chain with Sr25519 exchange keys and libp2p peer IDs for encrypted cid transmissions
+1. **Decentralized PKI** (`pallet-pki`): Each participant has a cryptographic identity anchored on-chain with X25519 exchange keys and libp2p peer IDs for encrypted cid transmissions
 2. **Multi-actor workflows** (`pallet-crypto-trail`): Send and receive encrypted deliverables on-chain between participants. Each step's output is encrypted, transmitted via IPFS, and only decryptable by the designated recipient—no external channels needed
 3. **RAG workflow storage** (`pallet-rag`): Multi-step workflow schemas stored as IPFS CIDs on-chain with tag-based search
 
@@ -33,7 +43,7 @@ Carge is built on **three custom Substrate pallets**, deployed on a Tanssi appch
 **Purpose**: Decentralized identity management for workflow participants
 
 **Key features**:
-- **Exchange keys**: Sr25519 public keys (32 bytes) for ECDH key exchange
+- **Exchange keys**: X25519 public keys (32 bytes) for ECDH key exchange
 - **Peer IDs**: Libp2p peer identifiers (38 bytes) for P2P network coordination
 - **Profile CIDs**: Optional IPFS CID v1 (36 bytes) for extended profile data
 - **TTL management**: Automatic expiration and cleanup of stale keys
@@ -42,7 +52,7 @@ Carge is built on **three custom Substrate pallets**, deployed on a Tanssi appch
 **Storage**:
 ```rust
 pub struct PkiProfile<T: Config> {
-    pub exchange_key: [u8; 32],        // Bob's public key for ECDH
+    pub exchange_key: [u8; 32],        // X25519 public key for ECDH
     pub peer_id: [u8; 38],             // Libp2p multiaddr peer ID
     pub profile_cid: Option<[u8; 36]], // IPFS CID v1 (optional)
     pub staked_amount: Balance,         // Staked currency
@@ -51,7 +61,7 @@ pub struct PkiProfile<T: Config> {
 }
 ```
 
-**Use case**: Before executing a workflow step, Alice retrieves Bob's `exchange_key` from his PKI profile to encrypt the next step's CID and sends it to Bob's `peer_id` via IPFS.
+**Use case**: Before executing a workflow step, Alice retrieves Bob's X25519 `exchange_key` from his PKI profile to perform ECDH key exchange, then encrypts the next step's CID and sends it to Bob's `peer_id` via IPFS.
 
 ---
 
@@ -84,14 +94,14 @@ pub struct CryptoTrail<T: Config> {
 ```
 
 **Cryptography workflow**:
-1. Alice generates ephemeral keypair `(ephemeral_sk, ephemeral_pk)`
-2. Alice retrieves Bob's `exchange_key` from his PKI profile
-3. Alice computes shared secret: `shared_secret = ECDH(ephemeral_sk, bob_exchange_key)`
+1. Alice generates X25519 ephemeral keypair `(ephemeral_sk, ephemeral_pk)`
+2. Alice retrieves Bob's X25519 `exchange_key` from his PKI profile
+3. Alice computes shared secret: `shared_secret = X25519_ECDH(ephemeral_sk, bob_exchange_key)`
 4. Alice derives encryption key: `key = HKDF(shared_secret)`
 5. Alice encrypts next step CID: `encrypted_cid = ChaCha20-Poly1305(key, cid_nonce, next_step_cid)`
-6. Alice signs the trail with her Substrate key: `signature = Sign(substrate_sk, content_hash)`
+6. Alice signs the trail with her Substrate key: `signature = Sr25519_Sign(substrate_sk, content_hash)`
 7. Alice submits extrinsic to store trail on-chain
-8. The extrinsic **verifies the signature on-chain** before accepting the storage
+8. The extrinsic **verifies the Sr25519 signature on-chain** before accepting the storage
 9. Trail stored with `ephemeral_pk` (Bob will use it to decrypt)
 
 **Indexed by**: `content_cid` (allows anyone to verify a proof by its content hash)
@@ -192,7 +202,7 @@ Building a full-stack parachain candidate (3 custom Substrate pallets + dApp + M
 
 5. **Browser-based IPFS**: Getting Helia.js (IPFS in browser) to work reliably with WebRTC and WebTransport for P2P connections, need a kubo node to work properly right now
 
-6. **Chain of custody verification**: Ensuring authenticity by verifying that each step's creator matches the previous step's designated recipient, the steps are in chronological order, reconstructing the on-chain workflow hash to validate each step, and ensuring data format matches the schema
+6. **Chain of custody verification**: Ensuring authenticity by verifying that each step's creator matches the previous step's designated recipient, the steps are in chronological order, reconstructing the on-chain workflow hash to validate each step, ensuring data format matches the schema and the person in front of you is the last designated recipient
 
 ---
 
@@ -371,7 +381,7 @@ graph TB
 | **Blockchain** | Substrate (Rust) | Custom runtime with 3 pallets |
 | **Consensus** | Tanssi appchain | Shared security + block production |
 | **Storage** | IPFS (Helia.js) | Decentralized content storage |
-| **Crypto** | Sr25519 | Schnorr signatures + ECDH |
+| **Crypto** | X25519 + Sr25519 | ECDH key exchange + Schnorr signatures |
 | **Encryption** | ChaCha20-Poly1305 | Authenticated encryption |
 | **Frontend** | React + Vite | Progressive Web App |
 | **Wallet** | Polkadot.js, SubWallet | Substrate account management |
