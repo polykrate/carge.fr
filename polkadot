@@ -22,10 +22,14 @@ Multi-party supply chains face identical complexity:
 - **Need for transparency**: Consumers demand verifiable proof of origin
 - **Privacy requirements**: Competitors in the same chain cannot see each other's data
 
-**Traditional centralized solutions fail here**:
-- Who hosts the database? Whose jurisdiction? Who pays?
-- Who has access? What prevents the platform from extracting rents?
-- What prevents censorship or selective data deletion?
+**This complexity creates a specific problem for creators and producers**: A small winemaker in Bordeaux, a coffee farmer in Colombia, or a craft distillery in Scotland cannot prove their product's authenticity to consumers without trusting a centralized intermediary. But who controls that intermediary? The distributor? The retailer? The government? Each option creates a power imbalance where the producer loses control of their story and value capture.
+
+**Consumers face the same trust problem**: They want to pay premium prices for authentic, traceable products—but how can they verify provenance when every actor in the chain has an incentive to lie, and the verification system is controlled by one of those actors?
+
+**Traditional centralized solutions fail at this threshold**:
+- Who hosts the database? Whose jurisdiction? Who pays? (The host becomes the rent-seeker)
+- Who has access? What prevents the platform from extracting value? (The middleman problem)
+- What prevents censorship or selective data deletion? (The producer loses control)
 
 ### **Why existing PKI solutions don't work**
 
@@ -518,4 +522,5 @@ From a military officer who once coordinated logistics in war zones, to a solo f
 ---
 
 **Carge: Code as Law**
+
 
