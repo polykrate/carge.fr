@@ -13,7 +13,11 @@ For **supply chain transparency and professional valorization**—from producer 
 - **Privacy between competitors**: Each supply chain actor sees only their own data, not their competitors' volumes or prices
 - **Censorship resistance**: No entity can delete or alter the proof of origin
 
-**The trade-off is real**: decentralized PKI systems are more expensive (higher transaction costs, technical complexity, no economies of scale). Traditional PKI systems (X.509, Certificate Authorities) are **deconcentrated** (multiple CAs), not decentralized—they remain hierarchical with trusted authorities who can revoke certificates or be coerced by governments. Blockchain solutions like Hyperledger Fabric are permissioned and don't solve the centralization problem.
+**The challenge**: True decentralization is more expensive than centralized or deconcentrated systems—higher transaction costs, technical complexity, no economies of scale.
+
+**Why existing solutions don't work**:
+- **Traditional PKI (X.509, CAs)**: Deconcentrated, not decentralized. Multiple Certificate Authorities exist, but each is a trusted hierarchy that can revoke certificates or be coerced by governments.
+- **Blockchain PKI (Hyperledger Fabric)**: Permissioned networks controlled by consortium members—still centralized trust, just distributed among fewer parties.
 
 **Carge's approach**: Accept the costs of decentralization, but minimize them through:
 - **AI-assisted process deployment**: Natural language to blockchain (NO CODE) reduces coordination costs by 90%
