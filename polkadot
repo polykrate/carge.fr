@@ -13,9 +13,11 @@ For **supply chain transparency and professional valorization**—from producer 
 - **Privacy between competitors**: Each supply chain actor sees only their own data, not their competitors' volumes or prices
 - **Censorship resistance**: No entity can delete or alter the proof of origin
 
-**The challenge**: Decentralization costs more—higher transaction fees, steeper learning curve, and none of the efficiency gains centralized systems enjoy.
+**The threshold paradox**: Centralized systems are economically efficient—**until they're not**. They work brilliantly for simple coordination, but beyond a certain complexity threshold (multiple jurisdictions, competing interests, zero pre-existing trust), centralized control becomes the bottleneck. **That's when decentralization becomes necessary, not despite its costs, but because centralized systems simply stop functioning.**
 
-**Why existing solutions don't work**:
+This is why the European Union launched **EBSI (European Blockchain Services Infrastructure)**—when coordinating 27 sovereign nations with competing interests, no single trusted authority exists. Decentralization works painfully where centralization fails completely.
+
+**Why existing solutions fall short**:
 - **Traditional PKI (X.509, CAs)**: Deconcentrated, not decentralized. Multiple Certificate Authorities exist, but each is a trusted hierarchy that can revoke certificates or be coerced by governments.
 - **Blockchain PKI (Hyperledger Fabric)**: Permissioned networks controlled by consortium members—still centralized trust, just distributed among fewer parties.
 
