@@ -13,7 +13,7 @@ For **supply chain transparency and professional valorization**—from producer 
 - **Privacy between competitors**: Each supply chain actor sees only their own data, not their competitors' volumes or prices
 - **Censorship resistance**: No entity can delete or alter the proof of origin
 
-**The challenge**: True decentralization is more expensive than centralized or deconcentrated systems—higher transaction costs, technical complexity, no economies of scale.
+**The challenge**: Decentralization costs more—higher transaction fees, steeper learning curve, and none of the efficiency gains centralized systems enjoy.
 
 **Why existing solutions don't work**:
 - **Traditional PKI (X.509, CAs)**: Deconcentrated, not decentralized. Multiple Certificate Authorities exist, but each is a trusted hierarchy that can revoke certificates or be coerced by governments.
