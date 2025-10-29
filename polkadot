@@ -13,17 +13,18 @@ For **supply chain transparency and professional valorization**—from producer 
 - **Privacy between competitors**: Each supply chain actor sees only their own data, not their competitors' volumes or prices
 - **Censorship resistance**: No entity can delete or alter the proof of origin
 
-**The trade-off is real**: decentralized PKI systems are more expensive (higher transaction costs, technical complexity, no economies of scale). Traditional solutions like Hyperledger Fabric remain permissioned and difficult to scale.
+**The trade-off is real**: decentralized PKI systems are more expensive (higher transaction costs, technical complexity, no economies of scale). Traditional PKI systems (X.509, Certificate Authorities) are **deconcentrated** (multiple CAs), not decentralized—they remain hierarchical with trusted authorities who can revoke certificates or be coerced by governments. Blockchain solutions like Hyperledger Fabric are permissioned and don't solve the centralization problem.
 
 **Carge's approach**: Accept the costs of decentralization, but minimize them through:
-- **AI-assisted workflows**: Natural language to blockchain (NO CODE) reduces coordination costs by 90%
-- **Economic staking**: Solves free-rider problems with skin-in-the-game incentives  
-- **Batch deployment**: 88% fewer wallet signatures (8 transactions → 1)
-- **Browser-based IPFS**: Zero installation, making verification accessible to everyone
+- **AI-assisted process deployment**: Natural language to blockchain (NO CODE) reduces coordination costs by 90%
+- **Economic staking**: Solves free-rider problems with skin-in-the-game incentives
+- **Browser-based Dapp**: Zero installation, making verification accessible to everyone
 
 **The bet**: For creators, artisans, small producers, and luxury brands who need to differentiate authentic products and build consumer trust, **the value of cryptographic proof exceeds the cost of decentralization**.
 
-In traditional PKI, trust flows from certificate authorities. In Carge, trust flows from cryptographic proof consistency. Your identity is your key. What's valid depends on verifiable proofs, not on who signed your certificate.
+**Traditional PKI vs Carge:**
+- **Traditional (deconcentrated)**: Trust flows from hierarchical Certificate Authorities (Root CA → Intermediate CA). Multiple CAs exist, but each is a trusted central authority that can revoke or refuse certificates.
+- **Carge (decentralized)**: Trust flows from cryptographic proof consistency on a permissionless blockchain. Your identity is your key. No authority can revoke your proofs—what's valid depends on verifiable cryptography, not on who signed your certificate.
 
 Carge is built for everyone—not just institutions. Web3 should be accessible to ordinary people, not locked behind technical barriers or corporate gatekeepers.
 
