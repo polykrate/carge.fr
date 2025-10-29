@@ -447,22 +447,7 @@ graph TB
 
 ## 🎯 Hackathon Categories
 
-### **Primary: AI & User Experience**
-
-- **AI Workflow Builder**: Natural language to blockchain deployment
-- **Intelligent prompt engineering**: Guides AI to generate blockchain-compliant workflows
-- **Single-signature batch deployment**: 88% reduction in wallet interactions
-- **Dual AI integration**: Browser-based + autonomous MCP agents
-- **Zero technical knowledge required**: Non-developers can deploy production workflows
-
-### **Secondary: Infrastructure & Tooling**
-
-- Novel use of Substrate pallets for workflow management
-- Reusable pallets for any proof-of-execution use case
-- Hybrid on-chain/IPFS architecture pattern
-- Batch transaction optimization with local hash calculation
-
-### **Tertiary: Real-World Applications**
+### **Primary:  Real-World Applications**
 
 - **Product valorization for creators**: Artisans, craftsmen, small producers, and luxury brands all need verifiable provenance to differentiate authentic products and build direct consumer relationships
 - **Supply chain transparency**: Cryptographic guarantees for any multi-party workflow (food, manufacturing, pharmaceuticals, art, etc.)
