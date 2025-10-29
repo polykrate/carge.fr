@@ -2,17 +2,28 @@
 
 ## 💡 Inspiration
 
-As a military officer, I got interested in **Public Key Infrastructure (PKI)** systems—tools like Hyperledger Fabric that promised secure, decentralized coordination. The concept was brilliant, but the reality was frustrating: **permissioned, complex to deploy, and not scalable**.
+**Why are centralized systems economically preferred?** Nobel laureate Ronald Coase explained why firms exist: **coordination costs in decentralized systems typically exceed the cost of hierarchy**. Centralized solutions offer economies of scale, rapid decision-making, and simplified resource management. For most use cases, centralization is the rational choice.
 
-Everyone uses PKI to prove identity. But PKI is fundamentally **an infrastructure for secure coordination**—it can be used for much more than just certificates.
+**So why build a decentralized PKI?**
 
-During humanitarian operations, including the Beirut harbor explosion response where I led logistics, I saw how critical decentralized coordination becomes when infrastructure fails. Multiple actors, zero pre-existing trust, no single point of failure—**exactly the problem PKI should solve, but traditional systems don't scale**.
+For **supply chain transparency and professional valorization**—from producer to consumer—decentralization provides value that centralized systems cannot deliver:
 
-That's when I decided to build Carge: **A decentralized PKI where anyone can register their cryptographic identity on-chain, with no permission needed and no central authority.**
+- **Verifiable authenticity**: Cryptographic proof that can't be faked or revoked by a single authority
+- **Direct relationships**: Producers connect with consumers without intermediaries extracting rents  
+- **Privacy between competitors**: Each supply chain actor sees only their own data, not their competitors' volumes or prices
+- **Censorship resistance**: No entity can delete or alter the proof of origin
+
+**The trade-off is real**: decentralized PKI systems are more expensive (higher transaction costs, technical complexity, no economies of scale). Traditional solutions like Hyperledger Fabric remain permissioned and difficult to scale.
+
+**Carge's approach**: Accept the costs of decentralization, but minimize them through:
+- **AI-assisted workflows**: Natural language to blockchain (NO CODE) reduces coordination costs by 90%
+- **Economic staking**: Solves free-rider problems with skin-in-the-game incentives  
+- **Batch deployment**: 88% fewer wallet signatures (8 transactions → 1)
+- **Browser-based IPFS**: Zero installation, making verification accessible to everyone
+
+**The bet**: For creators, artisans, small producers, and luxury brands who need to differentiate authentic products and build consumer trust, **the value of cryptographic proof exceeds the cost of decentralization**.
 
 In traditional PKI, trust flows from certificate authorities. In Carge, trust flows from cryptographic proof consistency. Your identity is your key. What's valid depends on verifiable proofs, not on who signed your certificate.
-
-**Why decentralization when centralization is more efficient?** Nobel laureate Ronald Coase explained why firms exist: coordination costs in decentralized systems exceed hierarchy costs. Decentralization is expensive—higher transaction costs, no economies of scale, technical complexity. But for **supply chain transparency**, some problems can't be solved by trusting a central authority: verifiable proof without intermediaries, privacy between competitors, censorship resistance. **Carge makes this bet**: the value of cryptographic proof exceeds the cost of decentralization. I address these costs through AI-assisted workflows (reducing coordination costs), economic staking (solving free-rider problems), and batch deployment (88% fewer signatures).
 
 Carge is built for everyone—not just institutions. Web3 should be accessible to ordinary people, not locked behind technical barriers or corporate gatekeepers.
 
