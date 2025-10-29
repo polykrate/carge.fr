@@ -114,7 +114,14 @@ Just paste this into your existing JSON to fix it.
 ## Critical Rules
 
 1. **FIRST field** in each step schema MUST be the actor's name in ENGLISH ending with "Name" (producerName, distributorName, sellerName, etc. - NOT producteurNom, vendeurNom)
-2. Each step needs: \`stepKey\`, \`stepName\`, \`description\`, \`instruction\`, \`resource\`, \`tags\`, \`schema\`
+2. **Each step MUST include ALL these fields**:
+   - \`stepKey\` (identifier)
+   - \`stepName\` (human-readable title)
+   - \`description\` (what this step does)
+   - **\`instruction\`** ⚠️ REQUIRED: How to fill the form with examples
+   - **\`resource\`** ⚠️ REQUIRED: Concrete real-world example for this step
+   - \`tags\` (for search)
+   - \`schema\` (JSON Schema for data structure)
 3. Schema follows JSON Schema standard (type, required, properties, etc.)
 4. Tags format: \`["industry", "stepKey", "step-N", "version"]\`
 5. **Always check**: \`stepKey.length + 1 + master.name.length ≤ 50\`
@@ -199,6 +206,14 @@ export const Agent = () => {
           errors.push('master.description must be ≤ 300 characters (blockchain limit)');
         }
         
+        // Warn if instruction or resource are missing (not blocking, but recommended)
+        if (!workflow.master.instruction || workflow.master.instruction.trim() === '') {
+          errors.push('master: ⚠️  WARNING - Missing \'instruction\' field (recommended for workflow overview)');
+        }
+        if (!workflow.master.resource || workflow.master.resource.trim() === '') {
+          errors.push('master: ⚠️  WARNING - Missing \'resource\' field (recommended for real-world example story)');
+        }
+        
         if (!workflow.master.tags || !Array.isArray(workflow.master.tags)) {
           errors.push('master.tags must be an array');
         } else {
@@ -251,6 +266,14 @@ export const Agent = () => {
             errors.push(`${prefix}.description is required`);
           } else if (step.description.length > 300) {
             errors.push(`${prefix}.description must be ≤ 300 characters (blockchain limit)`);
+          }
+          
+          // Warn if instruction or resource are missing (not blocking, but recommended)
+          if (!step.instruction || step.instruction.trim() === '') {
+            errors.push(`${prefix}: ⚠️  WARNING - Missing 'instruction' field (recommended for better UX)`);
+          }
+          if (!step.resource || step.resource.trim() === '') {
+            errors.push(`${prefix}: ⚠️  WARNING - Missing 'resource' field (recommended for real-world examples)`);
           }
           
           if (!step.schema) errors.push(`${prefix}.schema is required`);
@@ -437,8 +460,27 @@ export const Agent = () => {
       
       addLog(`✅ All CIDs uploaded to IPFS!`, 'success');
       stepResults.forEach((step, i) => {
-        addLog(`  Step ${i + 1}: Schema ${step.schemaCid}`, 'info');
+        addLog(`› Step ${i + 1}: Schema ${step.schemaCid}`, 'info');
+        if (step.instructionCid) {
+          addLog(`  ├─ Instruction ${step.instructionCid}`, 'info');
+        } else {
+          addLog(`  ⚠️  Warning: No instruction provided for this step`, 'warning');
+        }
+        if (step.resourceCid) {
+          addLog(`  └─ Resource ${step.resourceCid}`, 'info');
+        } else {
+          addLog(`  ⚠️  Warning: No resource provided for this step`, 'warning');
+        }
       });
+      if (masterResults.instructionCid || masterResults.resourceCid) {
+        addLog(`› Master:`, 'info');
+        if (masterResults.instructionCid) {
+          addLog(`  ├─ Instruction ${masterResults.instructionCid}`, 'info');
+        }
+        if (masterResults.resourceCid) {
+          addLog(`  └─ Resource ${masterResults.resourceCid}`, 'info');
+        }
+      }
       
       // ==================================================================
       // PHASE 2: Prepare all extrinsics and calculate hashes locally
@@ -911,32 +953,151 @@ export const Agent = () => {
           </div>
         )}
 
-        {/* Deployment Log */}
+        {/* Deployment Timeline */}
         {deploymentLog.length > 0 && (
-          <div className="mb-8 bg-gray-900 rounded-xl p-6">
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <div className="mb-8 bg-white rounded-2xl shadow-xl border-2 border-gray-200 p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               {t('ai.deploymentLogTitle')}
             </h3>
             <div
               ref={logRef}
-              className="bg-black rounded-lg p-4 max-h-96 overflow-y-auto font-mono text-sm"
+              className="relative space-y-3 max-h-[32rem] overflow-y-auto pr-2"
             >
-              {deploymentLog.map((log, i) => (
-                <div
-                  key={i}
-                  className={`mb-1 ${
-                    log.type === 'success' ? 'text-green-400' :
-                    log.type === 'error' ? 'text-red-400' :
-                    log.type === 'warning' ? 'text-yellow-400' :
-                    'text-gray-300'
-                  }`}
-                >
-                  {log.message}
-                </div>
-              ))}
+              {/* Vertical timeline line */}
+              <div className="absolute left-6 top-4 bottom-4 w-0.5 bg-gradient-to-b from-purple-200 via-blue-200 to-green-200"></div>
+              
+              {deploymentLog.map((log, i) => {
+                // Determine icon and colors based on message content and type
+                const getLogStyle = () => {
+                  const msg = log.message.toLowerCase();
+                  
+                  // Phase headers
+                  if (msg.includes('phase 1') || msg.includes('uploading')) {
+                    return {
+                      icon: (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                      ),
+                      bgColor: 'bg-blue-100',
+                      iconColor: 'text-blue-600',
+                      borderColor: 'border-blue-200'
+                    };
+                  }
+                  if (msg.includes('phase 2') || msg.includes('preparing')) {
+                    return {
+                      icon: (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      ),
+                      bgColor: 'bg-purple-100',
+                      iconColor: 'text-purple-600',
+                      borderColor: 'border-purple-200'
+                    };
+                  }
+                  if (msg.includes('phase 3') || msg.includes('batching') || msg.includes('signature')) {
+                    return {
+                      icon: (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                      ),
+                      bgColor: 'bg-orange-100',
+                      iconColor: 'text-orange-600',
+                      borderColor: 'border-orange-200'
+                    };
+                  }
+                  
+                  // Status types
+                  if (log.type === 'success') {
+                    return {
+                      icon: (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      ),
+                      bgColor: 'bg-green-100',
+                      iconColor: 'text-green-600',
+                      borderColor: 'border-green-200'
+                    };
+                  }
+                  if (log.type === 'error') {
+                    return {
+                      icon: (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      ),
+                      bgColor: 'bg-red-100',
+                      iconColor: 'text-red-600',
+                      borderColor: 'border-red-200'
+                    };
+                  }
+                  if (log.type === 'warning') {
+                    return {
+                      icon: (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                      ),
+                      bgColor: 'bg-yellow-100',
+                      iconColor: 'text-yellow-600',
+                      borderColor: 'border-yellow-200'
+                    };
+                  }
+                  
+                  // Default info style
+                  return {
+                    icon: (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    ),
+                    bgColor: 'bg-gray-100',
+                    iconColor: 'text-gray-600',
+                    borderColor: 'border-gray-200'
+                  };
+                };
+                
+                const style = getLogStyle();
+                const isIndented = log.message.startsWith('  ') || log.message.startsWith('›');
+                
+                return (
+                  <div
+                    key={i}
+                    className={`relative flex items-start gap-3 animate-fadeIn ${isIndented ? 'ml-8' : ''}`}
+                    style={{ animationDelay: `${i * 30}ms` }}
+                  >
+                    {/* Icon */}
+                    {!isIndented && (
+                      <div className={`relative z-10 flex-shrink-0 w-12 h-12 ${style.bgColor} ${style.iconColor} rounded-xl flex items-center justify-center shadow-md border-2 ${style.borderColor}`}>
+                        {style.icon}
+                      </div>
+                    )}
+                    
+                    {/* Content card */}
+                    <div className={`flex-1 ${!isIndented ? 'bg-white' : 'bg-gray-50/50'} rounded-lg ${!isIndented ? 'border-2 ' + style.borderColor : 'border border-gray-200'} p-3 ${!isIndented ? 'shadow-sm' : ''} hover:shadow-md transition-shadow`}>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm ${log.type === 'error' ? 'text-red-700 font-semibold' : log.type === 'success' ? 'text-green-700' : 'text-gray-700'} break-words`}>
+                            {log.message}
+                          </p>
+                        </div>
+                        {log.timestamp && (
+                          <span className="text-xs text-gray-400 flex-shrink-0">
+                            {new Date(log.timestamp).toLocaleTimeString()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
