@@ -38,3 +38,15 @@ Thumbs.db
 # Test coverage
 coverage
 .nyc_output
+
+# Private documentation and files (not for publication)
+private/
+*.pdf
+md2pdf.sh
+cleanup-all.sh
+
+# Workflow examples (private)
+gundam-custom-v1.json
+model-custom-v1.json
+opengov-pod-v1.json
+workflow-miniatures-3d-v2.json

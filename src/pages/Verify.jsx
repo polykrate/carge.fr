@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { ProofVerifier } from '../lib/core/proof-verifier.js';
 import { RagClient } from '../lib/core/rag-client.js';
+import { CidConverter } from '../lib/core/cid-converter.js';
 import { FormGenerator } from '../lib/core/form-generator.js';
 import { DeliverableDisplay } from '../components/DeliverableDisplay';
 import { showError, showSuccess, showLoading, dismiss, update, toastTx } from '../lib/toast';
@@ -211,7 +212,7 @@ export const Verify = () => {
   const [firstStepHash, setFirstStepHash] = useState(null); // Store first step hash for product verification
   
   // Workflow continuation states
-  const [allRags, setAllRags] = useState([]);
+  const [loadedRags, setLoadedRags] = useState([]);
   const [nextStepSchema, setNextStepSchema] = useState(null);
   const [workflowInfo, setWorkflowInfo] = useState(null); // { masterRag, currentStep, nextStepRag, livrable }
   const [loadingNextStep, setLoadingNextStep] = useState(false);
@@ -230,19 +231,37 @@ export const Verify = () => {
     }
   }, [selectedAccount]);
   
-  // Helper function to extract step identity (first meaningful field)
+  // Helper function to extract step identity (person/organization responsible for step)
   const extractStepIdentity = (stepData, stepKey) => {
     if (!stepData || typeof stepData !== 'object') return null;
     
-    // Priority fields for identity extraction (v5 with first field naming)
-    const identityFields = [
-      'producerName',      // production step
-      'distributorName',   // nationalDistribution step
-      'importerName',      // import1 and import2 steps
-      'exporterName',      // export step
-      'retailerName',      // retail step
-      'consumerName',      // consumer step
-      'distilleryName',    // legacy compatibility
+    // PRIORITY 1: New standard field name (workflows created after standardization)
+    if (stepData.responsibleIdentity && typeof stepData.responsibleIdentity === 'string') {
+      return stepData.responsibleIdentity.trim();
+    }
+    
+    // PRIORITY 2: Legacy field names ending with "Name" (old workflows)
+    const keys = Object.keys(stepData);
+    const legacyNameField = keys.find(key => 
+      !key.startsWith('_') && 
+      key.endsWith('Name') &&
+      typeof stepData[key] === 'string' &&
+      stepData[key].trim().length > 0
+    );
+    
+    if (legacyNameField) {
+      return stepData[legacyNameField];
+    }
+    
+    // PRIORITY 3: Very old hardcoded fields for backward compatibility
+    const legacyIdentityFields = [
+      'producerName',
+      'distributorName',
+      'importerName',
+      'exporterName',
+      'retailerName',
+      'consumerName',
+      'distilleryName',
       'companyName',
       'organizationName',
       'name',
@@ -250,14 +269,13 @@ export const Verify = () => {
       'manufacturer'
     ];
     
-    // Try to find a matching identity field
-    for (const field of identityFields) {
+    for (const field of legacyIdentityFields) {
       if (stepData[field]) {
         return stepData[field];
       }
     }
     
-    // Fallback: return first non-technical string field
+    // PRIORITY 3: Fallback to first non-technical string field
     for (const [key, value] of Object.entries(stepData)) {
       if (typeof value === 'string' && 
           !key.startsWith('_') && 
@@ -572,24 +590,8 @@ export const Verify = () => {
     setMode('json'); // Switch to JSON mode when loading example
   };
   
-  // Load all RAGs on mount (needed for workflow continuation)
-  useEffect(() => {
-    const loadRags = async () => {
-      try {
-        console.log('Loading RAGs from blockchain for workflow detection...');
-        const ragClient = new RagClient(substrateClient);
-        const loadedRags = await ragClient.getAllRags();
-        setAllRags(loadedRags);
-        console.log(`Loaded ${loadedRags.length} RAGs`);
-      } catch (err) {
-        console.error('Failed to load RAGs:', err);
-      }
-    };
-    
-    if (substrateClient) {
-      loadRags();
-    }
-  }, [substrateClient]);
+  // Note: We no longer load all RAGs on mount for better performance.
+  // RAGs are now loaded on-demand when needed for workflow continuation.
 
   // Generate form when schema is loaded
   useEffect(() => {
@@ -674,7 +676,7 @@ export const Verify = () => {
       setVerifyingChainOfTrust(false);
       setChronologicalOrderValid(null);
       
-      // Reset workflow continuation states (but keep allRags - needed for workflow detection)
+      // Reset workflow continuation states (but keep loadedRags - needed for workflow detection)
       setProofData(null);
       setNextStepSchema(null);
       setWorkflowInfo(null);
@@ -816,7 +818,7 @@ export const Verify = () => {
       setVerifyingChainOfTrust(false);
       setChronologicalOrderValid(null);
       
-      // Reset workflow continuation states (but keep allRags - needed for workflow detection)
+      // Reset workflow continuation states (but keep loadedRags - needed for workflow detection)
       setProofData(null);
       setNextStepSchema(null);
       setWorkflowInfo(null);
@@ -1081,6 +1083,95 @@ export const Verify = () => {
     }
   };
 
+  /**
+   * Pre-load remaining workflow RAGs and CIDs in background (non-blocking)
+   * Called after workflow history reconstruction to prepare for continuation
+   */
+  const preloadRemainingWorkflowSteps = async (masterRag, currentStepIndex) => {
+    try {
+      console.log('🔄 Pre-loading remaining workflow steps in background...');
+      
+      if (!masterRag.metadata.steps || masterRag.metadata.steps.length === 0) {
+        return;
+      }
+      
+      // Get remaining steps (after current step)
+      const remainingStepHashes = masterRag.metadata.steps.slice(currentStepIndex + 1);
+      
+      if (remainingStepHashes.length === 0) {
+        console.log('No remaining steps to pre-load (last step)');
+        return;
+      }
+      
+      console.log(`📥 Loading ${remainingStepHashes.length} remaining step RAG(s)...`);
+      const ragClient = new RagClient(substrateClient);
+      
+      // Load all remaining step RAGs in parallel
+      const stepLoadPromises = remainingStepHashes.map(async (stepHash) => {
+        let stepRag = loadedRags.find(r => r.hash === stepHash);
+        
+        if (!stepRag) {
+          try {
+            console.log(`📥 Loading remaining step RAG: ${stepHash.substring(0, 10)}...`);
+            stepRag = await ragClient.getRagByHash(stepHash);
+            if (stepRag) {
+              console.log(`✅ Loaded remaining step RAG: ${stepRag.metadata?.name || 'Unnamed'}`);
+              return stepRag;
+            }
+          } catch (err) {
+            console.warn(`⚠️ Failed to load remaining step RAG ${stepHash.substring(0, 10)}:`, err.message);
+            return null;
+          }
+        }
+        
+        return stepRag;
+      });
+      
+      const loadedSteps = await Promise.all(stepLoadPromises);
+      const newStepRags = loadedSteps.filter(s => s !== null);
+      
+      // Add new step RAGs to loadedRags state
+      if (newStepRags.length > 0) {
+        setLoadedRags(prev => {
+          const existingHashes = new Set(prev.map(r => r.hash));
+          const uniqueNewRags = newStepRags.filter(r => !existingHashes.has(r.hash));
+          if (uniqueNewRags.length > 0) {
+            console.log(`💾 Added ${uniqueNewRags.length} remaining step RAG(s) to cache`);
+            return [...prev, ...uniqueNewRags];
+          }
+          return prev;
+        });
+      }
+      
+      // Pre-load all CIDs for remaining steps
+      const cidsToLoad = [];
+      for (const stepRag of newStepRags) {
+        if (stepRag?.metadata?.instructionCid) cidsToLoad.push(stepRag.metadata.instructionCid);
+        if (stepRag?.metadata?.resourceCid) cidsToLoad.push(stepRag.metadata.resourceCid);
+        if (stepRag?.metadata?.schemaCid) cidsToLoad.push(stepRag.metadata.schemaCid);
+      }
+      
+      if (cidsToLoad.length > 0) {
+        console.log(`📦 Pre-loading ${cidsToLoad.length} CID(s) for remaining steps...`);
+        
+        const cidLoadPromises = cidsToLoad.map(async (hexCid) => {
+          try {
+            const cidString = CidConverter.hexToString(hexCid);
+            await ipfsClient.downloadJson(cidString);
+            console.log(`✅ Pre-loaded CID: ${cidString.substring(0, 20)}...`);
+          } catch (err) {
+            console.warn(`⚠️ Failed to pre-load CID:`, err.message);
+          }
+        });
+        
+        await Promise.allSettled(cidLoadPromises);
+        console.log(`✅ Finished pre-loading remaining steps: ${newStepRags.length} RAGs + ${cidsToLoad.length} CIDs`);
+      }
+    } catch (err) {
+      console.warn('⚠️ Remaining steps pre-loading failed (non-critical):', err);
+    }
+  };
+
   const loadNextWorkflowStep = async (ragData) => {
     try {
       setLoadingNextStep(true);
@@ -1089,10 +1180,26 @@ export const Verify = () => {
       console.log('Loading workflow continuation:', { ragHash, stepHash });
       
       // Find the master RAG
-      const masterRag = allRags.find(r => r.hash === ragHash);
+      let masterRag = loadedRags.find(r => r.hash === ragHash);
+      
+      // If not found in loadedRags, try to load it directly from blockchain
       if (!masterRag) {
-        console.warn(`Master workflow not found. RAG Hash: ${ragHash}`);
-        return;
+        console.warn(`Master workflow not found in cache, loading from blockchain: ${ragHash}`);
+        try {
+          const ragClient = new RagClient(substrateClient);
+          masterRag = await ragClient.getRagByHash(ragHash);
+          
+          if (masterRag) {
+            setLoadedRags(prev => [...prev, masterRag]);
+            console.log(`✅ Loaded master RAG from blockchain: ${masterRag.metadata?.name || 'Unnamed'}`);
+          } else {
+            console.warn(`Master workflow not found. RAG Hash: ${ragHash}`);
+            return;
+          }
+        } catch (err) {
+          console.error('Failed to load master RAG:', err);
+          return;
+        }
       }
 
       if (!masterRag.metadata.steps || masterRag.metadata.steps.length === 0) {
@@ -1110,6 +1217,11 @@ export const Verify = () => {
         return;
       }
 
+      // Pre-load remaining workflow steps in background (non-blocking)
+      preloadRemainingWorkflowSteps(masterRag, currentStepIndex).catch(err => {
+        console.warn('Background pre-loading failed (non-critical):', err);
+      });
+
       // Check if there's a next step
       if (currentStepIndex >= masterRag.metadata.steps.length - 1) {
         console.log('This is the last step of the workflow. No next step available.');
@@ -1124,11 +1236,27 @@ export const Verify = () => {
       }
 
       const nextStepHash = masterRag.metadata.steps[currentStepIndex + 1];
-      const nextStepRag = allRags.find(r => r.hash === nextStepHash);
+      let nextStepRag = loadedRags.find(r => r.hash === nextStepHash);
       
+      // If not found in loadedRags, try to load it directly from blockchain
       if (!nextStepRag) {
-        console.warn(`Next step RAG not found. Hash: ${nextStepHash}`);
-        return;
+        console.warn(`Next step RAG not found in cache, loading from blockchain: ${nextStepHash}`);
+        try {
+          const ragClient = new RagClient(substrateClient);
+          nextStepRag = await ragClient.getRagByHash(nextStepHash);
+          
+          if (nextStepRag) {
+            // Add to loadedRags for future use
+            setLoadedRags(prev => [...prev, nextStepRag]);
+            console.log(`✅ Loaded next step RAG from blockchain: ${nextStepRag.metadata?.name || 'Unnamed'}`);
+          } else {
+            console.warn(`Next step RAG not found on blockchain. Hash: ${nextStepHash}`);
+            return;
+          }
+        } catch (err) {
+          console.error('Failed to load next step RAG:', err);
+          return;
+        }
       }
 
       console.log(`Moving from step ${currentStepIndex + 1} to ${currentStepIndex + 2}`);
@@ -1166,7 +1294,8 @@ export const Verify = () => {
     e.preventDefault();
     
     // Validate form data against schema using Zod
-    const formData = FormGenerator.getFormData('next-step-form-fields');
+    // Pass schema to preserve field order ("first field = actor name" convention)
+    const formData = FormGenerator.getFormData('next-step-form-fields', nextStepSchema);
     const validation = FormGenerator.validateForm(formData, nextStepSchema);
     
     if (!validation.valid) {
@@ -1191,13 +1320,22 @@ export const Verify = () => {
       console.log('Previous livrable:', workflowInfo.livrable);
       console.log('Recipient:', recipientAddress);
 
-      // Merge data: previous livrable + new form data (new takes priority)
+      // Add _targetAddress to each key in the new form data (chain of trust)
+      const formDataWithAddress = {};
+      for (const key of Object.keys(formData)) {
+        formDataWithAddress[key] = {
+          ...formData[key],
+          _targetAddress: recipientAddress || selectedAccount // Self if no recipient
+        };
+      }
+
+      // Merge data: previous livrable + new form data with _targetAddress (new takes priority)
       const mergedLivrable = {
         ...workflowInfo.livrable,
-        ...formData
+        ...formDataWithAddress
       };
 
-      console.log('Merged livrable:', mergedLivrable);
+      console.log('Merged livrable (with _targetAddress):', mergedLivrable);
 
       // Create RAG object with workflow hash, NEXT step hash, and merged livrable
       const ragData = {
@@ -1301,7 +1439,7 @@ export const Verify = () => {
       setVerifyingChainOfTrust(false);
       setChronologicalOrderValid(null);
       
-      // Reset workflow continuation states (but keep allRags - needed for workflow detection)
+      // Reset workflow continuation states (but keep loadedRags - needed for workflow detection)
       setProofData(null);
       setNextStepSchema(null);
       setWorkflowInfo(null);
@@ -1807,13 +1945,13 @@ export const Verify = () => {
       {/* Error */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
-          <div className="flex items-center space-x-3">
-            <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex items-start gap-3">
+            <svg className="h-6 w-6 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
             <div>
               <div className="font-medium text-red-900">{t('verify.invalid')}</div>
-              <div className="text-sm text-red-700">{error}</div>
+              <div className="text-sm text-red-700 mt-1">{error}</div>
             </div>
           </div>
         </div>
@@ -2521,11 +2659,11 @@ export const Verify = () => {
             <>
               {loadingNextStep ? (
                 <div className="bg-gradient-to-br from-[#003399]/5 to-blue-50 rounded-xl p-8 text-center">
-                  <div className="animate-spin text-4xl text-[#003399] mb-4">⚙</div>
+                  <div className="w-12 h-12 mx-auto mb-4 border-4 border-[#003399] border-t-transparent rounded-full animate-spin"></div>
                   <span className="text-lg text-gray-700 font-medium">Loading next step from IPFS...</span>
                 </div>
               ) : nextStepSchema ? (
-                <div>
+                <>
                   <div className="bg-white border-2 border-[#003399]/30 rounded-xl p-6 mb-6">
                     <h3 className="text-xl font-bold text-[#003399] mb-2">
                       Step {workflowInfo.currentStep}: {workflowInfo.nextStepRag?.metadata?.name || 'Next Step'}
@@ -2639,7 +2777,7 @@ export const Verify = () => {
                       </p>
                     </div>
                   </form>
-                </div>
+                </>
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <p>No next step schema available</p>

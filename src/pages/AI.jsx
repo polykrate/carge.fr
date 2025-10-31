@@ -10,29 +10,45 @@ import { addFavorite, isFavorite } from '../lib/favorites';
 
 const AI_INSTRUCTIONS = `# Blockchain Workflow Builder
 
-I need a blockchain workflow for supply chain traceability. Please help me create it step by step.
+Create workflows with two clear phases:
+1. **BEFORE ORDER** - Build trust through storytelling OR guarantee
+2. **AFTER ORDER** - Coordinate logistics between actors
 
-## Step 1: Gather Requirements
+Ask me what I want to track, then build the JSON.
 
-Ask me these questions:
-1. **Industry/Product**: What type of supply chain? (e.g., spirits, food, electronics)
-2. **Number of Steps**: How many stages in your supply chain?
-3. **For Each Step**:
-   - Step identifier (e.g., "production", "distribution")
-   - Actor name (e.g., "Distillery", "Distributor", "Retailer")
-   - What data to capture? (fields, types, validations)
-   - Real-world example of this step
+## Step 1: Ask These Questions
 
-## Step 2: Generate JSON Workflow
+1. **What product?** (jewelry, spirits, miniatures, electronics, pharmaceuticals, etc.)
 
-Once I answer, generate the complete JSON in a **code artifact** (Claude) or **code block** (ChatGPT) with this exact structure:
+2. **PHASE 1 - BEFORE ORDER**: Choose one approach:
+   
+   **A. STORYTELLING** (artisan, luxury, handmade)
+   - Capture: maker's name, inspiration, techniques, photos, time invested
+   - Goal: Customer feels emotional connection to creation
+   - Example: Jewelry design → sourcing → crafting → photography
+   
+   **B. MANUFACTURER GUARANTEE** (industrial, safety, compliance)
+   - Capture: production date, batch number, quality tests, certifications
+   - Goal: Prove conformity, safety, authenticity
+   - Example: Electronics production → testing → quality control → packaging
+
+3. **PHASE 2 - AFTER ORDER** (coordination):
+   - Capture: order confirmation, tracking number, carrier, delivery date
+   - Goal: Transparent logistics between actors
+   - NO handoff objects - just: carrier, tracking, shipping date
+
+4. **Client validation?** Should client approve at key moments? (e.g., design before printing)
+
+## Step 2: Generate JSON
+
+Generate complete JSON with this structure:
 
 \`\`\`json
 {
   "master": {
     "name": "short-name-v1",
     "description": "Brief workflow description",
-    "instruction": "MASTER WORKFLOW - [Title]\\n\\n[Description]\\n\\nWorkflow Steps:\\n1. [STEP 1] - [Description]\\n   Actor: [Name]\\n   Key: [stepKey]\\n...",
+    "instruction": "MASTER WORKFLOW - [Title]\\n\\n[Description]\\n\\nWorkflow Steps:\\n1. [STEP 1] - [Description]\\n   Responsible: [Person/Organization]\\n   Key: [stepKey]\\n...",
     "resource": "Real-world example story",
     "tags": ["industry", "master", "v1"],
     "workflowType": "master",
@@ -52,17 +68,17 @@ Once I answer, generate the complete JSON in a **code artifact** (Claude) or **c
         "properties": {
           "step-identifier": {
             "type": "object",
-            "required": ["actorName", "otherRequiredFields"],
+            "required": ["responsibleIdentity"],
             "properties": {
-              "actorName": {
+              "responsibleIdentity": {
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 200,
-                "description": "Name of the actor performing this step (FIRST FIELD - MUST end with 'Name')"
+                "description": "Name of person/org (FIRST FIELD - ALWAYS REQUIRED)"
               },
-              "otherField": {
+              "otherFieldsHere": {
                 "type": "string",
-                "description": "Example field (use English camelCase names)"
+                "description": "Add your step-specific fields (no timestamp needed - automatic from blockchain)"
               }
             }
           }
@@ -72,6 +88,49 @@ Once I answer, generate the complete JSON in a **code artifact** (Claude) or **c
   ]
 }
 \`\`\`
+
+## Schema Examples by Step Type
+
+**Storytelling step** (design):
+\`\`\`json
+"properties": {
+  "responsibleIdentity": {"type": "string", "minLength": 1, "maxLength": 200},
+  "inspirationStory": {"type": "string", "maxLength": 1000},
+  "sketchCid": {"type": "string", "pattern": "^[Qb][a-zA-Z0-9]{40,}$", "description": "IPFS CID (e.g., bafkreiabcd...)"},
+  "hoursWorked": {"type": "number"}
+}
+\`\`\`
+
+**Guarantee step** (testing):
+\`\`\`json
+"properties": {
+  "responsibleIdentity": {"type": "string", "minLength": 1, "maxLength": 200},
+  "batchNumber": {"type": "string", "maxLength": 100},
+  "testResults": {"type": "string", "maxLength": 500},
+  "certificationCid": {"type": "string", "pattern": "^[Qb][a-zA-Z0-9]{40,}$", "description": "IPFS CID (e.g., bafkreiabcd...)"}
+}
+\`\`\`
+
+**Logistics step** (shipping):
+\`\`\`json
+"properties": {
+  "responsibleIdentity": {"type": "string", "minLength": 1, "maxLength": 200},
+  "carrier": {"type": "string", "maxLength": 100},
+  "trackingNumber": {"type": "string", "maxLength": 100},
+  "shippingDate": {"type": "string", "format": "date"}
+}
+\`\`\`
+
+**Client validation step**:
+\`\`\`json
+"properties": {
+  "responsibleIdentity": {"type": "string", "minLength": 1, "maxLength": 200},
+  "validated": {"type": "boolean"},
+  "comment": {"type": "string", "maxLength": 1000}
+}
+\`\`\`
+
+---
 
 ## Step 3: Fix Errors (If Validation Fails)
 
@@ -96,40 +155,73 @@ I'll shorten the master.description. Here's the corrected master object:
 Just paste this into your existing JSON to fix it.
 \`\`\`
 
-## BLOCKCHAIN LIMITS (Critical!)
+## BLOCKCHAIN LIMITS
 
-| Field | Limit | Notes |
-|-------|-------|-------|
-| master.name | ≤ 50 chars | Used in all RAG step names |
-| master.description | ≤ 300 chars | |
-| master.tags | ≤ 10 tags, each ≤ 15 chars | |
-| step.stepKey | ≤ 50 chars | |
-| step.description | ≤ 300 chars | |
-| step.tags | ≤ 10 tags, each ≤ 15 chars | |
-| steps array | ≤ 64 steps | |
-| **RAG Name** | **≤ 50 chars** | **stepKey + "-" + master.name** |
+| Field | Limit |
+|-------|-------|
+| master.name | ≤ 50 chars |
+| master.description | ≤ 300 chars |
+| master.tags | ≤ 10 tags, ≤ 15 chars each |
+| step.stepKey | ≤ 50 chars |
+| step.description | ≤ 300 chars |
+| step.tags | ≤ 10 tags, ≤ 15 chars each |
+| steps array | ≤ 64 steps |
+| **RAG Name** | **≤ 50 chars (stepKey + "-" + master.name)** |
+| responsibleIdentity | ≤ 200 chars |
 
-**Example**: If master.name = "spirits-v1" (10 chars), then stepKey max = 39 chars (50 - 1 for "-" - 10)
+**Example**: If master.name = "jewelry-v1" (11 chars), then stepKey max = 38 chars
 
 ## Critical Rules
 
-1. **FIRST field** in each step schema MUST be the actor's name in ENGLISH ending with "Name" (producerName, distributorName, sellerName, etc. - NOT producteurNom, vendeurNom)
-2. **Each step MUST include ALL these fields**:
-   - \`stepKey\` (identifier)
-   - \`stepName\` (human-readable title)
-   - \`description\` (what this step does)
-   - **\`instruction\`** ⚠️ REQUIRED: How to fill the form with examples
-   - **\`resource\`** ⚠️ REQUIRED: Concrete real-world example for this step
-   - \`tags\` (for search)
-   - \`schema\` (JSON Schema for data structure)
+1. **FIRST field** in each step schema MUST be **\`responsibleIdentity\`** (string, 1-200 chars) - the name of the person/organization responsible for this step
+   - Examples: "Marie Dubois", "Macallan Distillery", "La Poste", "FedEx Tracking"
+   - This field is ALWAYS first and ALWAYS named \`responsibleIdentity\` for consistency
+   - **Note**: No need for \`timestamp\` field - it's captured automatically from the blockchain transaction
+2. **Each step MUST include these fields**:
+   - \`stepKey\` (identifier) - REQUIRED
+   - \`stepName\` (human-readable title) - REQUIRED
+   - \`description\` (what this step does, max 300 chars) - REQUIRED
+   - \`instruction\` (how to fill the form) - RECOMMENDED
+   - \`resource\` (real-world example) - RECOMMENDED
+   - \`tags\` (for search, max 10 tags, 15 chars each) - REQUIRED
+   - \`schema\` (JSON Schema structure) - REQUIRED
 3. Schema follows JSON Schema standard (type, required, properties, etc.)
 4. Tags format: \`["industry", "stepKey", "step-N", "version"]\`
 5. **Always check**: \`stepKey.length + 1 + master.name.length ≤ 50\`
-6. **All field names** must be in English (camelCase): use "harvestDate" not "dateRecolte", "unitPrice" not "prixUnitaire"
+6. **All field names** in English (camelCase): "harvestDate" not "dateRecolte"
+7. **IPFS CID fields**: Use pattern \`^[Qb][a-zA-Z0-9]{40,}$\` to accept all CID formats
+   - MCP generates CIDs in format: \`bafkrei...\` (CIDv1 raw, ~59 chars)
+   - Pattern also accepts: \`Qm...\` (CIDv0), \`bafy...\` (CIDv1 dag-pb), \`bafybei...\`, etc.
+   - Example: "photoCid": {"type": "string", "pattern": "^[Qb][a-zA-Z0-9]{40,}$", "description": "IPFS CID (e.g., bafkreiabcd...)"}
+8. **For SENSITIVE data transfer** (STL files, passwords, private documents): Use the encrypted crypto-trail mechanism
+   - Example: Designer creates STL → encrypted in crypto-trail → only Printer can decrypt
+   - The blockchain proves transfer without exposing the data
+9. **For COORDINATION** (logistics, tracking): Add simple fields directly in the step
+   - Use: \`carrier\`, \`trackingNumber\`, \`shippingDate\`
+   - Example: shipping step → add "carrier": "Chronopost", "trackingNumber": "FR123456"
+10. **Client validation**: Create separate onchain steps where client approves critical moments
+   - Examples: "design-validation", "painting-validation", "delivery-confirmation"
+   - Schema: responsibleIdentity (client), validated (boolean), comment (feedback)
 
 ---
 
-Ready! Ask me your questions now, then generate the JSON.`;
+## Quick Examples
+
+**Artisan Jewelry** (storytelling):
+- PHASE 1: design → sourcing → crafting → photography
+- PHASE 2: order → packaging → shipping → delivery
+
+**Craft Spirits** (guarantee):
+- PHASE 1: distillation → aging → bottling → quality-test
+- PHASE 2: order → distribution → delivery
+
+**3D Miniatures** (storytelling + validation):
+- PHASE 1: commission → design → design-validation (client) → printing → painting → painting-validation (client)
+- PHASE 2: order → packaging → shipping → delivery-confirmation (client)
+
+---
+
+Ready to start? Tell me what you want to track!`;
 
 export const Agent = () => {
   const { t } = useTranslation();
@@ -208,10 +300,10 @@ export const Agent = () => {
         
         // Warn if instruction or resource are missing (not blocking, but recommended)
         if (!workflow.master.instruction || workflow.master.instruction.trim() === '') {
-          errors.push('master: ⚠️  WARNING - Missing \'instruction\' field (recommended for workflow overview)');
+          errors.push('master: WARNING - Missing \'instruction\' field (recommended for workflow overview)');
         }
         if (!workflow.master.resource || workflow.master.resource.trim() === '') {
-          errors.push('master: ⚠️  WARNING - Missing \'resource\' field (recommended for real-world example story)');
+          errors.push('master: WARNING - Missing \'resource\' field (recommended for real-world example story)');
         }
         
         if (!workflow.master.tags || !Array.isArray(workflow.master.tags)) {
@@ -270,10 +362,10 @@ export const Agent = () => {
           
           // Warn if instruction or resource are missing (not blocking, but recommended)
           if (!step.instruction || step.instruction.trim() === '') {
-            errors.push(`${prefix}: ⚠️  WARNING - Missing 'instruction' field (recommended for better UX)`);
+            errors.push(`${prefix}: WARNING - Missing 'instruction' field (recommended for better UX)`);
           }
           if (!step.resource || step.resource.trim() === '') {
-            errors.push(`${prefix}: ⚠️  WARNING - Missing 'resource' field (recommended for real-world examples)`);
+            errors.push(`${prefix}: WARNING - Missing 'resource' field (recommended for real-world examples)`);
           }
           
           if (!step.schema) errors.push(`${prefix}.schema is required`);
@@ -308,10 +400,24 @@ export const Agent = () => {
               if (!stepSchema.properties) {
                 errors.push(`${prefix}.schema.properties.${step.stepKey}.properties is required`);
               } else {
-                // Check first field is actor name
+                // Check first field is responsibleIdentity (NEW STANDARD)
                 const firstField = Object.keys(stepSchema.properties)[0];
-                if (!firstField || !firstField.toLowerCase().includes('name')) {
-                  errors.push(`${prefix}: First field in schema must be actor's name (e.g., "producerName", "distributorName")`);
+                if (firstField !== 'responsibleIdentity') {
+                  errors.push(`${prefix}: First field in schema MUST be "responsibleIdentity" (person/organization responsible for this step). Got: "${firstField}"`);
+                }
+                
+                // Verify responsibleIdentity has correct type and constraints
+                const responsibleIdentityField = stepSchema.properties.responsibleIdentity;
+                if (responsibleIdentityField) {
+                  if (responsibleIdentityField.type !== 'string') {
+                    errors.push(`${prefix}.responsibleIdentity must be type "string"`);
+                  }
+                  if (!responsibleIdentityField.minLength || responsibleIdentityField.minLength < 1) {
+                    errors.push(`${prefix}.responsibleIdentity must have minLength >= 1`);
+                  }
+                  if (!responsibleIdentityField.maxLength || responsibleIdentityField.maxLength > 200) {
+                    errors.push(`${prefix}.responsibleIdentity must have maxLength <= 200`);
+                  }
                 }
               }
             }
@@ -362,7 +468,7 @@ export const Agent = () => {
     };
     
     try {
-      addLog('🚀 Starting workflow deployment...', 'info');
+      addLog('Starting workflow deployment...', 'info');
       
       // Create RagClient instance
       const ragClient = new RagClient(substrateClient);
@@ -381,7 +487,7 @@ export const Agent = () => {
       // ==================================================================
       // PHASE 1: Upload ALL CIDs to IPFS (in parallel for speed)
       // ==================================================================
-      addLog('\n📤 PHASE 1: Uploading all content to IPFS in parallel...', 'info');
+      addLog('\nPHASE 1: Uploading all content to IPFS in parallel...', 'info');
       
       const { u8aToHex } = await import('@polkadot/util');
       
@@ -458,34 +564,31 @@ export const Agent = () => {
         masterUploadsPromise
       ]);
       
-      addLog(`✅ All CIDs uploaded to IPFS!`, 'success');
+      addLog(`All CIDs uploaded to IPFS!`, 'success');
       stepResults.forEach((step, i) => {
-        addLog(`› Step ${i + 1}: Schema ${step.schemaCid}`, 'info');
+        addLog(`Step ${i + 1}:`, 'info');
         if (step.instructionCid) {
-          addLog(`  ├─ Instruction ${step.instructionCid}`, 'info');
-        } else {
-          addLog(`  ⚠️  Warning: No instruction provided for this step`, 'warning');
+          addLog(`  Instruction ${step.instructionCid}`, 'info');
         }
         if (step.resourceCid) {
-          addLog(`  └─ Resource ${step.resourceCid}`, 'info');
-        } else {
-          addLog(`  ⚠️  Warning: No resource provided for this step`, 'warning');
+          addLog(`  Resource ${step.resourceCid}`, 'info');
         }
+        addLog(`  Schema ${step.schemaCid}`, 'info');
       });
       if (masterResults.instructionCid || masterResults.resourceCid) {
-        addLog(`› Master:`, 'info');
+        addLog(`Master:`, 'info');
         if (masterResults.instructionCid) {
-          addLog(`  ├─ Instruction ${masterResults.instructionCid}`, 'info');
+          addLog(`  Instruction ${masterResults.instructionCid}`, 'info');
         }
         if (masterResults.resourceCid) {
-          addLog(`  └─ Resource ${masterResults.resourceCid}`, 'info');
+          addLog(`  Resource ${masterResults.resourceCid}`, 'info');
         }
       }
       
       // ==================================================================
       // PHASE 2: Prepare all extrinsics and calculate hashes locally
       // ==================================================================
-      addLog('\n⚙️ PHASE 2: Preparing blockchain transactions...', 'info');
+      addLog('\nPHASE 2: Preparing blockchain transactions...', 'info');
       
       const extrinsics = [];
       const stepHashes = [];
@@ -531,7 +634,7 @@ export const Agent = () => {
         if (stepApi) await stepApi.disconnect();
       }
       
-      addLog(`✅ Prepared ${extrinsics.length} step transactions`, 'success');
+      addLog(`Prepared ${extrinsics.length} step transactions`, 'success');
       
       // Prepare master extrinsic with calculated step hashes
       const masterInstructionHex = masterResults.instructionCid 
@@ -569,13 +672,13 @@ export const Agent = () => {
       );
       
       extrinsics.push(masterExtrinsic);
-      addLog(`✅ Prepared master transaction`, 'success');
+      addLog(`Prepared master transaction`, 'success');
       
       // ==================================================================
       // PHASE 3: Batch all transactions and sign ONCE
       // ==================================================================
-      addLog('\n🔐 PHASE 3: Batching transactions and requesting signature...', 'info');
-      addLog(`📦 Total transactions to sign: ${extrinsics.length} (${extrinsics.length - 1} steps + 1 master)`, 'info');
+      addLog('\nPHASE 3: Batching transactions and requesting signature...', 'info');
+      addLog(`Total transactions to sign: ${extrinsics.length} (${extrinsics.length - 1} steps + 1 master)`, 'info');
       
       // Get wallet signer (with proper web3Enable initialization)
       const { getWalletSigner } = await import('../lib/core/blockchain-utils.js');
@@ -584,7 +687,7 @@ export const Agent = () => {
       // Create batch transaction (atomic - all or nothing)
       const batchTx = masterApi.tx.utility.batchAll(extrinsics);
       
-      addLog(`⏳ Waiting for wallet signature...`, 'info');
+      addLog(`Waiting for wallet signature...`, 'info');
       
       // Sign and send - ONLY ONE SIGNATURE!
       await new Promise((resolve, reject) => {
@@ -601,23 +704,23 @@ export const Agent = () => {
           }
           
           if (status.isInBlock) {
-            addLog(`✅ Transaction included in block: ${status.asInBlock.toHex()}`, 'success');
+            addLog(`Transaction included in block: ${status.asInBlock.toHex()}`, 'success');
             
             // Verify events
             const metadataStoredEvents = events
               .filter(({ event }) => event.section === 'rag' && event.method === 'MetadataStored');
             
-            addLog(`📋 Verified ${metadataStoredEvents.length} RAG metadata stored on blockchain`, 'success');
+            addLog(`Verified ${metadataStoredEvents.length} RAG metadata stored on blockchain`, 'success');
             
             setDeployedMasterHash(masterHash);
             
             // Success summary
-            addLog(`\n🎉 DEPLOYMENT SUCCESSFUL!`, 'success');
-            addLog(`\n📋 Workflow Details:`, 'info');
+            addLog(`\nDEPLOYMENT SUCCESSFUL!`, 'success');
+            addLog(`\nWorkflow Details:`, 'info');
             addLog(`  Name: ${validatedWorkflow.master.name}`, 'info');
             addLog(`  Master Hash: ${masterHash}`, 'success');
             addLog(`  Total Steps: ${stepHashes.length}`, 'info');
-            addLog(`\n📦 Step Hashes:`, 'info');
+            addLog(`\nStep Hashes:`, 'info');
             stepHashes.forEach(s => {
               addLog(`  ${s.stepNumber}. ${s.stepName} (${s.stepKey}): ${s.hash}`, 'info');
             });
@@ -633,7 +736,7 @@ export const Agent = () => {
       
     } catch (error) {
       logger.error('Deployment failed:', error);
-      addLog(`\n❌ DEPLOYMENT FAILED: ${error.message}`, 'error');
+      addLog(`\nDEPLOYMENT FAILED: ${error.message}`, 'error');
       showError('Deployment failed. Check logs for details.');
     } finally {
       setDeploying(false);
@@ -1070,7 +1173,7 @@ export const Agent = () => {
                 return (
                   <div
                     key={i}
-                    className={`relative flex items-start gap-3 animate-fadeIn ${isIndented ? 'ml-8' : ''}`}
+                    className={`relative flex items-start gap-3 animate-fadeIn ${isIndented ? 'ml-20' : ''}`}
                     style={{ animationDelay: `${i * 30}ms` }}
                   >
                     {/* Icon */}

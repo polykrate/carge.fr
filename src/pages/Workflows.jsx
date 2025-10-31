@@ -33,14 +33,15 @@ export const Workflows = () => {
     return `https://polkadot.js.org/apps/?rpc=${encodeURIComponent(wsUrl)}#/explorer/query/${blockNumber}`;
   };
   
-  // Pinned workflows (always displayed)
+  // Pinned workflows (always displayed) - workflow hashes for direct loading
   const PINNED_WORKFLOWS = [
-    'spirits-premium-7steps-fixed-v1',
-    'copyright-v3'
+    '0x8a8874f71768ad02a5d2ce15af202135becfd9aa455a2c41a22e0214bc5c36e8', // macallan-trace-v5 (spirits 7 steps)
+    '0x5e4985e555c2bef150394a2e037fd7213d2ced20cba6e94a1679fc8aad02f812', // copyright-v3
+    '0x229cc3f1753b4646033077e6fb6312b69f3962810d973fe72258a8f61806d22c'  // New workflow
   ];
   
   // State
-  const [allRags, setAllRags] = useState([]); // All RAGs from blockchain (for step resolution)
+  const [loadedRags, setLoadedRags] = useState([]); // All RAGs from blockchain (for step resolution)
   const [displayRags, setDisplayRags] = useState([]); // Only RAG masters (for display)
   const [loading, setLoading] = useState(true);
   const [selectedRag, setSelectedRag] = useState(null);
@@ -77,12 +78,12 @@ export const Workflows = () => {
       console.log(`⭐ Loaded ${userFavorites.length} favorites for ${selectedAccount}`);
       
       // Reload display to show user favorites
-      if (allRags.length > 0) {
-        const ragMasters = allRags.filter(rag => 
+      if (loadedRags.length > 0) {
+        const ragMasters = loadedRags.filter(rag => 
           rag.metadata?.steps && Array.isArray(rag.metadata.steps) && rag.metadata.steps.length > 0
         );
         const pinnedRags = ragMasters.filter(rag => {
-          return PINNED_WORKFLOWS.includes(rag.metadata?.name) || userFavorites.includes(rag.hash);
+          return PINNED_WORKFLOWS.includes(rag.hash) || userFavorites.includes(rag.hash);
         });
         setDisplayRags(pinnedRags);
         console.log(`Updated display with ${pinnedRags.length} workflows (${PINNED_WORKFLOWS.length} hardcoded + ${userFavorites.length} favorites)`);
@@ -128,7 +129,7 @@ export const Workflows = () => {
       showSuccess('Added to favorites');
       
       // Add to displayRags if not already there
-      const workflowToAdd = allRags.find(rag => rag.hash === workflowHash);
+      const workflowToAdd = loadedRags.find(rag => rag.hash === workflowHash);
       if (workflowToAdd && !displayRags.some(rag => rag.hash === workflowHash)) {
         setDisplayRags([...displayRags, workflowToAdd]);
       }
@@ -137,13 +138,8 @@ export const Workflows = () => {
       setFavorites(favorites.filter(h => h !== workflowHash));
       showSuccess('Removed from favorites');
       
-      // Remove from displayRags only if not a hardcoded pinned workflow
-      const workflow = allRags.find(rag => rag.hash === workflowHash);
-      const isHardcodedPinned = workflow && PINNED_WORKFLOWS.includes(workflow.metadata?.name);
-      
-      if (!isHardcodedPinned) {
-        setDisplayRags(displayRags.filter(rag => rag.hash !== workflowHash));
-      }
+      // Remove from displayRags (only non-pinned workflows)
+      setDisplayRags(displayRags.filter(rag => rag.hash !== workflowHash));
     }
   };
 
@@ -180,9 +176,9 @@ export const Workflows = () => {
   // Auto-select workflow if prefilledHash is provided from AI deployment
   useEffect(() => {
     const prefilledHash = location.state?.prefilledHash;
-    if (prefilledHash && allRags.length > 0 && !selectedRag) {
+    if (prefilledHash && loadedRags.length > 0 && !selectedRag) {
       console.log('Prefilled hash detected:', prefilledHash);
-      const matchingRag = allRags.find(rag => rag.hash === prefilledHash);
+      const matchingRag = loadedRags.find(rag => rag.hash === prefilledHash);
       if (matchingRag) {
         console.log('Auto-selecting workflow:', matchingRag.metadata.name);
         selectRag(matchingRag);
@@ -196,7 +192,7 @@ export const Workflows = () => {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.state, allRags, selectedRag]);
+  }, [location.state, loadedRags, selectedRag]);
 
   // Generate form when schema is loaded
   useEffect(() => {
@@ -219,23 +215,22 @@ export const Workflows = () => {
       const loadedRags = [];
       const stepHashes = new Set();
       
-      // 1. Load hardcoded pinned workflows by tags
-      for (const workflowName of PINNED_WORKFLOWS) {
+      // 1. Load hardcoded pinned workflows by hash (direct loading)
+      for (const workflowHash of PINNED_WORKFLOWS) {
         try {
-          console.log(`🔍 Searching for pinned workflow: ${workflowName}`);
-          const results = await ragClient.searchRagsByTags([workflowName]);
-          if (results.length > 0) {
-            const rag = results[0];
+          console.log(`🔍 Loading pinned workflow by hash: ${workflowHash.substring(0, 10)}...`);
+          const rag = await ragClient.getRagByHash(workflowHash);
+          if (rag) {
             loadedRags.push(rag);
             
             // Collect step hashes
             if (rag.metadata?.steps && Array.isArray(rag.metadata.steps)) {
               rag.metadata.steps.forEach(hash => stepHashes.add(hash));
             }
-            console.log(`✅ Found pinned workflow: ${workflowName} (${rag.metadata.steps?.length || 0} steps)`);
+            console.log(`✅ Loaded pinned workflow: ${rag.metadata?.name} (${rag.metadata.steps?.length || 0} steps)`);
           }
         } catch (err) {
-          console.warn(`⚠️ Failed to load pinned workflow ${workflowName}:`, err);
+          console.warn(`⚠️ Failed to load pinned workflow ${workflowHash.substring(0, 10)}...:`, err);
         }
       }
       
@@ -275,7 +270,7 @@ export const Workflows = () => {
       }
       
       // Store all loaded RAGs (masters + steps)
-      setAllRags(loadedRags);
+      setLoadedRags(loadedRags);
       
       // Filter only RAG masters for display (workflows with steps)
       const ragMasters = loadedRags.filter(rag => {
@@ -329,14 +324,14 @@ export const Workflows = () => {
       setDisplayRags(ragMasters);
       setCurrentPage(1); // Reset to first page on search
       
-      // Update allRags if we found new ones
+      // Update loadedRags if we found new ones
       if (foundRags.length > 0) {
-        // Merge with existing allRags (avoid duplicates)
-        const existingHashes = new Set(allRags.map(r => r.hash));
+        // Merge with existing loadedRags (avoid duplicates)
+        const existingHashes = new Set(loadedRags.map(r => r.hash));
         const newRags = foundRags.filter(r => !existingHashes.has(r.hash));
         if (newRags.length > 0) {
-          console.log(`Adding ${newRags.length} new RAG(s) to allRags`);
-          setAllRags([...allRags, ...newRags]);
+          console.log(`Adding ${newRags.length} new RAG(s) to loadedRags`);
+          setLoadedRags([...loadedRags, ...newRags]);
         }
       }
     } catch (err) {
@@ -385,9 +380,26 @@ export const Workflows = () => {
         const firstStepHash = rag.metadata.steps[0];
         
         // Find the step RAG in ALL RAGs (not just displayed masters)
-        const stepRag = allRags.find(r => r.hash === firstStepHash);
+        let stepRag = loadedRags.find(r => r.hash === firstStepHash);
+        
+        // If not found in loadedRags, try to load it directly from blockchain
         if (!stepRag) {
-          throw new Error(`First step RAG not found. Looking for hash: ${firstStepHash}`);
+          console.warn(`First step RAG not found in cache, loading from blockchain: ${firstStepHash}`);
+          try {
+            const ragClient = new RagClient(substrateClient);
+            stepRag = await ragClient.getRagByHash(firstStepHash);
+            
+            if (stepRag) {
+              // Add to loadedRags for future use
+              setLoadedRags(prev => [...prev, stepRag]);
+              console.log(`✅ Loaded first step RAG from blockchain: ${stepRag.metadata?.name || 'Unnamed'}`);
+            } else {
+              throw new Error(`First step RAG not found on blockchain. Hash: ${firstStepHash}`);
+            }
+          } catch (err) {
+            console.error('Failed to load first step RAG:', err);
+            throw new Error(`First step RAG not found. Looking for hash: ${firstStepHash}`);
+          }
         }
         
         console.log(`Found step RAG: ${stepRag.metadata?.name || 'Unnamed'}`);
@@ -412,13 +424,63 @@ export const Workflows = () => {
   };
 
   /**
-   * Pre-load workflow CIDs in background (non-blocking)
-   * Loads master workflow CIDs + all step CIDs into IPFS/Helia cache
+   * Pre-load workflow RAGs and CIDs in background (non-blocking)
+   * 1. Loads all step RAGs from blockchain if not in cache
+   * 2. Loads master workflow CIDs + all step CIDs into IPFS cache
    */
   const preloadWorkflowCids = async (rag) => {
     try {
-      console.log('🔄 Pre-loading workflow CIDs in background...');
+      console.log('🔄 Pre-loading workflow RAGs and CIDs in background...');
       
+      // PHASE 1: Load all step RAGs from blockchain if needed
+      const stepRags = [];
+      if (rag.metadata.steps && Array.isArray(rag.metadata.steps)) {
+        console.log(`📥 Loading ${rag.metadata.steps.length} step RAGs...`);
+        const ragClient = new RagClient(substrateClient);
+        
+        // Load all missing step RAGs in parallel
+        const stepLoadPromises = rag.metadata.steps.map(async (stepHash) => {
+          // Check if already in loadedRags
+          let stepRag = loadedRags.find(r => r.hash === stepHash);
+          
+          if (!stepRag) {
+            try {
+              console.log(`📥 Loading step RAG from blockchain: ${stepHash.substring(0, 10)}...`);
+              stepRag = await ragClient.getRagByHash(stepHash);
+              if (stepRag) {
+                console.log(`✅ Loaded step RAG: ${stepRag.metadata?.name || 'Unnamed'}`);
+                return stepRag;
+              }
+            } catch (err) {
+              console.warn(`⚠️ Failed to load step RAG ${stepHash.substring(0, 10)}:`, err.message);
+              return null;
+            }
+          }
+          
+          return stepRag;
+        });
+        
+        const loadedSteps = await Promise.all(stepLoadPromises);
+        const newStepRags = loadedSteps.filter(s => s !== null);
+        
+        // Add new step RAGs to loadedRags state
+        if (newStepRags.length > 0) {
+          setLoadedRags(prev => {
+            const existingHashes = new Set(prev.map(r => r.hash));
+            const uniqueNewRags = newStepRags.filter(r => !existingHashes.has(r.hash));
+            if (uniqueNewRags.length > 0) {
+              console.log(`💾 Added ${uniqueNewRags.length} new step RAG(s) to cache`);
+              return [...prev, ...uniqueNewRags];
+            }
+            return prev;
+          });
+        }
+        
+        stepRags.push(...loadedSteps.filter(s => s !== null));
+        console.log(`✅ Loaded ${stepRags.length}/${rag.metadata.steps.length} step RAG(s)`);
+      }
+      
+      // PHASE 2: Pre-load all CIDs to IPFS cache
       const cidsToLoad = [];
       
       // Add master workflow CIDs
@@ -426,38 +488,33 @@ export const Workflows = () => {
       if (rag.metadata.resourceCid) cidsToLoad.push(rag.metadata.resourceCid);
       if (rag.metadata.schemaCid) cidsToLoad.push(rag.metadata.schemaCid);
       
-      // Add all step CIDs if this is a master workflow
-      if (rag.metadata.steps && Array.isArray(rag.metadata.steps)) {
-        for (const stepHash of rag.metadata.steps) {
-          const stepRag = allRags.find(r => r.hash === stepHash);
-          if (stepRag) {
-            if (stepRag.metadata.instructionCid) cidsToLoad.push(stepRag.metadata.instructionCid);
-            if (stepRag.metadata.resourceCid) cidsToLoad.push(stepRag.metadata.resourceCid);
-            if (stepRag.metadata.schemaCid) cidsToLoad.push(stepRag.metadata.schemaCid);
-          }
-        }
+      // Add all step CIDs
+      for (const stepRag of stepRags) {
+        if (stepRag.metadata.instructionCid) cidsToLoad.push(stepRag.metadata.instructionCid);
+        if (stepRag.metadata.resourceCid) cidsToLoad.push(stepRag.metadata.resourceCid);
+        if (stepRag.metadata.schemaCid) cidsToLoad.push(stepRag.metadata.schemaCid);
       }
       
-      console.log(`📦 Pre-loading ${cidsToLoad.length} CIDs...`);
+      console.log(`📦 Pre-loading ${cidsToLoad.length} CIDs to IPFS cache...`);
       
       // Pre-load all CIDs in parallel (non-blocking)
-      const loadPromises = cidsToLoad.map(async (hexCid) => {
+      const cidLoadPromises = cidsToLoad.map(async (hexCid) => {
         try {
           const cidString = CidConverter.hexToString(hexCid);
           // Just trigger the download, we don't need the result
           await ipfsClient.downloadJson(cidString);
-          console.log(`✅ Pre-loaded: ${cidString.substring(0, 20)}...`);
+          console.log(`✅ Pre-loaded CID: ${cidString.substring(0, 20)}...`);
         } catch (err) {
           console.warn(`⚠️ Failed to pre-load CID:`, err.message);
         }
       });
       
       // Wait for all in background (don't block UI)
-      await Promise.allSettled(loadPromises);
-      console.log(`✅ Finished pre-loading ${cidsToLoad.length} CIDs`);
+      await Promise.allSettled(cidLoadPromises);
+      console.log(`✅ Finished pre-loading workflow: ${stepRags.length} RAGs + ${cidsToLoad.length} CIDs`);
     } catch (err) {
       // Non-critical, just log
-      console.warn('⚠️ CID pre-loading failed (non-critical):', err);
+      console.warn('⚠️ Workflow pre-loading failed (non-critical):', err);
     }
   };
 
@@ -465,7 +522,8 @@ export const Workflows = () => {
     e.preventDefault();
     
     // Validate form data against schema using Zod
-    const formData = FormGenerator.getFormData('dynamic-form-fields');
+    // Pass schema to preserve field order ("first field = actor name" convention)
+    const formData = FormGenerator.getFormData('dynamic-form-fields', schema);
     const validation = FormGenerator.validateForm(formData, schema);
     
     if (!validation.valid) {
@@ -504,14 +562,23 @@ export const Workflows = () => {
         console.log('Simple RAG - using own hash:', stepHash);
       }
 
+      // Add _targetAddress to each key in the form data (chain of trust)
+      const formDataWithAddress = {};
+      for (const key of Object.keys(formData)) {
+        formDataWithAddress[key] = {
+          ...formData[key],
+          _targetAddress: recipientAddress || selectedAccount // Self if no recipient
+        };
+      }
+
       // Create RAG object with workflow hash, first step hash, and form data as livrable
       const ragData = {
         ragHash: selectedRag.hash,
         stepHash: stepHash,
-        livrable: formData
+        livrable: formDataWithAddress
       };
 
-      console.log('RAG data:', ragData);
+      console.log('RAG data (with _targetAddress):', ragData);
 
       // Wait for Polkadot.js to be ready
       await waitForPolkadot();
@@ -563,7 +630,7 @@ export const Workflows = () => {
                 ipfsCid: ipfsCid || 'N/A (simple mode)',
                 recipient: recipientAddress || 'Self',
                 workflowName: selectedRag.metadata.name,
-                stepName: allRags.find(r => r.hash === stepHash)?.metadata?.name || 'Step 1',
+                stepName: loadedRags.find(r => r.hash === stepHash)?.metadata?.name || 'Step 1',
                 blockHash: txResult.status.asInBlock.toHex(),
                 proofDownloaded: true,
                 encrypted: useEncryption
@@ -724,15 +791,15 @@ export const Workflows = () => {
 
         {/* Available Workflows Section */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-6 gap-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">{t('workflows.available')}</h2>
               <p className="text-gray-600">Select a workflow to get started</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
               <button
                 onClick={() => navigate('/ai')}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-[#003399] text-white rounded-lg hover:from-purple-700 hover:to-[#002266] transition-all font-semibold shadow-lg hover:shadow-xl hover:scale-105"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-[#003399] text-white rounded-lg hover:from-purple-700 hover:to-[#002266] transition-all font-semibold shadow-lg hover:shadow-xl hover:scale-105 w-full md:w-auto"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -745,7 +812,7 @@ export const Workflows = () => {
                   setSelectedRag(null);
                   loadRags();
                 }}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm hover:shadow-md"
+                className="flex items-center justify-center gap-2 px-4 py-2 text-sm bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm hover:shadow-md w-full md:w-auto"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -776,7 +843,11 @@ export const Workflows = () => {
                     searchByTags();
                   }
                 }}
-                placeholder="e.g., whisky scotland premium"
+                placeholder="e.g., master wine"
+                autoCapitalize="off"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck="false"
                 className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#003399] focus:border-[#003399] transition-all"
               />
               <button
@@ -804,7 +875,7 @@ export const Workflows = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span>
-                <strong>Pinned workflows:</strong> {PINNED_WORKFLOWS.join(', ')} are always available. Clear search to return to pinned workflows.
+                <strong>Pinned workflows:</strong> Macallan Spirits (7 steps), Copyright Registration, Custom Miniatures (14 steps) are always available. Clear search to return to pinned workflows.
               </span>
             </div>
           </div>
@@ -841,7 +912,9 @@ export const Workflows = () => {
                 {displayRags
                   .slice((currentPage - 1) * WORKFLOWS_PER_PAGE, currentPage * WORKFLOWS_PER_PAGE)
                   .map((rag) => {
+                const isPinned = PINNED_WORKFLOWS.includes(rag.hash);
                 const isFav = isFavorite(selectedAccount, rag.hash);
+                const showFilled = isPinned || isFav; // Pinned workflows always show filled star
                 
                 return (
                 <div key={rag.hash} className="relative">
@@ -849,12 +922,22 @@ export const Workflows = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleToggleFavorite(rag.hash);
+                      if (!isPinned) {
+                        handleToggleFavorite(rag.hash);
+                      }
                     }}
-                    className="absolute top-3 right-3 z-10 p-2 rounded-lg hover:bg-white/80 transition-all group/star"
-                    title={isFav ? 'Remove from favorites' : 'Add to favorites'}
+                    className={`absolute top-3 right-3 z-10 p-2 rounded-lg transition-all ${
+                      isPinned 
+                        ? 'cursor-default' 
+                        : 'hover:bg-white/80 cursor-pointer group/star'
+                    }`}
+                    title={
+                      isPinned 
+                        ? 'Pinned workflow (always visible)' 
+                        : (isFav ? 'Remove from favorites' : 'Add to favorites')
+                    }
                   >
-                    {isFav ? (
+                    {showFilled ? (
                       <svg className="w-6 h-6 text-yellow-500 drop-shadow-md" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
@@ -1160,7 +1243,7 @@ export const Workflows = () => {
                       <div className="absolute left-5 top-8 bottom-8 w-0.5 bg-gradient-to-b from-[#003399] to-blue-200"></div>
                       
                       {selectedRag.metadata.steps.map((stepHash, i) => {
-                        const stepRag = allRags.find(r => r.hash === stepHash);
+                        const stepRag = loadedRags.find(r => r.hash === stepHash);
                         const isFirst = i === 0;
                         const isLast = i === selectedRag.metadata.steps.length - 1;
                         

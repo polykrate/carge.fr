@@ -66,12 +66,15 @@ export class FormGenerator {
 
   /**
    * Extract form data as JSON object
+   * Note: We collect inputs in DOM order, then rebuild the object in schema order
+   * to preserve the "first field = actor name" convention
    */
-  static getFormData(containerId) {
+  static getFormData(containerId, schema = null) {
     const container = document.getElementById(containerId);
     if (!container) return null;
 
-    const formData = {};
+    // First collect all values from DOM
+    const valuesMap = new Map();
     const inputs = container.querySelectorAll('input, select, textarea');
     
     inputs.forEach(input => {
@@ -87,19 +90,48 @@ export class FormGenerator {
         value = input.value;
       }
 
-      // Handle nested objects (e.g., "work.title" -> {work: {title: "..."}})
-      const parts = name.split('.');
-      let current = formData;
-      
-      for (let i = 0; i < parts.length - 1; i++) {
-        if (!current[parts[i]]) {
-          current[parts[i]] = {};
-        }
-        current = current[parts[i]];
-      }
-      
-      current[parts[parts.length - 1]] = value;
+      valuesMap.set(name, value);
     });
+
+    // If schema is provided, rebuild object in schema property order
+    // This ensures "first field = actor name" convention is preserved
+    const formData = {};
+    
+    if (schema && schema.properties) {
+      // Process top-level properties in schema order
+      for (const [key, prop] of Object.entries(schema.properties)) {
+        if (prop.type === 'object' && prop.properties) {
+          // Nested object - process in schema property order
+          formData[key] = {};
+          for (const [nestedKey] of Object.entries(prop.properties)) {
+            const fullName = `${key}.${nestedKey}`;
+            if (valuesMap.has(fullName)) {
+              formData[key][nestedKey] = valuesMap.get(fullName);
+            }
+          }
+        } else {
+          // Direct property
+          if (valuesMap.has(key)) {
+            formData[key] = valuesMap.get(key);
+          }
+        }
+      }
+    } else {
+      // Fallback: build object without schema ordering
+      valuesMap.forEach((value, name) => {
+        const parts = name.split('.');
+        let current = formData;
+        
+        for (let i = 0; i < parts.length - 1; i++) {
+          if (!current[parts[i]]) {
+            current[parts[i]] = {};
+          }
+          current = current[parts[i]];
+        }
+        
+        current[parts[parts.length - 1]] = value;
+      });
+    }
 
     return formData;
   }

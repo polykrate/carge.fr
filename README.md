@@ -76,7 +76,8 @@ Traditional authentication methods (certificates, holograms, QR codes) are easil
 
 ### 1. Web Interface (This Repository)
 Web application at **[carge.fr](https://carge.fr)** for direct user interaction:
-- Visual workflow builder and executor
+- **AI-Assisted Workflow Builder**: Create complex workflows with AI guidance (copy prompts → paste JSON → validate → deploy)
+- Visual workflow executor with dynamic forms
 - Browser-based wallet integration (Polkadot.js extension)
 - Proof verification and QR code scanning
 - Multi-language support (EN/FR)
@@ -273,7 +274,8 @@ src/
 │   └── toast.js                # Notification system
 ├── pages/
 │   ├── Home.jsx                # Landing, feature overview
-│   ├── Workflows.jsx           # RAG workflow creation
+│   ├── AI.jsx                  # AI-assisted workflow builder (NEW)
+│   ├── Workflows.jsx           # RAG workflow creation and execution
 │   ├── Verify.jsx              # Proof verification, workflow continuation
 │   ├── QuickSign.jsx           # Simple content signing
 │   └── WalletDebug.jsx         # Development tools
