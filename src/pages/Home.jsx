@@ -24,7 +24,7 @@ export const Home = () => {
         </div>
         
         <div className="container mx-auto px-6 text-center max-w-6xl relative z-10">
-          {/* Badge */}
+          {/* Badge */} 
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#003399] text-white rounded-full text-sm font-medium mb-8 shadow-lg">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -32,14 +32,14 @@ export const Home = () => {
             {t('home.badge')}
           </div>
 
-          {/* Main Title */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight bg-gradient-to-r from-gray-900 via-[#003399] to-gray-900 bg-clip-text text-transparent">
-            {t('home.title')}
+          {/* Main Title - Value Proposition */}
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight bg-gradient-to-r from-gray-900 via-[#003399] to-gray-900 bg-clip-text text-transparent">
+            {t('home.subtitle')}
           </h1>
 
-          {/* Subtitle */}
-          <p className="text-xl md:text-2xl font-medium text-gray-700 mb-12 max-w-3xl mx-auto leading-tight">
-            {t('home.subtitle')}
+          {/* Subtitle - Concise explanation */}
+          <p className="text-xl md:text-2xl font-medium text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
+            {t('home.valueProposition')}
           </p>
 
           {/* CTA Buttons */}
@@ -190,15 +190,14 @@ export const Home = () => {
 
             {/* Timeline Steps */}
             <div className="space-y-8">
-              {[1, 2, 3, 4, 5, 6, 7].map((step) => {
+              {[1, 2, 3, 4, 5, 6].map((step) => {
                 const stepData = {
-                  1: { title: t('home.workflowStep1'), desc: t('home.workflowStep1Desc'), icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
-                  2: { title: t('home.workflowStep2'), desc: t('home.workflowStep2Desc'), icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+                  1: { title: t('home.workflowStep1'), desc: t('home.workflowStep1Desc'), icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
+                  2: { title: t('home.workflowStep2'), desc: t('home.workflowStep2Desc'), icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z' },
                   3: { title: t('home.workflowStep3'), desc: t('home.workflowStep3Desc'), icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
-                  4: { title: t('home.workflowStep4'), desc: t('home.workflowStep4Desc'), icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
-                  5: { title: t('home.workflowStep5'), desc: t('home.workflowStep5Desc'), icon: 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0' },
-                  6: { title: t('home.workflowStep6'), desc: t('home.workflowStep6Desc'), icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
-                  7: { title: t('home.workflowStep7'), desc: t('home.workflowStep7Desc'), icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' }
+                  4: { title: t('home.workflowStep4'), desc: t('home.workflowStep4Desc'), icon: 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0' },
+                  5: { title: t('home.workflowStep5'), desc: t('home.workflowStep5Desc'), icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
+                  6: { title: t('home.workflowStep6'), desc: t('home.workflowStep6Desc'), icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' }
                 };
                 
                 const data = stepData[step];
@@ -458,7 +457,7 @@ export const Home = () => {
           </div>
 
           <div className="space-y-4">
-            {[1, 2, 3, 4, 5, 6, 7].map((num) => {
+            {[1, 2, 3, 4, 5, 6].map((num) => {
               const isOpen = openFaq === num;
               
               return (

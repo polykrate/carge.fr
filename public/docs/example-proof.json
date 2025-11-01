@@ -1,23 +1,24 @@
 {
   "ragData": {
-    "ragHash": "0x514361f1469c116fd024757559d1dd47d26ae6564c5551e6ff60e0aa50407253",
-    "stepHash": "0xd717d6ac1e0ba33c595b3da6f2970d6542e144372c418bf342a98dbc3477b378",
+    "ragHash": "0x51bd4b7e9b2669fe16c73c369c3b100d2ac6c826dee3e4f20aa1d532d992c39f",
+    "stepHash": "0xa49dd68aa82be451b214b56687f3ee46c46af652d6890caf3da90ae03fa32ff6",
     "livrable": {
-      "work": {
-        "title": "Digital Sunrise",
-        "type": "artwork",
-        "description": "An abstract representation of dawn using geometric shapes and vibrant colors, blending warm oranges and soft purples to capture the peaceful transition from night to day",
-        "creationDate": "2025-10-03",
-        "contentHash": "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
-      },
-      "creator": {
-        "legalName": "Alice Dubois",
-        "email": "alice.dubois@example.fr",
-        "country": "FR",
-        "walletAddress": "5GrwvaEF5zXb26eEhKWq5JnJT3SDVG3oVPqnQQfTvLTuEMZW",
-        "eidCertificate": "FR-eIDAS-2025-ART-001"
+      "production": {
+        "responsibleIdentity": "The Macallan Distillery",
+        "productType": "whisky",
+        "productName": "The Macallan 25 Years Old Sherry Oak",
+        "batchNumber": "B47-2023",
+        "totalUnitsProduced": 2500,
+        "productionYear": 2023,
+        "productionLocation": "Easter Elchies, Craigellachie, Moray, Scotland",
+        "certifications": [
+          "Scotch Whisky Association",
+          "Protected Geographical Indication"
+        ],
+        "qrCodeApplied": true,
+        "productionNotes": "Distilled March 15, 1998. Aged 25 years in European Oak Sherry casks from Jerez, Spain. Cask #7823. Master Distiller: Stuart MacPherson. Exceptional maturation with rich sherry notes and oak complexity.",
+        "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
       }
     }
   }
 }
-

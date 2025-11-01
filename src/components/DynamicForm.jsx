@@ -346,7 +346,7 @@ export const DynamicForm = ({ schema, onFileSelect }) => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <FormFields
         schema={schema}
         properties={schema.properties}

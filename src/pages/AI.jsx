@@ -258,7 +258,7 @@ export const Agent = () => {
    */
   const copyInstructions = () => {
     navigator.clipboard.writeText(AI_INSTRUCTIONS);
-    showSuccess('Instructions copied! Paste them to your AI assistant.');
+    showSuccess(t('messages.instructionsCopied'));
   };
 
   /**
@@ -267,7 +267,7 @@ export const Agent = () => {
   const copyErrors = () => {
     const errorText = `My workflow JSON has validation errors. Please fix them:\n\n${validationErrors.join('\n')}`;
     navigator.clipboard.writeText(errorText);
-    showSuccess('Errors copied! Give them to your AI to fix.');
+    showSuccess(t('messages.errorsCopied'));
   };
 
   /**
@@ -427,17 +427,17 @@ export const Agent = () => {
       
       if (errors.length > 0) {
         setValidationErrors(errors);
-        showError(`Validation failed: ${errors.length} error(s) found`);
+        showError(`${t('messages.validationFailed')}: ${errors.length} error(s) found`);
         return;
       }
       
       // Validation successful
       setValidatedWorkflow(workflow);
-      showSuccess('Workflow validated successfully! Review and deploy.');
+      showSuccess(t('messages.workflowValidated'));
       
     } catch (error) {
       setValidationErrors([`Invalid JSON: ${error.message}`]);
-      showError('Invalid JSON format');
+      showError(t('messages.invalidJSON'));
     }
   };
 
@@ -446,12 +446,12 @@ export const Agent = () => {
    */
   const deployWorkflow = async () => {
     if (!selectedAccount) {
-      showError('Please connect your wallet first');
+      showError(t('messages.walletNotConnectedDeploy'));
       return;
     }
     
     if (!validatedWorkflow) {
-      showError('Please validate the workflow first');
+      showError(t('messages.validateFirst'));
       return;
     }
     
@@ -725,7 +725,7 @@ export const Agent = () => {
               addLog(`  ${s.stepNumber}. ${s.stepName} (${s.stepKey}): ${s.hash}`, 'info');
             });
             
-            showSuccess('Workflow deployed successfully with a single signature!');
+            showSuccess(t('messages.workflowDeployed'));
             
             // Disconnect
             masterApi.disconnect();
@@ -737,7 +737,7 @@ export const Agent = () => {
     } catch (error) {
       logger.error('Deployment failed:', error);
       addLog(`\nDEPLOYMENT FAILED: ${error.message}`, 'error');
-      showError('Deployment failed. Check logs for details.');
+      showError(t('messages.deploymentFailed'));
     } finally {
       setDeploying(false);
     }

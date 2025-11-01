@@ -1,0 +1,117 @@
+{
+  "ragData": {
+    "ragHash": "0x51bd4b7e9b2669fe16c73c369c3b100d2ac6c826dee3e4f20aa1d532d992c39f",
+    "stepHash": "0xfe5b62ffda7a56d94311e1b00845e1c331578f4f8bbb333328c53333ac7041ad",
+    "livrable": {
+      "production": {
+        "responsibleIdentity": "The Macallan Distillery",
+        "productType": "whisky",
+        "productName": "The Macallan 25 Years Old Sherry Oak",
+        "batchNumber": "B47-2023",
+        "totalUnitsProduced": 2500,
+        "productionYear": 2023,
+        "productionLocation": "Easter Elchies, Craigellachie, Moray, Scotland",
+        "certifications": [
+          "Scotch Whisky Association",
+          "Protected Geographical Indication"
+        ],
+        "qrCodeApplied": true,
+        "productionNotes": "Distilled March 15, 1998. Aged 25 years in European Oak Sherry casks from Jerez, Spain. Cask #7823. Master Distiller: Stuart MacPherson. Exceptional maturation with rich sherry notes and oak complexity.",
+        "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
+      },
+      "national-distribution": {
+        "responsibleIdentity": "Edrington UK Distribution",
+        "fromEntity": "The Macallan Distillery",
+        "batchNumber": "B47-2023",
+        "unitsInLot": 2500,
+        "transferDate": "2024-02-15",
+        "carrier": "Highland Logistics Premium",
+        "trackingNumber": "HL-MAC-2024-047",
+        "transportMethod": "Secured GPS-tracked refrigerated truck with 24/7 monitoring",
+        "storageConditions": "Climate-controlled vault at 16°C, 65% humidity, high-security facility",
+        "qualityCheck": "conforme",
+        "qualityInspection": "All 2,500 bottles inspected. Seals intact. Temperature logs verified.",
+        "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
+      },
+      "import-1": {
+        "destinationCountry": "France",
+        "carrier": "Euro Premium Spirits Transport",
+        "originCountry": "United Kingdom",
+        "originCertificate": "UK-ORIGIN-SCOTCH-B47-2023",
+        "batchNumber": "B47-2023",
+        "unitsInLot": 500,
+        "trackingNumber": "EPST-FR-2024-089",
+        "fromEntity": "Edrington UK Distribution",
+        "transferDate": "2024-03-10",
+        "authenticityVerified": true,
+        "transportMethod": "Temperature-controlled truck with GPS tracking and security escort",
+        "responsibleIdentity": "La Maison du Whisky Paris",
+        "qualityCheck": "conforme",
+        "importLicense": "FR-IMPORT-2024-WHISKY-500",
+        "storageConditions": "Climate-controlled warehouse at 18°C, 65% humidity, preparing for Asian distribution",
+        "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
+      },
+      "export": {
+        "carrier": "Air France Cargo",
+        "batchNumber": "B47-2023",
+        "unitsInLot": 150,
+        "trackingNumber": "AF-AWB-2024-0405-MAC25",
+        "fromEntity": "La Maison du Whisky Paris",
+        "finalDestinationCountry": "Hong Kong",
+        "insuranceCurrency": "EUR",
+        "transferDate": "2024-04-05",
+        "transportMethod": "Air cargo flight AF129 Paris CDG to Hong Kong HKG. Climate-controlled cargo hold 18°C. GPS-tracked. ETA 24 hours.",
+        "originCountry": "France",
+        "responsibleIdentity": "Golden Dragon Spirits Export",
+        "qualityCheck": "conforme",
+        "exportLicense": "FR-EXP-SPIRITS-2024-0405",
+        "customsDeclaration": "FR-CUSTOMS-EXP-2024-0405-WHISKY",
+        "gpsTracking": true,
+        "insuranceValue": 180000,
+        "storageConditions": "Climate-controlled air cargo container at 18°C with real-time temperature monitoring",
+        "airWaybill": "AF-AWB-2024-0405-MAC25",
+        "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
+      },
+      "import-2": {
+        "carrier": "Shanghai Premium Logistics",
+        "gaccCertificate": "GACC-2024-SPIRITS-SH-B47",
+        "bilingualLabeling": true,
+        "healthCertificate": "CN-HEALTH-SPIRITS-2024-0420",
+        "batchNumber": "B47-2023",
+        "unitsInLot": 150,
+        "qrBlockchainVerified": true,
+        "fromEntity": "Golden Dragon Spirits Export",
+        "transferDate": "2024-04-20",
+        "labelingLanguages": [
+          "EN",
+          "CN"
+        ],
+        "destinationCountry": "China",
+        "transportMethod": "Climate-controlled truck from Hong Kong airport to Shanghai bonded warehouse. GPS-tracked. Customs clearance completed.",
+        "responsibleIdentity": "Shanghai Premium Imports",
+        "qualityCheck": "conforme",
+        "importLicense": "CN-IMPORT-SPIRITS-2024-SH-B47",
+        "storageConditions": "Shanghai free trade zone bonded warehouse. Climate-controlled 18°C, 65% humidity, 24/7 security surveillance",
+        "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
+      },
+      "retail": {
+        "carrier": "Emperor's Cellar VIP Delivery",
+        "retailCurrency": "CNY",
+        "batchNumber": "B47-2023",
+        "retailPrice": 28800,
+        "vipServicesIncluded": true,
+        "fromEntity": "Shanghai Premium Imports",
+        "transferDate": "2024-05-05",
+        "unitIdentifier": "Bottle #347 of 2500",
+        "transportMethod": "White-glove secured delivery with temperature monitoring and insurance. Personal courier service.",
+        "responsibleIdentity": "Emperor's Cellar Shanghai",
+        "qualityCheck": "conforme",
+        "provenanceVerified": "Complete blockchain verification: The Macallan Distillery (Scotland) → Edrington UK Distribution → La Maison du Whisky (Paris) → Golden Dragon Export (Hong Kong) → Shanghai Premium Imports → Emperor's Cellar. All 5 international transfers cryptographically signed and verified on blockchain.",
+        "storageConditions": "Premium climate-controlled cellar at 18°C, 65% humidity. VIP tasting room available. 24/7 security surveillance.",
+        "blockchainVerified": true,
+        "retailPriceEUR": 3600,
+        "_targetAddress": "5CLqgPWHnzKw7eF7pL8bV7kuV6FyJ3fFtJyGA7592jrrF1oM"
+      }
+    }
+  }
+}

@@ -82,7 +82,8 @@ const resources = {
       // Home page
       home: {
         title: 'CARGE',
-        subtitle: 'Give Your Products a Voice. Let Them Tell Their Story.',
+        subtitle: 'Give Your Products a Voice',
+        valueProposition: 'Transparency justifies premium prices. One QR scan proves your product\'s entire journey—every actor, every step, cryptographically verified.',
         badge: 'Proof of Authenticity',
         heroTitle: 'Your Customers Want to Know Where Their Products Come From',
         heroDesc: 'A digital certificate filled by each party from producer to consumer. Each step verified. One QR scan proves the product matches the certificate. Simple, transparent, trustworthy.',
@@ -177,20 +178,18 @@ const resources = {
         // Workflow Example
         workflowExampleTitle: 'How It Works: A 25-Year Journey in One Bottle',
         workflowExampleDesc: 'Mr. Wei Chen scans a Macallan bottle in Shanghai. Instantly, he sees 25 years of craftsmanship + 6 months journey across 3 continents. 7 actors signed. Every step verified. This is transparency that creates value.',
-        workflowStep1: '1999-2024: The Macallan Distillery, Scotland',
-        workflowStep1Desc: 'Master distiller fills hand-picked sherry oak casks from Jerez, Spain.\n25 years aging in Scottish Speyside.\n2024: Bottle #92 of batch B47 (2,400 bottles produced).\nQR code seals the story.',
-        workflowStep2: 'Feb 2024: Edrington UK - Official Guardian',
-        workflowStep2Desc: 'Receives complete batch B47 (2,400 bottles).\nHigh-security vault, 16°C climate control.\n24/7 monitoring ensures perfect conditions.\nEach bottle inspected before distribution.',
-        workflowStep3: 'March 2024: La Maison du Whisky, Paris',
-        workflowStep3Desc: '500 bottles selected for French market & Asia.\nFull customs clearance, authenticity certificate verified.\nTemperature-controlled truck from UK.\nStored in Paris, preparing Asian premium market.',
-        workflowStep4: 'April 2024: Golden Dragon Spirits, Hong Kong',
-        workflowStep4Desc: '150 bottles chosen for Chinese collectors.\nAir cargo Paris → Hong Kong, GPS tracked.\n€180,000 insurance coverage. Climate 18°C maintained.\nSecured container throughout journey.',
-        workflowStep5: 'April 2024: Shanghai Premium Imports',
-        workflowStep5Desc: 'Chinese customs cleared. GACC health certificate obtained.\nBilingual labels applied (EN/CN).\nAll 150 bottles QR-verified on blockchain.\nFree trade zone bonded warehouse.',
-        workflowStep6: 'May 2024: Emperor\'s Cellar, Shanghai',
-        workflowStep6Desc: 'Ultra-premium specialist receives bottle #92.\nClimate cellar 18°C, 65% humidity.\nComplete provenance verified: Scotland → UK → France → Hong Kong → Shanghai.\nPrice: ¥28,800 (~€3,600). VIP services included.',
-        workflowStep7: 'October 15, 2024: Mr. Wei Chen - Final Owner',
-        workflowStep7Desc: 'QR code on physical bottle + blockchain certificate = perfect match.\n7 actors signed, complete journey verified from Scotland.\nTasting notes: "Rich sherry, dark chocolate, 25 years in every sip."\n"Knowing exactly where this came from, who crafted it... it just tastes better. Every sip tells the whole story." Rating: 5/5',
+        workflowStep1: 'Craft Authentication - Macallan Distillery, Scotland',
+        workflowStep1Desc: 'Master Distiller: Stuart MacPherson\nDistillation: March 15, 1998\nCask: European Oak Sherry #7823\nAging: 25 years (1998-2023)\nBatch: B47-2023 (2,500 bottles produced)\nThis bottle: #347/2500\nCertificate: MAC-25Y-1998-7823-347\nQuality: "Exceptional maturation. Rich sherry notes with oak complexity."',
+        workflowStep2: 'Secured Export - UK Export Authority',
+        workflowStep2Desc: 'Export License: Official UK declaration\nQuantity: 500 bottles from batch B47-2023\nDestination: International premium market\nTamper-proof Seal: Unique seal number\nClimate Control: Temperature certification\nInsurance: Declared value (GBP)\nTracking: Real-time GPS enabled',
+        workflowStep3: 'Customs Clearance - Destination Authority',
+        workflowStep3Desc: 'Import Declaration: Official reference\nDuty Paid: Customs tax amount\nPhysical Inspection: Passed\nClearance Date: Official timestamp\nAuthenticity: Certificate verified\nCompliance: Multi-jurisdiction regulatory validation',
+        workflowStep4: 'Verified Logistics - Premium Delivery Partner',
+        workflowStep4Desc: 'Tracking Number: Shipment ID\nCarrier: Premium logistics name\nEstimated Delivery: Target date\nGPS Location: Real-time coordinates\nCold Chain: Integrity maintained\nCoordination: Multi-actor real-time visibility',
+        workflowStep5: 'Premium Retailer - Authorized Store',
+        workflowStep5Desc: 'Retailer: Authorized spirits specialist\nAllocation: 10 bottles from batch B47-2023\nBottle Numbers: #345-354 (store allocation)\nStore Location: Premium shop address\nReception Date: Arrival in store\nStorage: Climate cellar 18°C, 65% humidity\nRetail Price: Final sale price per bottle\nVerification: Each bottle QR-scanned for authenticity',
+        workflowStep6: 'Customer Purchase - Final Verification',
+        workflowStep6Desc: 'Customer: Final buyer identity\nPurchase Date: Transaction timestamp\nPurchase Confirmed: Validated\nBottle Condition: Excellent on arrival\nQR Scan: Complete provenance history displayed\nFeedback: "Knowing exactly where this came from, who crafted it, which authorized retailer sold it... Every detail verified. Perfect!"',
       workflowExampleNoteTitle: 'Proof of Authenticity',
       workflowExampleNote: 'The power of the certificate: QR code on the bottle + blockchain validation = irrefutable proof. Mr. Chen doesn\'t just believe his bottle is authentic—he can prove it to anyone, anywhere. 6 months journey, 7 signatures, €180K insurance, all verified on-chain. This is what digital certificates enable: ownership of proof itself.',
       verifyExampleButton: 'Verify This Proof',
@@ -279,6 +278,7 @@ const resources = {
         units: 'units',
         unnamed: 'Unnamed Workflow',
         unknownStep: 'Unknown Step',
+        pinnedWorkflowsInfo: 'Pinned workflows: Macallan 25 Years Supply Chain (7 steps: Production → Consumer), Copyright Registration, Custom Workflow are always available. Clear search to return to pinned workflows.',
       },
       
       // Quick Sign page
@@ -322,6 +322,7 @@ const resources = {
       verify: {
         title: 'Verify Proof',
         description: 'Reconstruct the complete chain of trust and verify product authenticity',
+        chooseMethod: 'Choose your verification method',
         howItWorksTitle: 'What do you want to verify?',
         step1Title: 'Simple File or QR Code',
         step1Desc: 'Upload any document or scan a QR code. Instantly check if it\'s registered and authentic on blockchain.',
@@ -356,6 +357,9 @@ const resources = {
         schemasInvalid: 'Data Errors',
         schemaValid: 'Data ✓',
         schemaInvalid: 'Data ✗',
+        productQRInstructions: 'Instructions:',
+        productQRInstructionsText: 'Scan the QR code on the product (e.g., bottle label) to verify if it matches the first step of this workflow.',
+        expectedHash: 'Expected hash:',
       },
       
       // About page
@@ -438,6 +442,49 @@ const resources = {
         browserExtensions: 'Browser Extensions',
         mobileWallets: 'Mobile Wallets',
         nextStepDesktop: 'Next step: After installing, click the extension icon in your browser toolbar to create your wallet.',
+      },
+      
+      // Errors & Success Messages
+      messages: {
+        // Wallet
+        walletNotConnectedFavorites: 'Please connect your wallet to save favorites',
+        walletNotConnectedWorkflow: 'Please connect your wallet to start the workflow',
+        walletNotConnectedSubmit: 'Please connect your wallet to submit the next step',
+        walletNotConnectedDeploy: 'Please connect your wallet first',
+        
+        // Forms
+        fillRequiredFields: 'Please fill all required fields',
+        validationFailed: 'Validation failed',
+        
+        // Favorites
+        addedToFavorites: 'Added to favorites',
+        removedFromFavorites: 'Removed from favorites',
+        
+        // Camera & QR
+        cameraAccessError: 'Unable to access camera. Please check permissions.',
+        qrScanFailed: 'Failed to scan QR code from image',
+        qrProcessFailed: 'Failed to process QR code',
+        productQRVerified: 'Product verified! QR code matches the workflow.',
+        productQRFailed: 'Product QR does not match the workflow!',
+        productQRError: 'Failed to verify product QR code',
+        
+        // File & Hash
+        fileProcessFailed: 'Failed to process file',
+        hashVerifiedSuccess: 'Hash verified successfully!',
+        fileHashVerifiedSuccess: 'File hash verified successfully!',
+        fileHashVerificationFailed: 'File hash verification failed',
+        
+        // Proof
+        proofVerifyFailed: 'Failed to verify proof',
+        
+        // AI Workflow
+        instructionsCopied: 'Instructions copied! Paste them to your AI assistant.',
+        errorsCopied: 'Errors copied! Give them to your AI to fix.',
+        workflowValidated: 'Workflow validated successfully! Review and deploy.',
+        workflowDeployed: 'Workflow deployed successfully with a single signature!',
+        deploymentFailed: 'Deployment failed. Check logs for details.',
+        invalidJSON: 'Invalid JSON format',
+        validateFirst: 'Please validate the workflow first',
       },
       
       // Errors
@@ -534,7 +581,8 @@ const resources = {
       // Page d'accueil
       home: {
         title: 'CARGE',
-        subtitle: 'Donnez une voix à vos produits et laissez-les raconter leur histoire.',
+        subtitle: 'Donnez une voix à vos produits',
+        valueProposition: 'La transparence justifie le prix premium. Un scan QR prouve le parcours complet de votre produit—chaque acteur, chaque étape, cryptographiquement vérifiés.',
         badge: 'Preuve d\'Authenticité',
         heroTitle: 'Vos clients veulent savoir d\'où viennent leurs produits',
         heroDesc: 'Un certificat numérique complété par chaque acteur, du producteur au consommateur. Chaque étape est vérifiée. Un scan QR permet de vérifier la correspondance entre le produit physique et son certificat. Simple, transparent, fiable.',
@@ -629,20 +677,18 @@ const resources = {
         // Exemple de Workflow
         workflowExampleTitle: 'Voici Comment : Un Parcours de 25 Ans dans une Bouteille',
         workflowExampleDesc: 'M. Wei Chen scanne une bouteille de Macallan à Shanghai. Instantanément, il découvre 25 ans de savoir-faire + 6 mois de voyage sur 3 continents. 7 acteurs ont signé. Chaque étape est vérifiée. C\'est la transparence qui crée de la valeur.',
-        workflowStep1: '1999-2024 : The Macallan Distillery, Écosse',
-        workflowStep1Desc: 'Le maître distillateur remplit des fûts de chêne de xérès sélectionnés à Jerez, Espagne.\n25 ans de vieillissement dans le Speyside écossais.\n2024 : Bouteille #92 du lot B47 (2 400 bouteilles produites).\nLe QR code scelle l\'histoire.',
-        workflowStep2: 'Fév. 2024 : Edrington UK - Gardien Officiel',
-        workflowStep2Desc: 'Réception du lot B47 complet (2 400 bouteilles).\nCoffre haute sécurité, climatisé 16°C.\nSurveillance 24/7 pour des conditions parfaites.\nChaque bouteille inspectée avant distribution.',
-        workflowStep3: 'Mars 2024 : La Maison du Whisky, Paris',
-        workflowStep3Desc: '500 bouteilles sélectionnées pour la France et l\'Asie.\nDédouanement complet, certificat d\'authenticité vérifié.\nCamion climatisé depuis le Royaume-Uni.\nStockage à Paris, destination marché premium asiatique.',
-        workflowStep4: 'Avril 2024 : Golden Dragon Spirits, Hong Kong',
-        workflowStep4Desc: '150 bouteilles choisies pour les collectionneurs chinois.\nFret aérien Paris → Hong Kong, suivi GPS.\nAssurance 180 000 €. Température 18°C maintenue.\nConteneur sécurisé tout au long du voyage.',
-        workflowStep5: 'Avril 2024 : Shanghai Premium Imports',
-        workflowStep5Desc: 'Dédouanement chinois validé. Certificat GACC obtenu.\nÉtiquetage bilingue appliqué (EN/CN).\n150 bouteilles vérifiées par QR blockchain.\nEntrepôt sous douane en zone franche.',
-        workflowStep6: 'Mai 2024 : Emperor\'s Cellar, Shanghai',
-        workflowStep6Desc: 'Spécialiste ultra-premium reçoit la bouteille #92.\nCave climatisée 18°C, humidité 65%.\nProvenance complète vérifiée : Écosse → UK → France → Hong Kong → Shanghai.\nPrix : 28 800 ¥ (~3 600 €). Services VIP inclus.',
-        workflowStep7: '15 mai 2024 : M. Wei Chen - Propriétaire Final',
-        workflowStep7Desc: 'QR code sur la bouteille physique + certificat blockchain = correspondance parfaite.\n7 acteurs ont signé, parcours complet vérifié depuis l\'Écosse.\nNotes de dégustation : "Xérès riche, chocolat noir, 25 ans dans chaque gorgée."\n"Savoir exactement d\'où ça vient, qui l\'a créé... ça a meilleur goût. Chaque gorgée raconte toute l\'histoire." Note : 5/5',
+        workflowStep1: 'Authentification Artisanale - Distillerie Macallan, Écosse',
+        workflowStep1Desc: 'Maître Distillateur : Stuart MacPherson\nDistillation : 15 mars 1998\nFût : Chêne Européen Xérès #7823\nVieillissement : 25 ans (1998-2023)\nBatch : B47-2023 (2 500 bouteilles produites)\nCette bouteille : #347/2500\nCertificat : MAC-25Y-1998-7823-347\nQualité : "Maturation exceptionnelle. Notes riches de xérès et complexité du chêne."',
+        workflowStep2: 'Export Sécurisé - Autorité Export UK',
+        workflowStep2Desc: 'Licence Export : Déclaration officielle UK\nQuantité : 500 bouteilles du batch B47-2023\nDestination : Marché international premium\nScellé Anti-Effraction : Numéro unique\nContrôle Climat : Certification température\nAssurance : Valeur déclarée (GBP)\nSuivi : GPS temps réel activé',
+        workflowStep3: 'Dédouanement - Autorité Douanière Destination',
+        workflowStep3Desc: 'Déclaration Import : Référence officielle\nDroits Payés : Montant taxes douanières\nInspection Physique : Validé\nDate Dédouanement : Timestamp officiel\nAuthenticité : Certificat vérifié\nConformité : Validation réglementaire multi-juridictions',
+        workflowStep4: 'Logistique Certifiée - Partenaire Livraison Premium',
+        workflowStep4Desc: 'Numéro Suivi : ID expédition\nTransporteur : Nom logistique premium\nLivraison Estimée : Date cible\nLocalisation GPS : Coordonnées temps réel\nChaîne Froid : Intégrité maintenue\nCoordination : Visibilité multi-acteurs en temps réel',
+        workflowStep5: 'Revendeur Premium - Boutique Autorisée',
+        workflowStep5Desc: 'Revendeur : Spécialiste spiritueux autorisé\nAllocation : 10 bouteilles du batch B47-2023\nNuméros : #345-354 (allocation boutique)\nLocalisation : Adresse boutique premium\nDate Réception : Arrivée en magasin\nStockage : Cave climatisée 18°C, humidité 65%\nPrix de Vente : Prix final retail par bouteille\nVérification : Chaque bouteille scannée QR',
+        workflowStep6: 'Achat Client - Vérification Finale',
+        workflowStep6Desc: 'Client : Identité acheteur final\nDate Achat : Timestamp transaction\nAchat Confirmé : Validé\nÉtat Bouteille : Excellent à l\'achat\nScan QR : Historique provenance complet affiché\nFeedback : "Savoir exactement d\'où ça vient, qui l\'a fait, quel revendeur autorisé l\'a vendu... Chaque détail vérifié. Parfait !"',
       workflowExampleNoteTitle: 'Preuve d\'Authenticité',
       workflowExampleNote: 'Le pouvoir du certificat : QR code sur la bouteille + validation blockchain = preuve irréfutable. M. Chen ne se contente pas de croire que sa bouteille est authentique : il peut le prouver à quiconque, n\'importe où. 6 mois de voyage, 7 signatures, assurance 180 k€, tout vérifié sur la chaîne. Voilà ce que permettent les certificats numériques : posséder la preuve elle-même.',
       verifyExampleButton: 'Vérifier cette preuve',
@@ -731,6 +777,7 @@ const resources = {
         units: 'unités',
         unnamed: 'Workflow sans nom',
         unknownStep: 'Étape inconnue',
+        pinnedWorkflowsInfo: 'Workflows épinglés : Chaîne d\'approvisionnement Macallan 25 ans (7 étapes : Production → Consommateur), Enregistrement Copyright, Workflow Personnalisé sont toujours disponibles. Effacez la recherche pour revenir aux workflows épinglés.',
       },
       
       // Page Signature Rapide
@@ -774,6 +821,7 @@ const resources = {
       verify: {
         title: 'Vérifier une preuve',
         description: 'Reconstruisez la chaîne de confiance complète et vérifiez l\'authenticité du produit',
+        chooseMethod: 'Choisissez votre méthode de vérification',
         howItWorksTitle: 'Que voulez-vous vérifier ?',
         step1Title: 'Fichier ou QR Code Simple',
         step1Desc: 'Importez n\'importe quel document ou scannez un QR code. Vérifiez instantanément s\'il est enregistré et authentique sur blockchain.',
@@ -808,6 +856,9 @@ const resources = {
         schemasInvalid: 'Erreurs Données',
         schemaValid: 'Données ✓',
         schemaInvalid: 'Données ✗',
+        productQRInstructions: 'Instructions :',
+        productQRInstructionsText: 'Scannez le QR code sur le produit (par ex. étiquette de bouteille) pour vérifier s\'il correspond au premier step de ce workflow.',
+        expectedHash: 'Hash attendu :',
       },
       
       // Page À propos
@@ -890,6 +941,49 @@ const resources = {
         browserExtensions: 'Extensions Navigateur',
         mobileWallets: 'Portefeuilles Mobiles',
         nextStepDesktop: 'Prochaine étape : après l\'installation, cliquez sur l\'icône de l\'extension dans votre barre de navigation pour créer votre portefeuille.',
+      },
+      
+      // Messages d'Erreur & de Succès
+      messages: {
+        // Portefeuille
+        walletNotConnectedFavorites: 'Veuillez connecter votre portefeuille pour sauvegarder les favoris',
+        walletNotConnectedWorkflow: 'Veuillez connecter votre portefeuille pour démarrer le workflow',
+        walletNotConnectedSubmit: 'Veuillez connecter votre portefeuille pour soumettre l\'étape suivante',
+        walletNotConnectedDeploy: 'Veuillez d\'abord connecter votre portefeuille',
+        
+        // Formulaires
+        fillRequiredFields: 'Veuillez remplir tous les champs obligatoires',
+        validationFailed: 'Validation échouée',
+        
+        // Favoris
+        addedToFavorites: 'Ajouté aux favoris',
+        removedFromFavorites: 'Retiré des favoris',
+        
+        // Caméra & QR
+        cameraAccessError: 'Impossible d\'accéder à la caméra. Vérifiez les permissions.',
+        qrScanFailed: 'Échec du scan du QR code depuis l\'image',
+        qrProcessFailed: 'Échec du traitement du QR code',
+        productQRVerified: 'Produit vérifié ! Le QR code correspond au workflow.',
+        productQRFailed: 'Le QR code du produit ne correspond PAS au workflow !',
+        productQRError: 'Échec de la vérification du QR code du produit',
+        
+        // Fichier & Hash
+        fileProcessFailed: 'Échec du traitement du fichier',
+        hashVerifiedSuccess: 'Hash vérifié avec succès !',
+        fileHashVerifiedSuccess: 'Hash du fichier vérifié avec succès !',
+        fileHashVerificationFailed: 'Échec de la vérification du hash du fichier',
+        
+        // Preuve
+        proofVerifyFailed: 'Échec de la vérification de la preuve',
+        
+        // Workflow IA
+        instructionsCopied: 'Instructions copiées ! Collez-les à votre assistant IA.',
+        errorsCopied: 'Erreurs copiées ! Donnez-les à votre IA pour correction.',
+        workflowValidated: 'Workflow validé avec succès ! Vérifiez et déployez.',
+        workflowDeployed: 'Workflow déployé avec succès en une seule signature !',
+        deploymentFailed: 'Déploiement échoué. Consultez les logs pour plus de détails.',
+        invalidJSON: 'Format JSON invalide',
+        validateFirst: 'Veuillez d\'abord valider le workflow',
       },
       
       // Erreurs

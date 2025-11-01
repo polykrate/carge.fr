@@ -9,6 +9,7 @@ import { FormGenerator } from '../lib/core/form-generator.js';
 import { DeliverableDisplay } from '../components/DeliverableDisplay';
 import { showError, showSuccess, showLoading, dismiss, update, toastTx } from '../lib/toast';
 import { scrollToElement } from '../utils/scroll';
+import { config } from '../lib/config';
 import {
   waitForPolkadot,
   connectToApi,
@@ -48,7 +49,7 @@ const QRCodeScanner = ({ onScan, scanning, setScanning, verifying, autoStart = f
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
-      showError('Unable to access camera. Please check permissions.');
+      showError(t('messages.cameraAccessError'));
       setScanning(false);
     }
   };
@@ -93,7 +94,8 @@ const QRCodeScanner = ({ onScan, scanning, setScanning, verifying, autoStart = f
         const code = jsQR(imageData.data, imageData.width, imageData.height);
         
         if (code) {
-          console.log('QR Code detected:', code.data);
+          console.log('📱 QR Code scanned! Detected hash:', code.data);
+          console.log('🔍 Searching blockchain for this hash...');
           stopScanning();
           onScan(code.data);
         }
@@ -456,136 +458,132 @@ export const Verify = () => {
     }
   }, [workflowHistory, verifyingChainOfTrust]);
   
-  // Example proof JSON - Macallan 25 Years Workflow V5 (6 steps: Production → Retail)
-  // Real executed workflow with proof hash: 0xe3596af49ac1c832465199717d4bb48901aa295e10e89d72b900e28c4f0539a7
+  // Example proof JSON - Macallan 25 Years Supply Chain Workflow (Step 6/7: Retail)
+  // Real executed workflow with proof hash from config.EXAMPLES.COMPLETE_WORKFLOW_HASH
+  // Hash: 0x7519e725790fbdec11a7d82a963197e8a4208d22e87d7faa357769502b730459
+  // Product Supply Chain V1: Scotland → UK → France → Hong Kong → Shanghai
   const exampleProof = {
     "ragData": {
-      "ragHash": "0x8a8874f71768ad02a5d2ce15af202135becfd9aa455a2c41a22e0214bc5c36e8",
-      "stepHash": "0x2409a55343b255e786b1167ac6abb005ddd145c940d124ec3eafa215e510b3e0",
+      "ragHash": "0x51bd4b7e9b2669fe16c73c369c3b100d2ac6c826dee3e4f20aa1d532d992c39f",
+      "stepHash": "0xfe5b62ffda7a56d94311e1b00845e1c331578f4f8bbb333328c53333ac7041ad",
       "livrable": {
         "production": {
-          "producerName": "The Macallan Distillery",
-          "spiritType": "whisky",
-          "productName": "The Macallan 25 Year Old Sherry Oak",
-          "batchNumber": "B47",
-          "bottleNumberRange": "1-2400",
-          "totalBottlesProduced": 2400,
-          "distillationYear": 1999,
-          "bottlingYear": 2024,
-          "ageYears": 25,
-          "volumePerBottle": 0.7,
-          "alcoholPercentage": 43,
-          "distillationLocation": "Easter Elchies, Craigellachie, Speyside, Scotland",
-          "caskType": "Hand-picked Sherry Oak Casks",
-          "caskOrigin": "Jerez, Spain",
-          "colorDescription": "Deep mahogany with rich amber highlights",
+          "responsibleIdentity": "The Macallan Distillery",
+          "productType": "whisky",
+          "productName": "The Macallan 25 Years Old Sherry Oak",
+          "batchNumber": "B47-2023",
+          "totalUnitsProduced": 2500,
+          "productionYear": 2023,
+          "productionLocation": "Easter Elchies, Craigellachie, Moray, Scotland",
+          "certifications": [
+            "Scotch Whisky Association",
+            "Protected Geographical Indication"
+          ],
           "qrCodeApplied": true,
-          "certifications": ["Scotch Whisky Association", "Protected Geographical Indication"],
-          "productionNotes": "25 years maturation in Scottish Speyside. Hand-picked sherry oak casks from Jerez, Spain. Only 2,400 bottles produced in this exclusive batch.",
+          "productionNotes": "Distilled March 15, 1998. Aged 25 years in European Oak Sherry casks from Jerez, Spain. Cask #7823. Master Distiller: Stuart MacPherson. Exceptional maturation with rich sherry notes and oak complexity.",
           "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
         },
-        "nationalDistribution": {
-          "distributorName": "Edrington UK - Official Guardian",
-          "transferDate": "2024-02-15",
+        "national-distribution": {
+          "responsibleIdentity": "Edrington UK Distribution",
           "fromEntity": "The Macallan Distillery",
-          "batchNumber": "B47",
-          "bottleNumberRange": "1-2400",
-          "bottlesInLot": 2400,
-          "volumeTotal": 1680,
-          "storageConditions": "High-security vault, 16°C climate control, 24/7 monitoring ensures perfect conditions",
+          "batchNumber": "B47-2023",
+          "unitsInLot": 2500,
+          "transferDate": "2024-02-15",
+          "carrier": "Highland Logistics Premium",
+          "trackingNumber": "HL-MAC-2024-047",
+          "transportMethod": "Secured GPS-tracked refrigerated truck with 24/7 monitoring",
+          "storageConditions": "Climate-controlled vault at 16°C, 65% humidity, high-security facility",
           "qualityCheck": "conforme",
-          "qualityInspection": "Each bottle inspected before distribution. All seals intact, labels perfect, no damage detected.",
-          "transportMethod": "Secured truck with GPS tracking, direct delivery from distillery to vault",
-          "customsDocLicense": "UK-SPIRITS-2024-B47",
-          "transferNotes": "Complete batch B47 received and secured in climate-controlled vault. Ready for international distribution selection.",
+          "qualityInspection": "All 2,500 bottles inspected. Seals intact. Temperature logs verified.",
           "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
         },
-        "import1": {
-          "batchNumber": "B47",
-          "bottleNumberRange": "1-500",
-          "storageConditions": "Temperature-controlled warehouse, 18°C, humidity 65%, preparing for Asian premium market",
-          "authenticityVerified": true,
-          "importerName": "La Maison du Whisky, Paris",
+        "import-1": {
           "destinationCountry": "France",
+          "carrier": "Euro Premium Spirits Transport",
           "originCountry": "United Kingdom",
-          "bottlesInLot": 500,
-          "fromEntity": "Edrington UK - Official Guardian",
-          "originCertificate": "UK-SPIRITS-ORIGIN-B47-2024",
+          "originCertificate": "UK-ORIGIN-SCOTCH-B47-2023",
+          "batchNumber": "B47-2023",
+          "unitsInLot": 500,
+          "trackingNumber": "EPST-FR-2024-089",
+          "fromEntity": "Edrington UK Distribution",
+          "transferDate": "2024-03-10",
+          "authenticityVerified": true,
+          "transportMethod": "Temperature-controlled truck with GPS tracking and security escort",
+          "responsibleIdentity": "La Maison du Whisky Paris",
           "qualityCheck": "conforme",
           "importLicense": "FR-IMPORT-2024-WHISKY-500",
-          "transferDate": "2024-03-10",
-          "transferNotes": "500 bottles selected for French market and Asia distribution. Full customs clearance completed. Authenticity certificate verified.",
-          "transportMethod": "Temperature-controlled truck Paris route with GPS tracking",
-          "volumeTotal": 350,
+          "storageConditions": "Climate-controlled warehouse at 18°C, 65% humidity, preparing for Asian distribution",
           "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
         },
         "export": {
-          "batchNumber": "B47",
-          "bottleNumberRange": "1-150",
-          "volumeTotal": 105,
-          "exporterName": "Golden Dragon Spirits - Premium Asian Import",
-          "bottlesInLot": 150,
-          "fromEntity": "La Maison du Whisky, Paris",
+          "carrier": "Air France Cargo",
+          "batchNumber": "B47-2023",
+          "unitsInLot": 150,
+          "trackingNumber": "AF-AWB-2024-0405-MAC25",
+          "fromEntity": "La Maison du Whisky Paris",
+          "finalDestinationCountry": "Hong Kong",
           "insuranceCurrency": "EUR",
           "transferDate": "2024-04-05",
-          "customsDeclaration": "EU-CUSTOMS-SPIRITS-B47-150",
+          "transportMethod": "Air cargo flight AF129 Paris CDG to Hong Kong HKG. Climate-controlled cargo hold 18°C. GPS-tracked. ETA 24 hours.",
           "originCountry": "France",
-          "transferNotes": "150 bottles chosen for Chinese collectors market. Air cargo Paris to Hong Kong with GPS tracking. €180,000 insurance coverage. Climate-controlled secured container throughout journey.",
-          "airWaybill": "AF-AWB-2024-0405-MAC25",
-          "gpsTracking": true,
-          "finalDestinationCountry": "China",
-          "transportMethod": "Air cargo Paris → Hong Kong, GPS tracked. Flight AF129. ETA 24 hours",
+          "responsibleIdentity": "Golden Dragon Spirits Export",
           "qualityCheck": "conforme",
           "exportLicense": "FR-EXP-SPIRITS-2024-0405",
+          "customsDeclaration": "FR-CUSTOMS-EXP-2024-0405-WHISKY",
+          "gpsTracking": true,
           "insuranceValue": 180000,
-          "storageConditions": "Climate 18°C maintained during transport, secured container",
+          "storageConditions": "Climate-controlled air cargo container at 18°C with real-time temperature monitoring",
+          "airWaybill": "AF-AWB-2024-0405-MAC25",
           "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
         },
-        "import2": {
-          "gaccCertificate": "GACC-HEALTH-CERT-2024-0420-SPIRITS",
-          "qrBlockchainVerified": true,
-          "batchNumber": "B47",
-          "bottleNumberRange": "1-150",
+        "import-2": {
+          "carrier": "Shanghai Premium Logistics",
+          "gaccCertificate": "GACC-2024-SPIRITS-SH-B47",
           "bilingualLabeling": true,
-          "volumeTotal": 105,
-          "bottlesInLot": 150,
-          "fromEntity": "Golden Dragon Spirits - Premium Asian Import",
-          "destinationCountry": "China",
+          "healthCertificate": "CN-HEALTH-SPIRITS-2024-0420",
+          "batchNumber": "B47-2023",
+          "unitsInLot": 150,
+          "qrBlockchainVerified": true,
+          "fromEntity": "Golden Dragon Spirits Export",
           "transferDate": "2024-04-20",
-          "transferNotes": "Chinese customs cleared. GACC health certificate obtained. Bilingual labels applied (EN/CN). All 150 bottles QR-verified on blockchain. Stored in Shanghai free trade zone bonded warehouse.",
-          "transportMethod": "Secured ground transport Hong Kong to Shanghai bonded zone",
+          "labelingLanguages": [
+            "EN",
+            "CN"
+          ],
+          "destinationCountry": "China",
+          "transportMethod": "Climate-controlled truck from Hong Kong airport to Shanghai bonded warehouse. GPS-tracked. Customs clearance completed.",
+          "responsibleIdentity": "Shanghai Premium Imports",
           "qualityCheck": "conforme",
-          "importerName": "Shanghai Premium Imports",
           "importLicense": "CN-IMPORT-SPIRITS-2024-SH-B47",
-          "labelingLanguages": ["EN", "CN"],
-          "storageConditions": "Free trade zone bonded warehouse, 18°C, 65% humidity",
-          "healthCertificate": "CN-HEALTH-SPIRITS-2024-B47-150",
+          "storageConditions": "Shanghai free trade zone bonded warehouse. Climate-controlled 18°C, 65% humidity, 24/7 security surveillance",
           "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
         },
         "retail": {
-          "volumeUnit": 0.7,
-          "blockchainVerified": true,
-          "retailerName": "Emperor's Cellar - Ultra-Premium Specialist",
-          "fromEntity": "Shanghai Premium Imports",
-          "batchNumber": "B47",
-          "bottleNumber": "92",
-          "transferDate": "2024-05-05",
+          "carrier": "Emperor's Cellar VIP Delivery",
           "retailCurrency": "CNY",
-          "vipServicesIncluded": true,
-          "retailPriceEUR": 3600,
-          "transferNotes": "Ultra-premium specialist receives bottle 92 from batch B47. Climate cellar 18°C, 65% humidity. Blockchain verification shows complete provenance Scotland → Shanghai. Price: ¥28,800 (~€3,600). VIP services included.",
-          "transportMethod": "White-glove secured delivery to premium retail cellar",
-          "provenanceVerified": "Complete provenance verified: Scotland → UK → France → Hong Kong → Shanghai. All 5 transfers cryptographically signed on blockchain.",
-          "qualityCheck": "conforme",
-          "storageConditions": "Climate cellar 18°C, 65% humidity, high-security display, VIP tasting room",
+          "batchNumber": "B47-2023",
           "retailPrice": 28800,
-          "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU"
+          "vipServicesIncluded": true,
+          "fromEntity": "Shanghai Premium Imports",
+          "transferDate": "2024-05-05",
+          "unitIdentifier": "Bottle #347 of 2500",
+          "transportMethod": "White-glove secured delivery with temperature monitoring and insurance. Personal courier service.",
+          "responsibleIdentity": "Emperor's Cellar Shanghai",
+          "qualityCheck": "conforme",
+          "provenanceVerified": "Complete blockchain verification: The Macallan Distillery (Scotland) → Edrington UK Distribution → La Maison du Whisky (Paris) → Golden Dragon Export (Hong Kong) → Shanghai Premium Imports → Emperor's Cellar. All 5 international transfers cryptographically signed and verified on blockchain.",
+          "storageConditions": "Premium climate-controlled cellar at 18°C, 65% humidity. VIP tasting room available. 24/7 security surveillance.",
+          "blockchainVerified": true,
+          "retailPriceEUR": 3600,
+          "_targetAddress": "5CLqgPWHnzKw7eF7pL8bV7kuV6FyJ3fFtJyGA7592jrrF1oM"
         }
       }
     }
   };
 
   const loadExampleProof = () => {
+    console.log('🔍 Loading Example Proof');
+    console.log('📋 Complete Workflow Hash:', config.EXAMPLES.COMPLETE_WORKFLOW_HASH);
+    console.log('📋 Workflow Details:', config.EXAMPLES.WORKFLOW);
     setJsonInput(JSON.stringify(exampleProof, null, 2));
     setMode('json'); // Switch to JSON mode when loading example
   };
@@ -607,24 +605,13 @@ export const Verify = () => {
   // Pre-fill form with example data for consumer step
   useEffect(() => {
     if (workflowInfo?.isExample && nextStepSchema) {
+      console.log('✍️ Pre-filling form for example workflow...');
+      console.log('   workflowInfo.isExample:', workflowInfo.isExample);
       // Wait for form to be rendered
       setTimeout(() => {
-        const exampleConsumerData = {
-          consumerName: 'Mr. Wei Chen, Private Collector',
-          purchaseDate: '2024-10-15',
-          retailerName: 'Emperor\'s Cellar - Ultra-Premium Specialist',
-          consumerType: 'collectionneur',
-          purchaseLocation: 'Shanghai, China',
-          finalDestination: 'Private collection, Shanghai penthouse',
-          batchNumber: 'B47',
-          bottleNumber: '92',
-          purchasePrice: '28800',
-          purchaseCurrency: 'CNY',
-          usage: 'Collection',
-          tastingNotes: 'Rich dried fruits, sherry sweetness, oak complexity, dark chocolate, hint of spice. Smooth finish with lingering warmth.',
-          feedback: 'Simply extraordinary. The deep mahogany color promises richness, and it delivers. The sherry oak influence is sublime – dark chocolate, dried fruit, rich spices. Each sip reveals another layer. 25 years of Scottish craftsmanship in a glass. The QR blockchain verification gives me confidence in its authenticity. Worth every yuan. A true collector\'s piece.',
-          rating: '5'
-        };
+        // Use pre-filled data from config
+        const exampleConsumerData = config.EXAMPLES.CONSUMER_DATA;
+        console.log('   Consumer data to fill:', exampleConsumerData);
 
         // Fill form fields
         Object.entries(exampleConsumerData).forEach(([key, value]) => {
@@ -714,7 +701,7 @@ export const Verify = () => {
         } catch (err) {
           console.error('Failed to scan QR from image:', err);
           dismiss(qrToastId);
-          showError('Failed to scan QR code from image');
+          showError(t('messages.qrScanFailed'));
           throw err;
         }
         return;
@@ -745,7 +732,7 @@ export const Verify = () => {
       console.error('File upload error:', err);
       setError(err.message || 'Failed to process file');
       dismiss(toastId);
-      showError(err.message || 'Failed to process file');
+      showError(err.message || t('messages.fileProcessFailed'));
     } finally {
       setVerifying(false);
     }
@@ -837,7 +824,7 @@ export const Verify = () => {
       console.error('JSON verification error:', err);
       setError(err.message || 'Failed to verify proof');
       dismiss(toastId);
-      showError(err.message || 'Failed to verify proof');
+      showError(err.message || t('messages.proofVerifyFailed'));
     } finally {
       setVerifying(false);
     }
@@ -871,7 +858,7 @@ export const Verify = () => {
       });
       
       const verification = await verifier.verifyProof(proof);
-      
+      console.log('🔎 Calculated content hash for verification:', verification.contentHash);
       console.log('Verification result:', verification);
       
       // Step 3: Check if found and verify signature
@@ -1177,7 +1164,10 @@ export const Verify = () => {
       setLoadingNextStep(true);
       
       const { ragHash, stepHash, livrable } = ragData;
-      console.log('Loading workflow continuation:', { ragHash, stepHash });
+      console.log('🔄 Continue Workflow clicked!');
+      console.log('📊 Current workflow hash (ragHash):', ragHash);
+      console.log('📍 Current step hash:', stepHash);
+      console.log('🔍 Searching for next step in workflow...');
       
       // Find the master RAG
       let masterRag = loadedRags.find(r => r.hash === ragHash);
@@ -1236,11 +1226,12 @@ export const Verify = () => {
       }
 
       const nextStepHash = masterRag.metadata.steps[currentStepIndex + 1];
+      console.log('➡️  Next step hash to load:', nextStepHash);
       let nextStepRag = loadedRags.find(r => r.hash === nextStepHash);
       
       // If not found in loadedRags, try to load it directly from blockchain
       if (!nextStepRag) {
-        console.warn(`Next step RAG not found in cache, loading from blockchain: ${nextStepHash}`);
+        console.log('⏳ Next step not in cache, fetching from blockchain:', nextStepHash);
         try {
           const ragClient = new RagClient(substrateClient);
           nextStepRag = await ragClient.getRagByHash(nextStepHash);
@@ -1270,7 +1261,12 @@ export const Verify = () => {
       setNextStepSchema(schemaObj);
       
       // Check if this is the example workflow (retail step proof)
-      const isExampleWorkflow = stepHash === '0x2409a55343b255e786b1167ac6abb005ddd145c940d124ec3eafa215e510b3e0';
+      // If current step is retail (step 6), enable pre-fill for consumer form (step 7)
+      console.log('🔍 Checking if example workflow...');
+      console.log('   Current stepHash:', stepHash);
+      console.log('   Expected retailStepHash:', config.EXAMPLES.WORKFLOW.retailStepHash);
+      const isExampleWorkflow = stepHash === config.EXAMPLES.WORKFLOW.retailStepHash;
+      console.log('   isExampleWorkflow:', isExampleWorkflow);
       
       setWorkflowInfo({
         masterRag,
@@ -1299,13 +1295,13 @@ export const Verify = () => {
     const validation = FormGenerator.validateForm(formData, nextStepSchema);
     
     if (!validation.valid) {
-      showError('Please fill all required fields:\n' + validation.errors.join('\n'));
+      showError(t('messages.fillRequiredFields') + ':\n' + validation.errors.join('\n'));
       return;
     }
-
+    
     // Check wallet connection
     if (!selectedAccount) {
-      showError('Please connect your wallet to submit the next step');
+      showError(t('messages.walletNotConnectedSubmit'));
       return;
     }
 
@@ -1483,7 +1479,7 @@ export const Verify = () => {
       console.error('QR scan error:', err);
       setError(err.message || 'Failed to process QR code');
       dismiss(toastId);
-      showError(err.message || 'Failed to process QR code');
+      showError(err.message || t('messages.qrProcessFailed'));
     } finally {
       setVerifying(false);
       setScanning(false);
@@ -1538,7 +1534,7 @@ export const Verify = () => {
         
         if (result.isValid) {
           dismiss(toastId);
-          showSuccess('Hash verified successfully!');
+          showSuccess(t('messages.hashVerifiedSuccess'));
         } else {
           dismiss(toastId);
           showError(result.message);
@@ -1595,14 +1591,14 @@ export const Verify = () => {
           message: 'Product is authentic!',
           details: 'The scanned QR code matches the first step of the verified workflow. This confirms the product\'s authenticity.'
         });
-        showSuccess('Product verified! QR code matches the workflow.');
+        showSuccess(t('messages.productQRVerified'));
       } else {
         setProductQRResult({
           isValid: false,
           message: 'Product verification failed!',
           details: 'The scanned QR code does NOT match the first step of the verified workflow. This product may be counterfeit.'
         });
-        showError('Product QR does not match the workflow!');
+        showError(t('messages.productQRFailed'));
       }
     } catch (err) {
       console.error('Product QR verification error:', err);
@@ -1611,7 +1607,7 @@ export const Verify = () => {
         message: 'Verification error',
         details: err.message || 'Failed to verify product QR code'
       });
-      showError('Failed to verify product QR code');
+      showError(t('messages.productQRError'));
     }
   };
 
@@ -1671,7 +1667,7 @@ export const Verify = () => {
         
         if (result.isValid) {
           dismiss(toastId);
-          showSuccess('File hash verified successfully!');
+          showSuccess(t('messages.fileHashVerifiedSuccess'));
         } else {
           dismiss(toastId);
           showError(result.message);
@@ -1696,7 +1692,7 @@ export const Verify = () => {
     } catch (err) {
       console.error('File hash verification error:', err);
       dismiss(toastId);
-      showError(err.message || 'File hash verification failed');
+      showError(err.message || t('messages.fileHashVerificationFailed'));
       throw err;
     }
   };
@@ -1786,7 +1782,7 @@ export const Verify = () => {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-1">{t('verify.title')}</h2>
-              <p className="text-sm text-gray-600">Choose your verification method</p>
+              <p className="text-sm text-gray-600">{t('verify.chooseMethod')}</p>
             </div>
             <button
               type="button"
@@ -2534,12 +2530,12 @@ export const Verify = () => {
 
           <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-900">
-              <strong>Instructions:</strong> Scan the QR code on the product (e.g., bottle label) to verify if it matches the first step of this workflow.
+              <strong>{t('verify.productQRInstructions')}</strong> {t('verify.productQRInstructionsText')}
             </p>
             <p className="text-xs text-blue-700 mt-2">
-              Expected hash: <code className="bg-blue-100 px-2 py-1 rounded font-mono">{firstStepHash.substring(0, 20)}...{firstStepHash.substring(firstStepHash.length - 10)}</code>
+              {t('verify.expectedHash')} <code className="bg-blue-100 px-2 py-1 rounded font-mono">{firstStepHash.substring(0, 20)}...{firstStepHash.substring(firstStepHash.length - 10)}</code>
             </p>
-            {firstStepHash === '0x2210161b7fb2f09a31e88e0222429641551a9b7a254af386d76ae832301f84b1' && (
+            {firstStepHash === config.EXAMPLES.QR_CODE_HASH && (
               <div className="mt-3 p-3 bg-green-50 border border-green-300 rounded-lg">
                 <p className="text-xs text-green-900">
                   <strong>{t('about.qrExampleHint')}</strong> {' '}

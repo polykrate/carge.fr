@@ -95,7 +95,7 @@ Integrate directly with Ragchain using Substrate APIs:
 **Human Context Protocol** - Model Context Protocol server for AI agents:
 - Native integration with Claude Desktop, Cursor, and MCP-compatible AI clients
 - AI agents can read/write certified contexts and verify proofs autonomously
-- **Status**: Not yet publicly released - contact `jf.meneust@gmail.com` for early access
+- **Status**: Not yet publicly released - contact `admin@carge.fr` for early access
 - **Repository**: `github.com/polykrate/human-context-protocol` (private)
 - **Use Case**: Autonomous AI verification, AI-assisted compliance workflows
 
@@ -330,7 +330,7 @@ All pallets feature:
 5. Recipient decrypts CID → retrieves content from IPFS
 ```
 
-For detailed pallet specifications, see Ragchain repository (contact: jf.meneust@gmail.com).
+For detailed pallet specifications, see Ragchain repository (contact: admin@carge.fr).
 
 ### Configuration (`src/lib/config.js`)
 

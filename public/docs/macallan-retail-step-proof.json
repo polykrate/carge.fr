@@ -1,0 +1,58 @@
+{
+  "ragData": {
+    "ragHash": "0x3ceb3516629b41adf8360ea64aae227aeb2b43af539edde11cff75c12f9ef9b5",
+    "stepHash": "0x7c0119e68669c6d65c520e9c8c3596adf455fd88dfdfad991d9cfa9e1735fb0a",
+    "livrable": {
+      "craft-auth": {
+        "qualityNotes": "Exceptional maturation. Rich sherry notes with oak complexity. Distilled from finest Scottish barley, matured in hand-selected European oak sherry casks from Jerez, Spain.",
+        "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU",
+        "bottleNumber": "347/2500",
+        "caskType": "European Oak Sherry Cask #7823",
+        "batchNumber": "B47-2023",
+        "certificateNumber": "MAC-25Y-1998-7823-347",
+        "distillationDate": "1998-03-15",
+        "responsibleIdentity": "Macallan Estate Distillery, Craigellachie, Scotland - Master Distiller: Stuart MacPherson",
+        "agingYears": 25
+      },
+      "export-sec": {
+        "insuranceValue": "£2,500,000 GBP",
+        "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU",
+        "trackingEnabled": true,
+        "quantityExported": 500,
+        "temperatureControl": "Certified 12-18°C during transport",
+        "exportLicense": "UK-EXP-SPIRITS-2023-B47",
+        "responsibleIdentity": "UK Export Authority - Spirits Division",
+        "destination": "Asian Premium Market via Hong Kong",
+        "sealNumber": "UK-EXP-2023-847"
+      },
+      "customs-clear": {
+        "customsDeclaration": "HK-IMP-SPIRITS-2024-5847",
+        "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU",
+        "clearanceDate": "2024-01-10",
+        "complianceStatus": "Certificate MAC-25Y-1998-7823-347 validated against UK export documents. All seals intact.",
+        "responsibleIdentity": "Hong Kong Customs & Excise Department",
+        "physicalInspection": "passed",
+        "dutiesPaid": "$38,500 HKD"
+      },
+      "logistics": {
+        "carrier": "SF Express Premium",
+        "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU",
+        "estimatedDelivery": "2024-01-15",
+        "coldChainIntegrity": true,
+        "trackingNumber": "SF-EXPRESS-2024-HK-9847",
+        "responsibleIdentity": "SF Express Premium Logistics - Hong Kong",
+        "gpsCoordinates": "22.3193,114.1694"
+      },
+      "retailer-stock": {
+        "_targetAddress": "5DXBoe8maXbydrgqiKX1PCY9PS19Kfaq59vrroiXp4se7MgU",
+        "provenanceVerified": true,
+        "receptionDate": "2024-01-16",
+        "retailPrice": "$58,000 HKD per bottle",
+        "allocationReceived": 10,
+        "bottleNumbers": "#345-354 (including bottle #347)",
+        "responsibleIdentity": "Emperor's Cellar - Premium Whisky Palace, Hong Kong Central",
+        "storageConditions": "Climate-controlled cellar at 18°C, 65% humidity. 24/7 security monitoring."
+      }
+    }
+  }
+}
